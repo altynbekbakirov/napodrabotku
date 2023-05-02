@@ -1,0 +1,139 @@
+name: ishtapp
+description: ishtapp mobile app
+
+# The following line prevents the package from being accidentally published to
+# pub.dev using `pub publish`. This is preferred for private packages.
+publish_to: 'none' # Remove this line if you wish to publish to pub.dev
+
+# The following defines the version and build number for your application.
+# A version number is three numbers separated by dots, like 1.2.43
+# followed by an optional build number separated by a +.
+# Both the version and the builder number may be overridden in flutter
+# build by specifying --build-name and --build-number, respectively.
+# In Android, build-name is used as versionName while build-number used as versionCode.
+# Read more about Android versioning at https://developer.android.com/studio/publish/versioning
+# In iOS, build-name is used as CFBundleShortVersionString while build-number used as CFBundleVersion.
+# Read more about iOS versioning at
+# https://developer.apple.com/library/archive/documentation/General/Reference/InfoPlistKeyReference/Articles/CoreFoundationKeys.html
+version: 1.0.1+1
+
+environment:
+  sdk: ">=2.7.0 <3.0.0"
+
+dependencies:
+  flutter:
+    sdk: flutter
+  image_picker: ^0.6.7+21
+  http: ^0.12.2
+  path_provider: ^1.6.27
+  easy_localization: ^2.3.2
+  shared_preferences: ^0.5.6
+  flutter_bloc: ^4.0.0
+  equatable: ^1.2.0
+  flutter_boxicons: ^2.0.2
+  multiselect_formfield: ^0.1.5
+  flutter_staggered_animations: ^0.1.2
+  flutter_tindercard: ^0.2.0
+  redux: ^3.0.0
+  flutter_redux: ^0.5.0
+  redux_dev_tools: ^0.4.0
+  flutter_redux_dev_tools: ^0.3.0
+  redux_api_middleware: ^0.1.9
+  redux_thunk: ^0.2.1
+  dynamic_form: any
+  fluttertoast: ^6.0.1
+  web_socket_channel: ^1.2.0
+  masked_text: ^0.0.6
+  email_validator: '^1.0.5'
+  url_launcher: ^5.7.2
+  socket_io_client: ^0.9.12
+#  gx_file_picker: ^1.9.0+2
+  intl_phone_number_input: ^0.6.0
+  exif: ^1.0.3
+  flutter_exif_rotation: ^0.3.1
+  firebase_auth: ^0.20.1
+  firebase_core: ^0.7.0
+
+#  appmetrica_sdk: any
+  workmanager: ^0.3.0
+  flutter_local_notifications: ^4.0.1+2
+  searchable_dropdown: ^1.1.3
+
+  dropdown_search: ^0.4.9
+
+  flutter_guid: ^0.1.0
+  chips_choice: ^2.0.1
+
+  youtube_player_iframe: ^1.2.0+2
+  cached_network_image: ^2.5.1
+  ms_accordion: ^0.0.1
+  smart_select: ^4.3.2
+
+  auto_size_text: ^2.1.0
+  file_picker: ^2.1.7
+
+  # The following adds the Cupertino Icons font to your application.
+  # Use with the CupertinoIcons class for iOS style icons.
+  cupertino_icons: ^0.1.3
+  flutter_svg: ^0.19.1             # This plugin help us to use custom svg icons
+  carousel_pro: ^1.0.0             # This plugin help us to display user profile images in carousel style
+  flutter_launcher_icons: ^0.7.5   # Used to generate app icon launcher for both platforms android and iOS
+  swipe_stack: ^1.0.0              # Used to Swipe User Profiles like tinder cards
+  flutter_datetime_picker: ^1.4.0  # Used to Select Date Time - (here used especially for User Birthday)
+  country_code_picker: ^1.4.0      # Used to Select User Country Code
+  otp_screen: ^0.0.3               # Screen Used to Validate OTP sent to user device (SMS Code Verification)
+
+dev_dependencies:
+  flutter_test:
+    sdk: flutter
+
+
+# For information on the generic Dart part of this file, see the
+# following page: https://dart.dev/tools/pub/pubspec
+
+# The following section is specific to Flutter.
+flutter:
+  fonts:
+    - family: Manrope
+      fonts:
+        - asset: assets/fonts/Manrope-Light.ttf
+          weight: 300
+        - asset: assets/fonts/Manrope-Regular.ttf
+          weight: 400
+        - asset: assets/fonts/Manrope-Medium.ttf
+          weight: 500
+        - asset: assets/fonts/Manrope-Bold.ttf
+          weight: 700
+  # The following line ensures that the Material Icons font is
+  # included with your application, so that you can use the icons in
+  # the material Icons class.
+  uses-material-design: true
+
+  # To add assets to your application, add an assets section, like this:
+  assets:
+    - assets/ytbPlayBotton.png
+    - assets/images/
+    - assets/icons/
+    - assets/languages/
+    - assets/images/demo_users/
+    - assets/images/partners/
+    - assets/images/youtube/
+
+  # An image asset can refer to one or more resolution-specific "variants", see
+  # https://flutter.dev/assets-and-images/#resolution-aware.
+
+     # For details regarding fonts from package dependencies,
+     # see https://flutter.dev/custom-fonts/#from-packages
+flutter_icons:
+  android: true
+  ios: true
+#  image_path: "assets/images/app_logo.png"
+
+  # To add custom fonts to your application, add a fonts section here,
+  # in this "flutter" section. Each entry in this list should have a
+  # "family" key with the font family name, and a "fonts" key with a
+  # list giving the asset and other descriptors for the font. For
+  # example:
+
+  # For details regarding fonts from package dependencies,
+  # see https://flutter.dev/custom-fonts/#from-packages
