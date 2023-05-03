@@ -603,7 +603,7 @@ class _ProductLabSignUpState extends State<ProductLabSignUp> {
                           user.is_company = false;
                           user.is_migrant = is_migrant ? 1 : 0;
                           user.linkedin = _linkedin_controller.text;
-                          user.gender = gender == user_gender.Male ? 0 : 1;
+                          user.gender = gender == user_gender.Male ? "male" : "female";
                           user.region = selectedRegion;
                           user.district = selectedDistrict;
                           user.job_type = selectedJobType;

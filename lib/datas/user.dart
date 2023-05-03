@@ -25,7 +25,7 @@ class Users {
   String experience_year;
   bool is_company;
   int is_migrant;
-  int gender;
+  String gender;
   String region;
   String district;
   String job_type;
@@ -39,6 +39,8 @@ class Users {
   String address;
   int recruited;
   int userVacancyId;
+  String lat;
+  String long;
 
   Users({
     this.id,
@@ -70,6 +72,8 @@ class Users {
     this.address,
     this.recruited,
     this.userVacancyId,
+    this.lat,
+    this.long,
   });
 
   factory Users.fromJson(Map<String, dynamic> json) => new Users(
@@ -99,7 +103,10 @@ class Users {
       is_product_lab_user: json['is_product_lab_user'] == 1,
       address: json['address'],
       recruited: json['recruited'],
-      userVacancyId: json['user_vacancy_id']);
+      userVacancyId: json['user_vacancy_id'],
+      lat: json['lat'],
+      long: json['long'],
+  );
 
   Future<void> setRecruit(int userId, int userVacancyId, int recruited) async {
     var uri = Uri.parse(API_IP + API_SET_RECRUIT);
@@ -302,6 +309,8 @@ class Users {
         "department": user.department,
         "social_orientation": user.social_orientation,
         "address": user.address,
+        "lat": user.lat,
+        "long": user.long,
       };
 
   bool get isAuth {
@@ -331,6 +340,8 @@ class Users {
         Prefs.setString(Prefs.TOKEN, responseData["token"]);
         Prefs.setString(Prefs.PROFILEIMAGE, responseData["avatar"]);
         Prefs.setString(Prefs.USER_TYPE, responseData["user_type"]);
+        Prefs.setString(Prefs.USER_LAT, responseData["lat"]);
+        Prefs.setString(Prefs.USER_LONG, responseData["long"]);
         return "OK";
       } else {
         return "FAILED";
@@ -363,6 +374,8 @@ class Users {
         Prefs.setString(Prefs.TOKEN, responseData["token"]);
         Prefs.setString(Prefs.PROFILEIMAGE, responseData["avatar"]);
         Prefs.setString(Prefs.USER_TYPE, responseData["user_type"]);
+        Prefs.setString(Prefs.USER_LAT, responseData["lat"]);
+        Prefs.setString(Prefs.USER_LONG, responseData["long"]);
         return "OK";
       } else {
         return "FAILED";

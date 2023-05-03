@@ -728,7 +728,7 @@ class _SignUpScreenState extends State<SignUpScreen> {
                           user.is_company = company == is_company.Company;
                           user.is_migrant = isMigrant ? 1 : 0;
                           user.linkedin = _linkedinController.text;
-                          user.gender = gender == user_gender.Male ? 0 : 1;
+                          user.gender = gender == user_gender.Male ? "male" : "female";
                           user.region = selectedRegion;
                           user.district = selectedDistrict;
                           user.is_product_lab_user = Prefs.getString(Prefs.ROUTE) == "PRODUCT_LAB";

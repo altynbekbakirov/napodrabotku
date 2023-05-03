@@ -837,7 +837,7 @@ class _EditProfileScreenState extends State<EditProfileScreen> {
                             user.name = _name_controller.text;
                             user.surname = _surnname_controller.text;
                             user.is_migrant = is_migrant ? 1 : 0;
-                            user.gender = gender == user_gender.Male ? 0 : 1;
+                            user.gender = gender == user_gender.Male ? "male" : "female";
                             user.region = selectedRegion;
                             user.district = selectedDistrict;
                             user.contact_person_fullname = _fullname_of_contact_person.text;

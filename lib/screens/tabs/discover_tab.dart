@@ -1,9 +1,13 @@
+import 'dart:async';
+
 import 'package:flutter/material.dart';
 import 'package:easy_localization/easy_localization.dart';
 import 'package:ishtapp/components/custom_button.dart';
 import 'package:ishtapp/datas/RSAA.dart';
+import 'package:ishtapp/datas/app_lat_long.dart';
 import 'package:ishtapp/datas/app_state.dart';
 import 'package:ishtapp/datas/pref_manager.dart';
+import 'package:ishtapp/services/location_service.dart';
 import 'package:redux/redux.dart';
 import 'package:flutter_redux/flutter_redux.dart';
 import 'package:ishtapp/datas/vacancy.dart';
@@ -19,6 +23,7 @@ import 'dart:convert';
 import 'package:ishtapp/datas/pref_manager.dart';
 import 'package:ishtapp/datas/user.dart';
 import 'package:ishtapp/datas/Skill.dart';
+import 'package:yandex_mapkit/yandex_mapkit.dart';
 
 class DiscoverTab extends StatefulWidget {
   @override
@@ -27,13 +32,22 @@ class DiscoverTab extends StatefulWidget {
 
 class _DiscoverTabState extends State<DiscoverTab> with SingleTickerProviderStateMixin {
   CardController cardController = CardController();
+
+  // yandex maps
+  Completer<YandexMapController> _controller = Completer();
+  YandexMapController _yandexMapController;
+  Point _point;
+
   int button = 0;
   int offset = 5;
+  bool onMap = false;
 
   @override
   void initState() {
     super.initState();
     Prefs.setInt(Prefs.OFFSET, 0);
+    _initPermission();
+    _point = Point(latitude: double.parse(Prefs.getString(Prefs.USER_LAT)), longitude: double.parse(Prefs.getString(Prefs.USER_LONG)));
   }
 
   @override
@@ -118,7 +132,7 @@ class _DiscoverTabState extends State<DiscoverTab> with SingleTickerProviderStat
     StoreConnector<AppState, VacanciesScreenProps>(
       converter: (store) => mapStateToProps(store),
       onInitialBuild: (props) => this.handleInitialBuild(props),
-      builder: (context, props) {
+      builder: (context, props)  {
         List<Vacancy> data = props.listResponse.data;
         bool loading = props.listResponse.loading;
 
@@ -135,7 +149,19 @@ class _DiscoverTabState extends State<DiscoverTab> with SingleTickerProviderStat
           Container(
             // color: kColorProductLab,
             padding: EdgeInsets.only(bottom: 10),
-            child: TinderSwapCard(
+            child: onMap ? YandexMap(
+              onMapCreated: (YandexMapController controller) async {
+                _yandexMapController = controller;
+                await _yandexMapController.showUserLayer(iconName: 'assets/user_location.png', arrowName: '');
+                await _yandexMapController.move(
+                    point: _point,
+                    animation: const MapAnimation(smooth: true, duration: 2.0)
+                );
+                // if(!_controller.isCompleted){
+                //   _controller.complete(controller);
+                // }
+              },
+            ) : TinderSwapCard(
               orientation: AmassOrientation.BOTTOM,
               totalNum: data.length,
               swipeUp: false,
@@ -342,9 +368,12 @@ class _DiscoverTabState extends State<DiscoverTab> with SingleTickerProviderStat
                                           ),
                                           height: 40.0,
                                           padding: EdgeInsets.all(0),
-                                          color: Colors.transparent,
-                                          textColor: kColorWhite,
+                                          color: !onMap ? Colors.transparent : Colors.white,
+                                          textColor: !onMap ? kColorWhite : kColorPrimary,
                                           onPressed: () {
+                                            setState(() {
+                                              onMap = false;
+                                            });
                                             Prefs.setInt(Prefs.OFFSET, 0);
                                             /*StoreProvider.of<AppState>(context).dispatch(setTimeFilter(
                                                 type: StoreProvider.of<AppState>(context).state.vacancy.type == 'day' ? 'all' : 'day'));
@@ -365,9 +394,12 @@ class _DiscoverTabState extends State<DiscoverTab> with SingleTickerProviderStat
                                           ),
                                           height: 40.0,
                                           padding: EdgeInsets.all(0),
-                                          color: Colors.transparent,
-                                          textColor: kColorWhite,
+                                          color: onMap ? Colors.transparent : Colors.white,
+                                          textColor: onMap ? kColorWhite : kColorPrimary,
                                           onPressed: () {
+                                            setState(() {
+                                              onMap = true;
+                                            });
                                             Prefs.setInt(Prefs.OFFSET, 0);
                                             /*StoreProvider.of<AppState>(context).dispatch(setTimeFilter(
                                                 type: StoreProvider.of<AppState>(context).state.vacancy.type == 'week' ? 'all' : 'week')
@@ -399,6 +431,39 @@ class _DiscoverTabState extends State<DiscoverTab> with SingleTickerProviderStat
           ),
         );
       },
+    );
+  }
+
+  Future<void> _initPermission() async {
+    if (!await LocationService().checkPermission()) {
+      await LocationService().requestPermission();
+    }
+    // await _fetchCurrentLocation();
+  }
+
+  Future<void> _fetchCurrentLocation() async {
+    AppLatLong location;
+    const defLocation = MoscowLocation();
+    try {
+      location = AppLatLong(
+        lat: 55.7522200,
+        long: 37.6155600
+      );
+      // location = await LocationService().getCurrentLocation();
+    } catch (_) {
+      location = defLocation;
+    }
+    _moveToCurrentLocation(location);
+  }
+
+  Future<void> _moveToCurrentLocation(AppLatLong appLatLong) async {
+    (await _controller.future).move(
+      point: Point(
+        latitude: appLatLong.lat,
+        longitude: appLatLong.long,
+      ),
+      animation: const MapAnimation(smooth: true, duration: 1),
+      zoom: 12,
     );
   }
 

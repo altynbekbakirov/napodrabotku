@@ -1,4 +1,4 @@
 /// CONSTANT VARIABLES ///
 
-const APP_NAME = "ISHTAPP";
+const APP_NAME = "napodrabotku.ru";
 

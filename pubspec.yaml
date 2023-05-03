@@ -83,6 +83,9 @@ dependencies:
   country_code_picker: ^1.4.0      # Used to Select User Country Code
   otp_screen: ^0.0.3               # Screen Used to Validate OTP sent to user device (SMS Code Verification)
 
+  yandex_mapkit: ^0.5.1
+  geolocator: ^6.2.1
+
 dev_dependencies:
   flutter_test:
     sdk: flutter
@@ -118,6 +121,7 @@ flutter:
     - assets/images/demo_users/
     - assets/images/partners/
     - assets/images/youtube/
+    - assets/
 
   # An image asset can refer to one or more resolution-specific "variants", see
   # https://flutter.dev/assets-and-images/#resolution-aware.
