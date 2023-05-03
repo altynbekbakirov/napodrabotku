@@ -6,7 +6,9 @@ import 'package:flutter_boxicons/flutter_boxicons.dart';
 import 'package:ishtapp/datas/RSAA.dart';
 import 'package:ishtapp/datas/app_state.dart';
 import 'package:ishtapp/datas/user.dart';
+import 'package:ishtapp/screens/profile_visits_screen.dart';
 import 'package:ishtapp/screens/tabs/school_tab.dart';
+import 'package:ishtapp/screens/tabs/vacancies_tab.dart';
 import 'package:multiselect_formfield/multiselect_formfield.dart';
 import 'package:redux/redux.dart';
 import 'package:flutter_redux/flutter_redux.dart';
@@ -2109,7 +2111,7 @@ class _HomeScreenState extends State<HomeScreen> {
           ),
         ],
       ),
-      Row(
+      Prefs.getString(Prefs.ROUTE) == 'COMPANY' ? Row(
         mainAxisAlignment: MainAxisAlignment.spaceBetween,
         crossAxisAlignment: CrossAxisAlignment.center,
         children: [
@@ -2138,13 +2140,61 @@ class _HomeScreenState extends State<HomeScreen> {
             },
           ),
         ],
+      ) : Row(
+        mainAxisAlignment: MainAxisAlignment.spaceBetween,
+        crossAxisAlignment: CrossAxisAlignment.center,
+        children: [
+          Text('my_responses'.tr(), style: TextStyle(fontSize: 22, color: Colors.white, fontWeight: FontWeight.w600)),
+          GestureDetector(
+            child: CircleButton(
+              bgColor: Colors.transparent,
+              padding: 12,
+              icon: Icon(
+                Boxicons.bx_user,
+                color: Colors.white,
+                size: 35,
+              ),
+            ),
+            onTap: () {
+              _nextTab(4);
+              setState(() {
+                isProfile = true;
+              });
+            },
+          ),
+        ],
       ),
-      Row(
+      Prefs.getString(Prefs.ROUTE) == 'COMPANY' ? Row(
         mainAxisAlignment: MainAxisAlignment.spaceBetween,
         crossAxisAlignment: CrossAxisAlignment.center,
         children: [
           Text(
-            'improve_qualification'.tr(),
+            'training'.tr(),
+          ),
+          GestureDetector(
+            child: CircleButton(
+              bgColor: Colors.transparent,
+              padding: 12,
+              icon: Icon(
+                Boxicons.bx_user,
+                color: kColorPrimary,
+                size: 35,
+              ),
+            ),
+            onTap: () {
+              _nextTab(4);
+              setState(() {
+                isProfile = true;
+              });
+            },
+          ),
+        ],
+      ) : Row(
+        mainAxisAlignment: MainAxisAlignment.spaceBetween,
+        crossAxisAlignment: CrossAxisAlignment.center,
+        children: [
+          Text(
+            'chat'.tr(),
           ),
           GestureDetector(
             child: CircleButton(
@@ -2306,16 +2356,30 @@ class _HomeScreenState extends State<HomeScreen> {
                       });
                     }
                     _nextTab(index);
-                    if (index == 3 || index == 2) {
-                      setState(() {
-                        isSpecial = true;
-                        isProfile = true;
-                      });
+                    if(Prefs.getString(Prefs.USER_TYPE) == 'COMPANY'){
+                      if (index == 3 || index == 2) {
+                        setState(() {
+                          isSpecial = true;
+                          isProfile = true;
+                        });
+                      } else {
+                        setState(() {
+                          isSpecial = false;
+                          isProfile = false;
+                        });
+                      }
                     } else {
-                      setState(() {
-                        isSpecial = false;
-                        isProfile = false;
-                      });
+                      if (index == 3) {
+                        setState(() {
+                          isSpecial = true;
+                          isProfile = true;
+                        });
+                      } else {
+                        setState(() {
+                          isSpecial = false;
+                          isProfile = false;
+                        });
+                      }
                     }
                   },
                   items: [
@@ -2374,37 +2438,6 @@ class _HomeScreenState extends State<HomeScreen> {
                               Boxicons.bx_heart,
                               color: _tabCurrentIndex == 1 ? kColorPrimary : Colors.grey,
                             ),
-                            // icon: Container(
-                            //   width: 50,
-                            //   height: 30,
-                            //   child: Stack(children: [
-                            //     Positioned(
-                            //       top: 0.0,
-                            //       left: 0.0,
-                            //       right: StoreProvider.of<AppState>(context).state.vacancy.number_of_likeds == null
-                            //           ? 0.0
-                            //           : null,
-                            //       child: Icon(
-                            //         Boxicons.bx_heart,
-                            //         color: _tabCurrentIndex == 1 ? kColorPrimary : Colors.grey,
-                            //       ),
-                            //     ),
-                            //     StoreProvider.of<AppState>(context).state.vacancy.number_of_likeds == null
-                            //         ? Container()
-                            //         : Positioned(
-                            //             top: 0.0,
-                            //             right: 0.0,
-                            //             child: StoreProvider.of<AppState>(context).state.vacancy.number_of_likeds > 0
-                            //                 ? Badge(
-                            //                     text: StoreProvider.of<AppState>(context)
-                            //                         .state
-                            //                         .vacancy
-                            //                         .number_of_likeds
-                            //                         .toString())
-                            //                 : Container(),
-                            //           ),
-                            //   ]),
-                            // ),
                             title: Text(
                               "matches".tr(),
                               style: TextStyle(color: _tabCurrentIndex == 1 ? kColorPrimary : Colors.grey),
@@ -2451,7 +2484,7 @@ class _HomeScreenState extends State<HomeScreen> {
             ),
             body: WillPopScope(
                 child: Container(
-                  child: PageView(
+                  child: Prefs.getString(Prefs.USER_TYPE) == 'COMPANY' ? PageView(
                     controller: _pageController,
                     physics: NeverScrollableScrollPhysics(),
                     children: [
@@ -2459,6 +2492,16 @@ class _HomeScreenState extends State<HomeScreen> {
                       MatchesTab(),
                       ConversationsTab(),
                       SchoolTab(),
+                      ProfileTab(),
+                    ],
+                  ) : PageView(
+                    controller: _pageController,
+                    physics: NeverScrollableScrollPhysics(),
+                    children: [
+                      DiscoverTab(),
+                      MatchesTab(),
+                      VacanciesTab(),
+                      ConversationsTab(),
                       ProfileTab(),
                     ],
                   ),

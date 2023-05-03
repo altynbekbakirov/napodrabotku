@@ -40,5 +40,3 @@ app.*.symbols
 # Obfuscation related
 app.*.map.json
 
-android/build.gradle
-android/gradle/wrapper/gradle-wrapper.properties

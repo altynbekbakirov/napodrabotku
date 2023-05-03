@@ -36,48 +36,6 @@ class _DiscoverTabState extends State<DiscoverTab> with SingleTickerProviderStat
     Prefs.setInt(Prefs.OFFSET, 0);
   }
 
-  void removeCards({String type, int vacancyId, props, context}) {
-    if (Prefs.getInt(Prefs.OFFSET) > 0 && Prefs.getInt(Prefs.OFFSET) != null) {
-      offset = Prefs.getInt(Prefs.OFFSET);
-    } else {
-      offset = 5;
-    }
-
-    if (Prefs.getString(Prefs.TOKEN) != null) {
-      if (type == "LIKED") {
-        props.addOneToMatches();
-      }
-      Vacancy.saveVacancyUser(vacancy_id: vacancyId, type: type).then((value) {
-        StoreProvider.of<AppState>(context).dispatch(getNumberOfLikedVacancies());
-      });
-      setState(() {
-        props.listResponse.data.remove(props.listResponse.data[0]);
-      });
-    } else {
-      setState(() {
-        props.listResponse.data.remove(props.listResponse.data[0]);
-      });
-    }
-
-    Vacancy.getVacancyByOffset(
-            offset: offset,
-            job_type_ids: StoreProvider.of<AppState>(context).state.vacancy.job_type_ids,
-            region_ids: StoreProvider.of<AppState>(context).state.vacancy.region_ids,
-            schedule_ids: StoreProvider.of<AppState>(context).state.vacancy.schedule_ids,
-            busyness_ids: StoreProvider.of<AppState>(context).state.vacancy.busyness_ids,
-            vacancy_type_ids: StoreProvider.of<AppState>(context).state.vacancy.vacancy_type_ids,
-            type: StoreProvider.of<AppState>(context).state.vacancy.type)
-        .then((value) {
-      if (value != null) {
-        offset = offset + 1;
-        Prefs.setInt(Prefs.OFFSET, offset);
-        setState(() {
-          props.listResponse.data.add(value);
-        });
-      }
-    });
-  }
-
   @override
   Widget build(BuildContext context) {
     return Prefs.getString(Prefs.USER_TYPE) == 'COMPANY' ?
@@ -442,6 +400,48 @@ class _DiscoverTabState extends State<DiscoverTab> with SingleTickerProviderStat
         );
       },
     );
+  }
+
+  void removeCards({String type, int vacancyId, props, context}) {
+    if (Prefs.getInt(Prefs.OFFSET) > 0 && Prefs.getInt(Prefs.OFFSET) != null) {
+      offset = Prefs.getInt(Prefs.OFFSET);
+    } else {
+      offset = 5;
+    }
+
+    if (Prefs.getString(Prefs.TOKEN) != null) {
+      if (type == "LIKED") {
+        props.addOneToMatches();
+      }
+      Vacancy.saveVacancyUser(vacancy_id: vacancyId, type: type).then((value) {
+        StoreProvider.of<AppState>(context).dispatch(getNumberOfLikedVacancies());
+      });
+      setState(() {
+        props.listResponse.data.remove(props.listResponse.data[0]);
+      });
+    } else {
+      setState(() {
+        props.listResponse.data.remove(props.listResponse.data[0]);
+      });
+    }
+
+    Vacancy.getVacancyByOffset(
+        offset: offset,
+        job_type_ids: StoreProvider.of<AppState>(context).state.vacancy.job_type_ids,
+        region_ids: StoreProvider.of<AppState>(context).state.vacancy.region_ids,
+        schedule_ids: StoreProvider.of<AppState>(context).state.vacancy.schedule_ids,
+        busyness_ids: StoreProvider.of<AppState>(context).state.vacancy.busyness_ids,
+        vacancy_type_ids: StoreProvider.of<AppState>(context).state.vacancy.vacancy_type_ids,
+        type: StoreProvider.of<AppState>(context).state.vacancy.type)
+        .then((value) {
+      if (value != null) {
+        offset = offset + 1;
+        Prefs.setInt(Prefs.OFFSET, offset);
+        setState(() {
+          props.listResponse.data.add(value);
+        });
+      }
+    });
   }
 
   void handleInitialBuild(VacanciesScreenProps props) {

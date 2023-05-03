@@ -16,7 +16,6 @@ import 'package:ishtapp/constants/configs.dart';
 import 'package:ishtapp/screens/chat_screen.dart';
 import '../widgets/Dialogs/Dialogs.dart';
 import 'package:flutter_tindercard/flutter_tindercard.dart';
-
 import 'package:flutter_guid/flutter_guid.dart';
 
 class ProfileCard extends StatefulWidget {
@@ -128,8 +127,8 @@ class _ProfileCardState extends State<ProfileCard> {
                                                 ? widget.vacancy.name.toString() + '\n'
                                                 : "",
                                             style: TextStyle(
-                                                fontSize: 16,
-                                                fontWeight: FontWeight.w700,
+                                                fontSize: 20,
+                                                fontWeight: FontWeight.bold,
                                                 fontFamily: 'Manrope',
                                                 color: kColorDark
                                             ),
