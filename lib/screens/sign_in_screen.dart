@@ -92,8 +92,6 @@ class _SignInScreenState extends State<SignInScreen> {
 
   @override
   Widget build(BuildContext context) {
-    print(company);
-
     return Scaffold(
       appBar: AppBar(
         title: Text("sign_in_title".tr()),
@@ -153,6 +151,7 @@ class _SignInScreenState extends State<SignInScreen> {
                             onInputChanged: (PhoneNumber number) async {
                               phoneNumber = number.phoneNumber;
                               await Users.checkPhone(phoneNumber.trim()).then((value) {
+                                print(phoneNumber);
                                 setState(() {
                                   isPhoneExists = value;
                                 });

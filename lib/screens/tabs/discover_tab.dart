@@ -27,16 +27,6 @@ class DiscoverTab extends StatefulWidget {
 
 class _DiscoverTabState extends State<DiscoverTab> with SingleTickerProviderStateMixin {
   CardController cardController = CardController();
-
-  void handleInitialBuild(VacanciesScreenProps props) {
-    props.getVacancies();
-  }
-
-  void handleInitialBuildOfCompanyVacancy(CompanyVacanciesScreenProps props) {
-    props.getCompanyVacancies();
-    props.getNumOfActiveVacancies();
-  }
-
   int button = 0;
   int offset = 5;
 
@@ -452,6 +442,15 @@ class _DiscoverTabState extends State<DiscoverTab> with SingleTickerProviderStat
         );
       },
     );
+  }
+
+  void handleInitialBuild(VacanciesScreenProps props) {
+    props.getVacancies();
+  }
+
+  void handleInitialBuildOfCompanyVacancy(CompanyVacanciesScreenProps props) {
+    props.getCompanyVacancies();
+    props.getNumOfActiveVacancies();
   }
 }
 
