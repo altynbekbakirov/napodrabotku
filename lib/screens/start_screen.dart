@@ -85,7 +85,7 @@ class _StartScreenState extends State<StartScreen> {
                 child: Column(
                   children: [
                     Container(
-                      padding: EdgeInsets.symmetric(horizontal: 10),
+                      padding: EdgeInsets.symmetric(horizontal: 15),
                       margin: EdgeInsets.only(bottom: 20),
                       child: Flex(
                         direction: Axis.horizontal,
@@ -95,6 +95,7 @@ class _StartScreenState extends State<StartScreen> {
                             child: Container(
                               margin: EdgeInsets.symmetric(horizontal: 5),
                               child: CustomButton(
+                                padding: EdgeInsets.symmetric(horizontal: 0),
                                 color: kColorWhite,
                                 textColor: kColorPrimary,
                                 onPressed: () {
@@ -108,6 +109,7 @@ class _StartScreenState extends State<StartScreen> {
                             child: Container(
                               margin: EdgeInsets.symmetric(horizontal: 5),
                               child: CustomButton(
+                                padding: EdgeInsets.symmetric(horizontal: 0),
                                 color: kColorPrimary,
                                 textColor: kColorWhite,
                                 onPressed: () {

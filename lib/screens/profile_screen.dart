@@ -217,44 +217,6 @@ class _ProfileScreenState extends State<ProfileScreen> {
                             ),
                           ),
 
-                          // Container(
-                          //   margin: EdgeInsets.only(bottom: 5),
-                          //   child: Column(
-                          //     crossAxisAlignment: CrossAxisAlignment.start,
-                          //     children: [
-                          //       Container(
-                          //         child: Text("type".tr(),
-                          //             softWrap: true,
-                          //             style: TextStyle(
-                          //                 fontSize: 16,
-                          //                 color: Colors.grey,
-                          //                 height: 2)),
-                          //       ),
-                          //       TextFormField(
-                          //         controller: type_controller,
-                          //         decoration: InputDecoration(
-                          //           contentPadding:
-                          //               EdgeInsets.fromLTRB(15, 5, 15, 5),
-                          //           border: OutlineInputBorder(
-                          //               borderRadius: BorderRadius.circular(10),
-                          //               borderSide: BorderSide.none),
-                          //           floatingLabelBehavior:
-                          //               FloatingLabelBehavior.always,
-                          //           filled: true,
-                          //           fillColor: Colors.grey[200],
-                          //         ),
-                          //         validator: (name) {
-                          //           // Basic validation
-                          //           if (name.isEmpty) {
-                          //             return "please_fill_this_field".tr();
-                          //           }
-                          //           return null;
-                          //         },
-                          //       ),
-                          //     ],
-                          //   ),
-                          // ),
-
                           Container(
                             margin: EdgeInsets.only(bottom: 30),
                             child: Column(

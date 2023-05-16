@@ -37,6 +37,8 @@ class _DiscoverTabState extends State<DiscoverTab> with SingleTickerProviderStat
   Completer<YandexMapController> _controller = Completer();
   YandexMapController _yandexMapController;
   Point _point;
+  AppLatLong _appLatLong;
+  Placemark _placemark;
 
   int button = 0;
   int offset = 5;
@@ -47,17 +49,17 @@ class _DiscoverTabState extends State<DiscoverTab> with SingleTickerProviderStat
     super.initState();
     Prefs.setInt(Prefs.OFFSET, 0);
     _initPermission();
-    _point = Point(latitude: double.parse(Prefs.getString(Prefs.USER_LAT)), longitude: double.parse(Prefs.getString(Prefs.USER_LONG)));
+    _currentLocation();
   }
 
   @override
   Widget build(BuildContext context) {
-    return Prefs.getString(Prefs.USER_TYPE) == 'COMPANY' ?
 
+    return Prefs.getString(Prefs.USER_TYPE) == 'COMPANY' ?
     StoreConnector<AppState, CompanyVacanciesScreenProps>(
-            converter: (store) => mapStateToVacancyProps(store),
-            onInitialBuild: (props) => this.handleInitialBuildOfCompanyVacancy(props),
-            builder: (context, props) {
+      converter: (store) => mapStateToVacancyProps(store),
+      onInitialBuild: (props) => this.handleInitialBuildOfCompanyVacancy(props),
+      builder: (context, props) {
               List<Vacancy> data = props.listResponse.data;
               bool loading = props.listResponse.loading;
 
@@ -127,14 +129,14 @@ class _DiscoverTabState extends State<DiscoverTab> with SingleTickerProviderStat
 
               return body;
             },
-          ) :
-
+    ) :
     StoreConnector<AppState, VacanciesScreenProps>(
       converter: (store) => mapStateToProps(store),
       onInitialBuild: (props) => this.handleInitialBuild(props),
       builder: (context, props)  {
         List<Vacancy> data = props.listResponse.data;
         bool loading = props.listResponse.loading;
+        List<Placemark> _placemarks = [];
 
         Widget body;
         if (loading) {
@@ -145,23 +147,43 @@ class _DiscoverTabState extends State<DiscoverTab> with SingleTickerProviderStat
           );
         } else {
           var _index = 0;
-          body = data != null && data.isNotEmpty ?
+          body = onMap ?
+          Container(
+            color: kColorGray,
+            child: YandexMap(
+              onMapCreated: (YandexMapController controller) async {
+                _yandexMapController = controller;
+
+                for (var i = 0; i < data.length; i++) {
+                  await _yandexMapController.addPlacemark(
+                      Placemark(
+                          point: Point(
+                              latitude: double.parse(data[i].latitude),
+                              longitude: double.parse(data[i].longitude)
+                          ),
+                          style: PlacemarkStyle(
+                              iconName: 'assets/marker.png',
+                              opacity: 1.0
+                          ),
+                          onTap: (Point point) {
+                            print(point);
+                          }
+                      )
+                  );
+                }
+
+                await _yandexMapController.move(
+                    point: _point,
+                    animation: const MapAnimation(smooth: true, duration: 2.0),
+                    zoom: 8
+                );
+              },
+            ),
+          ) : data != null && data.isNotEmpty ?
           Container(
             // color: kColorProductLab,
             padding: EdgeInsets.only(bottom: 10),
-            child: onMap ? YandexMap(
-              onMapCreated: (YandexMapController controller) async {
-                _yandexMapController = controller;
-                await _yandexMapController.showUserLayer(iconName: 'assets/user_location.png', arrowName: '');
-                await _yandexMapController.move(
-                    point: _point,
-                    animation: const MapAnimation(smooth: true, duration: 2.0)
-                );
-                // if(!_controller.isCompleted){
-                //   _controller.complete(controller);
-                // }
-              },
-            ) : TinderSwapCard(
+            child: TinderSwapCard(
               orientation: AmassOrientation.BOTTOM,
               totalNum: data.length,
               swipeUp: false,
@@ -438,21 +460,22 @@ class _DiscoverTabState extends State<DiscoverTab> with SingleTickerProviderStat
     if (!await LocationService().checkPermission()) {
       await LocationService().requestPermission();
     }
-    // await _fetchCurrentLocation();
+    await _fetchCurrentLocation();
   }
 
   Future<void> _fetchCurrentLocation() async {
     AppLatLong location;
     const defLocation = MoscowLocation();
     try {
-      location = AppLatLong(
-        lat: 55.7522200,
-        long: 37.6155600
-      );
-      // location = await LocationService().getCurrentLocation();
+      location = await LocationService().getCurrentLocation();
+      // location = AppLatLong(
+      //     lat: 56.321639975018435,
+      //     long: 43.99102901753601
+      // );
     } catch (_) {
       location = defLocation;
     }
+
     _moveToCurrentLocation(location);
   }
 
@@ -463,8 +486,45 @@ class _DiscoverTabState extends State<DiscoverTab> with SingleTickerProviderStat
         longitude: appLatLong.long,
       ),
       animation: const MapAnimation(smooth: true, duration: 1),
-      zoom: 12,
+      zoom: 5,
     );
+  }
+
+  Future<void> _currentLocation() async {
+    AppLatLong appLatLong;
+    Placemark placemark;
+    try {
+      appLatLong = await LocationService().getCurrentLocation();
+      appLatLong = AppLatLong(
+        lat: 56.321639975018435,
+        long: 43.99102901753601
+      );
+      placemark = Placemark(
+        point: Point(
+            latitude: 56.321639975018435,
+            longitude: 43.99102901753601
+        ),
+        style: PlacemarkStyle(
+          iconName: 'assets/marker.png',
+          opacity: 1.0
+        ),
+        onTap: (Point point) {
+          print(point);
+        }
+      );
+      setState(() {
+        _placemark = placemark;
+      });
+    } catch (_) {
+      appLatLong = MoscowLocation();
+    }
+
+    setState(() {
+      _point = Point(
+          latitude: appLatLong.lat,
+          longitude: appLatLong.long
+      );
+    });
   }
 
   void removeCards({String type, int vacancyId, props, context}) {

@@ -90,9 +90,7 @@ class _ProfileCardState extends State<ProfileCard> {
               elevation: 4.0,
               color: Colors.white,
               margin: EdgeInsets.all(0),
-              shape: RoundedRectangleBorder(
-                borderRadius: BorderRadius.circular(4.0),
-              ),
+              shape: defaultCardBorder(),
               child: Container(
                 alignment: Alignment.center,
                 padding: const EdgeInsets.all(0),
@@ -128,7 +126,7 @@ class _ProfileCardState extends State<ProfileCard> {
                                                 : "",
                                             style: TextStyle(
                                                 fontSize: 20,
-                                                fontWeight: FontWeight.bold,
+                                                fontWeight: FontWeight.w900,
                                                 fontFamily: 'Manrope',
                                                 color: kColorDark
                                             ),
@@ -178,48 +176,6 @@ class _ProfileCardState extends State<ProfileCard> {
                       ),
                     ),
 
-                    /// Product Lab
-                    widget.vacancy.opportunity != null && isProductLabVacancy ?
-                    Flexible(
-                      flex: 1,
-                      child: Container(
-                        color: kColorDark,
-                        child: Flex(
-                          direction: Axis.horizontal,
-                          mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                          children: [
-                            Flexible(
-                              child: Container(
-                                padding: EdgeInsets.symmetric(horizontal: 10, vertical: 5),
-                                decoration: BoxDecoration(
-                                    color: kColorPrimary,
-                                    borderRadius: BorderRadius.circular(4)
-                                ),
-                                child: Text(
-                                  widget.vacancy.opportunity != null ? widget.vacancy.opportunity.toString() : "",
-                                  style: TextStyle(
-                                    fontSize: 12,
-                                    fontWeight: FontWeight.w700,
-                                    color: kColorWhite,
-                                  ),
-                                ),
-                              ),
-                            ),
-                            Flexible(
-                                child: Text(
-                                  widget.vacancy.opportunityType != null ? widget.vacancy.opportunityType : '',
-                                  style: TextStyle(
-                                      fontSize: 15,
-                                      fontWeight: FontWeight.bold,
-                                      fontFamily: 'Manrope',
-                                      color: kColorPrimary
-                                  ),
-                                )),
-                          ],
-                        ),
-                      ),
-                    ) : Container(),
-
                     Flexible(
                       flex: 2,
                       child: Container(
@@ -242,7 +198,7 @@ class _ProfileCardState extends State<ProfileCard> {
                                     Container(
                                       padding: EdgeInsets.symmetric(horizontal: 10, vertical: 5),
                                       decoration: BoxDecoration(
-                                          color: kColorPrimary,
+                                          color: kColorGray,
                                           borderRadius: BorderRadius.circular(4)
                                       ),
                                       child: Text(
@@ -250,7 +206,7 @@ class _ProfileCardState extends State<ProfileCard> {
                                         style: TextStyle(
                                           fontSize: 12,
                                           fontWeight: FontWeight.w700,
-                                          color: kColorWhite,
+                                          color: kColorDark,
                                         ),
                                       ),
                                     ) : Container(),
@@ -260,7 +216,7 @@ class _ProfileCardState extends State<ProfileCard> {
                                       padding: EdgeInsets.symmetric(horizontal: 10, vertical: 5),
                                       margin: EdgeInsets.only(top: 5),
                                       decoration: BoxDecoration(
-                                          color: kColorPrimary,
+                                          color: kColorGray,
                                           borderRadius: BorderRadius.circular(4)
                                       ),
                                       child: Text(
@@ -271,7 +227,7 @@ class _ProfileCardState extends State<ProfileCard> {
                                             fontSize: 12,
                                             fontWeight: FontWeight.bold,
                                             fontFamily: 'Manrope',
-                                            color: kColorWhite
+                                            color: kColorDark
                                         ),
                                       ),
                                     ) :
@@ -279,7 +235,7 @@ class _ProfileCardState extends State<ProfileCard> {
                                       padding: EdgeInsets.symmetric(horizontal: 10, vertical: 5),
                                       margin: EdgeInsets.only(top: 5),
                                       decoration: BoxDecoration(
-                                          color: kColorPrimary,
+                                          color: kColorGray,
                                           borderRadius: BorderRadius.circular(4)
                                       ),
                                       child: Text(
@@ -288,7 +244,7 @@ class _ProfileCardState extends State<ProfileCard> {
                                             fontSize: 12,
                                             fontWeight: FontWeight.bold,
                                             fontFamily: 'Manrope',
-                                            color: kColorWhite
+                                            color: kColorDark
                                         ),
                                       ),
                                     ),
@@ -300,16 +256,39 @@ class _ProfileCardState extends State<ProfileCard> {
 
                             /// Salary
                             Flexible(
-                                child: Text(
-                                  widget.vacancy.salary != null ? widget.vacancy.salary : '',
-                                  textAlign: TextAlign.end,
-                                  style: TextStyle(
-                                    fontSize: 18,
-                                    fontWeight: FontWeight.bold,
-                                    fontFamily: 'Manrope',
-                                    color: kColorPrimary,
+                                child: Container(
+                                  child: Flex(
+                                    direction: Axis.vertical,
+                                    crossAxisAlignment: CrossAxisAlignment.end,
+                                    mainAxisAlignment: MainAxisAlignment.start,
+                                    children: [
+                                      Container(
+                                        child: Text(
+                                          (widget.vacancy.salary != null ? widget.vacancy.salary : '') + widget.vacancy.currency,
+                                          textAlign: TextAlign.end,
+                                          style: TextStyle(
+                                            fontSize: 24,
+                                            fontWeight: FontWeight.w900,
+                                            fontFamily: 'Manrope',
+                                            color: kColorPrimary,
+                                          ),
+                                        ),
+                                      ),
+                                      Container(
+                                        child: Text(
+                                          widget.vacancy.period != null ? widget.vacancy.period.toLowerCase() : '',
+                                          textAlign: TextAlign.end,
+                                          style: TextStyle(
+                                            fontSize: 16,
+                                            fontWeight: FontWeight.w700,
+                                            fontFamily: 'Manrope',
+                                            color: kColorPrimary,
+                                          ),
+                                        ),
+                                      ),
+                                    ],
                                   ),
-                                )
+                                ),
                             ),
 
                           ],
@@ -384,7 +363,7 @@ class _ProfileCardState extends State<ProfileCard> {
                                   ),
                                   padding: EdgeInsets.all(0),
                                   color: Colors.transparent,
-                                  textColor: Prefs.getString(Prefs.ROUTE) == "PRODUCT_LAB" ? kColorProductLab : kColorPrimary,
+                                  textColor: kColorPrimary,
                                   onPressed: () async {
                                     if (Prefs.getString(Prefs.TOKEN) == null) {
                                       if (Prefs.getInt(Prefs.OFFSET) > 0 && Prefs.getInt(Prefs.OFFSET) != null) {

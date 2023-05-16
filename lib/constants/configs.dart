@@ -1,5 +1,5 @@
-// String API_IP = "https://ishtapp.kg/api/";
-// String SERVER_IP = "https://ishtapp.kg/";
+// String API_IP = "http://10.0.2.2/api/";
+// String SERVER_IP = "http://10.0.2.2/";
 String API_IP = "http://188.246.185.182/api/";
 String SERVER_IP = "http://188.246.185.182/";
 String API_GET_USER = "user";

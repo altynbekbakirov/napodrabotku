@@ -28,6 +28,10 @@
 	<string>Разрешите приложению доступ к камере, чтобы создавать фотографии для загрузки в профиле, резюме и чате.</string>
 	<key>NSPhotoLibraryUsageDescription</key>
 	<string>Разрешите приложению доступ к галерее устройства для загрузки Ваших изображений в профиле, резюме и чате.</string>
+	<key>NSLocationWhenInUseUsageDescription</key>
+    <string>This app needs access to location when open.</string>
+    <key>NSLocationAlwaysUsageDescription</key>
+    <string>This app needs access to location when in the background.</string>
 	<key>UILaunchStoryboardName</key>
 	<string>LaunchScreen</string>
 	<key>UIMainStoryboardFile</key>

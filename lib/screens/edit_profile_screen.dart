@@ -3,9 +3,11 @@ import 'package:dropdown_search/dropdown_search.dart';
 import 'package:flutter/material.dart';
 import 'package:easy_localization/easy_localization.dart';
 import 'package:image_picker/image_picker.dart';
+import 'package:intl_phone_number_input/intl_phone_number_input.dart';
 import 'package:ishtapp/components/custom_button.dart';
 import 'package:flutter_datetime_picker/flutter_datetime_picker.dart';
 import 'package:flutter_redux/flutter_redux.dart';
+import 'package:ishtapp/widgets/svg_icon.dart';
 import 'package:path/path.dart';
 import 'package:ishtapp/constants/configs.dart';
 import 'package:ishtapp/datas/app_state.dart';
@@ -88,32 +90,30 @@ class _EditProfileScreenState extends State<EditProfileScreen> {
 //  List<UserExperienceForm> user_experience_forms = [];
 
   void _onImageButtonPressed(ImageSource source, {BuildContext context}) async {
-    {
-      try {
-        final pickedFile = await _picker.getImage(
-          source: source,
-        );
+    try {
+      final pickedFile = await _picker.getImage(
+        source: source,
+      );
 
-        File rotatedImage = await FlutterExifRotation.rotateAndSaveImage(path: pickedFile.path);
+      File rotatedImage = await FlutterExifRotation.rotateAndSaveImage(path: pickedFile.path);
 
-        if (pickedFile != null && pickedFile.path != null) {
-          File rotatedImage = await FlutterExifRotation.rotateImage(path: pickedFile.path);
+      if (pickedFile != null && pickedFile.path != null) {
+        File rotatedImage = await FlutterExifRotation.rotateImage(path: pickedFile.path);
 
-          setState(() {
-            _imageFile = rotatedImage;
-          });
-        }
-
-        // setState(() {
-        //   _imageFile = pickedFile;
-        // });
-
-      } catch (e) {
-        print("error: " + e.toString());
         setState(() {
-          _pickImageError = e;
+          _imageFile = rotatedImage;
         });
       }
+
+      // setState(() {
+      //   _imageFile = pickedFile;
+      // });
+
+    } catch (e) {
+      print("error: " + e.toString());
+      setState(() {
+        _pickImageError = e;
+      });
     }
   }
 
@@ -297,13 +297,9 @@ class _EditProfileScreenState extends State<EditProfileScreen> {
                   GestureDetector(
                     child: _imageFile == null
                         ? CircleAvatar(
-                            backgroundColor: Prefs.getString(Prefs.ROUTE) == "PRODUCT_LAB" ? kColorProductLab : kColorPrimary,
+                            backgroundColor: kColorGray,
                             radius: 60,
-                            backgroundImage: Prefs.getString(Prefs.PROFILEIMAGE) != null
-                                ? NetworkImage(
-                                    SERVER_IP + Prefs.getString(Prefs.PROFILEIMAGE) + "?token=${Guid.newGuid}",
-                                    headers: {"Authorization": Prefs.getString(Prefs.TOKEN)})
-                                : null,
+                            child: SvgIcon("assets/icons/camera_icon.svg", width: 40, height: 40, color: kColorSecondary),
                           )
                         : CircleAvatar(
                             backgroundColor: kColorPrimary,
@@ -340,24 +336,28 @@ class _EditProfileScreenState extends State<EditProfileScreen> {
                     SizedBox(height: 20),
 
                     /// Название компании
-                    Prefs.getString(Prefs.USER_TYPE) == "COMPANY"
-                        ? Column(
+                    Prefs.getString(Prefs.USER_TYPE) == "COMPANY" ? Column(
                       children: <Widget>[
                         Align(
+                            widthFactor: 10,
                             heightFactor: 1.5,
                             alignment: Alignment.topLeft,
                             child: Text(
-                              'company_name'.tr(),
-                              style: TextStyle(fontSize: 16, color: Colors.black),
-                            )),
+                              'organization_name'.tr().toString().toUpperCase() + '*',
+                              style: TextStyle(fontSize: 12, color: Colors.black, fontWeight: FontWeight.w700),
+                            )
+                        ),
                         TextFormField(
                           controller: _name_controller,
                           decoration: InputDecoration(
-                            border: OutlineInputBorder(
-                                borderRadius: BorderRadius.circular(10), borderSide: BorderSide.none),
+                            contentPadding: EdgeInsets.symmetric(vertical: 10, horizontal: 20),
+                            border: OutlineInputBorder(),
+                            enabledBorder: OutlineInputBorder(borderSide: BorderSide(color: Colors.grey[200], width: 2.0)),
+                            errorBorder: OutlineInputBorder(borderSide: BorderSide(color: kColorPrimary, width: 2.0)),
+                            errorStyle: TextStyle(color: kColorPrimary, fontWeight: FontWeight.w500),
                             floatingLabelBehavior: FloatingLabelBehavior.always,
                             filled: true,
-                            fillColor: Colors.grey[200],
+                            fillColor: kColorWhite,
                           ),
                           validator: (name) {
                             // Basic validation
@@ -369,8 +369,7 @@ class _EditProfileScreenState extends State<EditProfileScreen> {
                         ),
                         SizedBox(height: 20),
                       ],
-                    )
-                        : Container(),
+                    ) : Container(),
 
                     /// Контактный телефон
                     Align(
@@ -378,16 +377,21 @@ class _EditProfileScreenState extends State<EditProfileScreen> {
                         heightFactor: 1.5,
                         alignment: Alignment.topLeft,
                         child: Text(
-                          'phone_number'.tr(),
-                          style: TextStyle(fontSize: 16, color: Colors.black),
-                        )),
+                          'phone_number'.tr().toString().toUpperCase() + '*',
+                          style: TextStyle(fontSize: 12, color: Colors.black, fontWeight: FontWeight.w700),
+                        )
+                    ),
                     TextFormField(
                       controller: _phone_number_controller,
                       decoration: InputDecoration(
-                        border: OutlineInputBorder(borderRadius: BorderRadius.circular(10), borderSide: BorderSide.none),
+                        contentPadding: EdgeInsets.symmetric(vertical: 10, horizontal: 20),
+                        border: OutlineInputBorder(),
+                        enabledBorder: OutlineInputBorder(borderSide: BorderSide(color: Colors.grey[200], width: 2.0)),
+                        errorBorder: OutlineInputBorder(borderSide: BorderSide(color: kColorPrimary, width: 2.0)),
+                        errorStyle: TextStyle(color: kColorPrimary, fontWeight: FontWeight.w500),
                         floatingLabelBehavior: FloatingLabelBehavior.always,
                         filled: true,
-                        fillColor: Colors.grey[200],
+                        fillColor: kColorWhite,
                       ),
                       validator: (name) {
                         // Basic validation
@@ -398,8 +402,8 @@ class _EditProfileScreenState extends State<EditProfileScreen> {
                       },
                     ),
 
-                    Prefs.getString(Prefs.USER_TYPE) == "USER"
-                        ? Column(
+                    Prefs.getString(Prefs.USER_TYPE) == "USER" ?
+                    Column(
                       children: [
                         SizedBox(height: 20),
                         Align(
@@ -407,21 +411,25 @@ class _EditProfileScreenState extends State<EditProfileScreen> {
                             heightFactor: 1.5,
                             alignment: Alignment.topLeft,
                             child: Text(
-                              'surname'.tr(),
-                              style: TextStyle(fontSize: 16, color: Colors.black),
-                            )),
+                              'surname'.tr().toString().toUpperCase() + '*',
+                              style: TextStyle(fontSize: 12, color: Colors.black, fontWeight: FontWeight.w700),
+                            )
+                        ),
                       ],
-                    )
-                        : Container(),
-                    Prefs.getString(Prefs.USER_TYPE) == "USER"
-                        ? TextFormField(
+                    ) : Container(),
+
+                    Prefs.getString(Prefs.USER_TYPE) == "USER" ?
+                    TextFormField(
                       controller: _name_controller,
                       decoration: InputDecoration(
-                        border: OutlineInputBorder(
-                            borderRadius: BorderRadius.circular(10), borderSide: BorderSide.none),
+                        contentPadding: EdgeInsets.symmetric(vertical: 10, horizontal: 20),
+                        border: OutlineInputBorder(),
+                        enabledBorder: OutlineInputBorder(borderSide: BorderSide(color: Colors.grey[200], width: 2.0)),
+                        errorBorder: OutlineInputBorder(borderSide: BorderSide(color: kColorPrimary, width: 2.0)),
+                        errorStyle: TextStyle(color: kColorPrimary, fontWeight: FontWeight.w500),
                         floatingLabelBehavior: FloatingLabelBehavior.always,
                         filled: true,
-                        fillColor: Colors.grey[200],
+                        fillColor: kColorWhite,
                       ),
                       validator: (name) {
                         // Basic validation
@@ -430,8 +438,7 @@ class _EditProfileScreenState extends State<EditProfileScreen> {
                         }
                         return null;
                       },
-                    )
-                        : Container(),
+                    ) : Container(),
                     SizedBox(height: 20),
 
                     Align(
@@ -439,17 +446,23 @@ class _EditProfileScreenState extends State<EditProfileScreen> {
                         heightFactor: 1.5,
                         alignment: Alignment.topLeft,
                         child: Text(
-                          'email'.tr(),
-                          style: TextStyle(fontSize: 16, color: Colors.black),
-                        )),
+                          'email'.tr().toString().toUpperCase() + '*',
+                          style: TextStyle(fontSize: 12, color: Colors.black, fontWeight: FontWeight.w700),
+                        )
+                    ),
                     TextFormField(
-                      enabled: false,
                       controller: _email_controller,
                       decoration: InputDecoration(
-                        border: OutlineInputBorder(borderRadius: BorderRadius.circular(10), borderSide: BorderSide.none),
+                        enabled: false,
+                        contentPadding: EdgeInsets.symmetric(vertical: 10, horizontal: 20),
+                        border: OutlineInputBorder(),
+                        disabledBorder: OutlineInputBorder(borderSide: BorderSide(color: Colors.grey[200], width: 2.0)),
+                        enabledBorder: OutlineInputBorder(borderSide: BorderSide(color: Colors.grey[200], width: 2.0)),
+                        errorBorder: OutlineInputBorder(borderSide: BorderSide(color: kColorPrimary, width: 2.0)),
+                        errorStyle: TextStyle(color: kColorPrimary, fontWeight: FontWeight.w500),
                         floatingLabelBehavior: FloatingLabelBehavior.always,
                         filled: true,
-                        fillColor: Colors.grey[100],
+                        fillColor: kColorWhite,
                       ),
                       validator: (name) {
                         // Basic validation
@@ -468,9 +481,10 @@ class _EditProfileScreenState extends State<EditProfileScreen> {
                         heightFactor: 1.5,
                         alignment: Alignment.topLeft,
                         child: Text(
-                          'region'.tr(),
-                          style: TextStyle(fontSize: 16, color: Colors.black),
-                        )),
+                          'region'.tr().toString().toUpperCase() + '*',
+                          style: TextStyle(fontSize: 12, color: Colors.black, fontWeight: FontWeight.w700),
+                        )
+                    ),
                     DropdownSearch<String>(
                         showSelectedItem: true,
                         items: items,
@@ -483,14 +497,17 @@ class _EditProfileScreenState extends State<EditProfileScreen> {
                           });
                         },
                         dropdownSearchDecoration: InputDecoration(
-                            border: OutlineInputBorder(
-                              borderRadius: BorderRadius.circular(10),
-                              borderSide: BorderSide.none,
-                            ),
-                            filled: true,
-                            fillColor: Colors.grey[200],
-                            contentPadding: EdgeInsets.symmetric(vertical: 5, horizontal: 12)),
-                        selectedItem: selectedRegion),
+                          contentPadding: EdgeInsets.symmetric(vertical: 0, horizontal: 20),
+                          border: OutlineInputBorder(),
+                          enabledBorder: OutlineInputBorder(borderSide: BorderSide(color: Colors.grey[200], width: 2.0)),
+                          errorBorder: OutlineInputBorder(borderSide: BorderSide(color: kColorPrimary, width: 2.0)),
+                          errorStyle: TextStyle(color: kColorPrimary, fontWeight: FontWeight.w500),
+                          floatingLabelBehavior: FloatingLabelBehavior.always,
+                          filled: true,
+                          fillColor: kColorWhite,
+                        ),
+                        selectedItem: selectedRegion
+                    ),
                     SizedBox(height: 20),
 
                     /// Регион
@@ -499,9 +516,10 @@ class _EditProfileScreenState extends State<EditProfileScreen> {
                         heightFactor: 1.5,
                         alignment: Alignment.topLeft,
                         child: Text(
-                          'district'.tr(),
-                          style: TextStyle(fontSize: 16, color: Colors.black),
-                        )),
+                          'district'.tr().toString().toUpperCase() + '*',
+                          style: TextStyle(fontSize: 12, color: Colors.black, fontWeight: FontWeight.w700),
+                        )
+                    ),
                     DropdownSearch<String>(
                         showSelectedItem: true,
                         items: districts,
@@ -512,77 +530,86 @@ class _EditProfileScreenState extends State<EditProfileScreen> {
                           });
                         },
                         dropdownSearchDecoration: InputDecoration(
-                            border: OutlineInputBorder(
-                              borderRadius: BorderRadius.circular(10),
-                              borderSide: BorderSide.none,
-                            ),
-                            filled: true,
-                            fillColor: Colors.grey[200],
-                            contentPadding: EdgeInsets.symmetric(vertical: 5, horizontal: 12)),
-                        selectedItem: selectedDistrict),
+                          contentPadding: EdgeInsets.symmetric(vertical: 0, horizontal: 20),
+                          border: OutlineInputBorder(),
+                          enabledBorder: OutlineInputBorder(borderSide: BorderSide(color: Colors.grey[200], width: 2.0)),
+                          errorBorder: OutlineInputBorder(borderSide: BorderSide(color: kColorPrimary, width: 2.0)),
+                          errorStyle: TextStyle(color: kColorPrimary, fontWeight: FontWeight.w500),
+                          floatingLabelBehavior: FloatingLabelBehavior.always,
+                          filled: true,
+                          fillColor: kColorWhite,
+                        ),
+                        selectedItem: selectedDistrict
+                    ),
                     SizedBox(height: 20),
 
                     /// Адрес компании/организации
-                    Prefs.getString(Prefs.USER_TYPE) == "COMPANY"
-                        ? Column(
+                    Prefs.getString(Prefs.USER_TYPE) == "COMPANY" ?
+                    Column(
                       children: <Widget>[
                         Align(
                             widthFactor: 10,
                             heightFactor: 1.5,
                             alignment: Alignment.topLeft,
                             child: Text(
-                              'company_address'.tr(),
-                              style: TextStyle(fontSize: 16, color: Colors.black),
-                            )),
+                              'company_address'.tr().toString().toUpperCase() + '*',
+                              style: TextStyle(fontSize: 12, color: Colors.black, fontWeight: FontWeight.w700),
+                            )
+                        ),
                         TextFormField(
                           enabled: true,
                           controller: _address_of_company,
                           decoration: InputDecoration(
-                            border: OutlineInputBorder(
-                                borderRadius: BorderRadius.circular(10), borderSide: BorderSide.none),
+                            contentPadding: EdgeInsets.symmetric(vertical: 10, horizontal: 20),
+                            border: OutlineInputBorder(),
+                            enabledBorder: OutlineInputBorder(borderSide: BorderSide(color: Colors.grey[200], width: 2.0)),
+                            errorBorder: OutlineInputBorder(borderSide: BorderSide(color: kColorPrimary, width: 2.0)),
+                            errorStyle: TextStyle(color: kColorPrimary, fontWeight: FontWeight.w500),
                             floatingLabelBehavior: FloatingLabelBehavior.always,
                             filled: true,
-                            fillColor: Colors.grey[200],
+                            fillColor: kColorWhite,
                           ),
                           style: TextStyle(color: kColorPrimary.withOpacity(0.6)),
                         ),
                         SizedBox(height: 20),
                       ],
-                    )
-                        : Container(),
+                    ) : Container(),
 
                     /// ФИО Контактного лица
-                    Prefs.getString(Prefs.USER_TYPE) == "COMPANY"
-                        ? Column(
+                    Prefs.getString(Prefs.USER_TYPE) == "COMPANY" ?
+                    Column(
                       children: <Widget>[
                         Align(
                             widthFactor: 10,
                             heightFactor: 1.5,
                             alignment: Alignment.topLeft,
                             child: Text(
-                              'name_of_contact_person'.tr(),
-                              style: TextStyle(fontSize: 16, color: Colors.black),
-                            )),
+                              'name_of_contact_person'.tr().toString().toUpperCase() + '*',
+                              style: TextStyle(fontSize: 12, color: Colors.black, fontWeight: FontWeight.w700),
+                            )
+                        ),
                         TextFormField(
                           enabled: true,
                           controller: _fullname_of_contact_person,
                           decoration: InputDecoration(
-                            border: OutlineInputBorder(
-                                borderRadius: BorderRadius.circular(10), borderSide: BorderSide.none),
+                            contentPadding: EdgeInsets.symmetric(vertical: 10, horizontal: 20),
+                            border: OutlineInputBorder(),
+                            enabledBorder: OutlineInputBorder(borderSide: BorderSide(color: Colors.grey[200], width: 2.0)),
+                            errorBorder: OutlineInputBorder(borderSide: BorderSide(color: kColorPrimary, width: 2.0)),
+                            errorStyle: TextStyle(color: kColorPrimary, fontWeight: FontWeight.w500),
                             floatingLabelBehavior: FloatingLabelBehavior.always,
                             filled: true,
-                            fillColor: Colors.grey[200],
+                            fillColor: kColorWhite,
                           ),
                           style: TextStyle(color: kColorPrimary.withOpacity(0.6)),
                         ),
                         SizedBox(height: 20),
                       ],
-                    )
-                        : Container(),
+                    ) : Container(),
 
                     /// Должность контактного лица
-                    Prefs.getString(Prefs.USER_TYPE) == "COMPANY"
-                        ? Column(
+                    Prefs.getString(Prefs.USER_TYPE) == "COMPANY" ?
+                    Column(
                       children: <Widget>[
                         Align(
                             widthFactor: 10,
@@ -606,21 +633,21 @@ class _EditProfileScreenState extends State<EditProfileScreen> {
                         ),
                         SizedBox(height: 20),
                       ],
-                    )
-                        : Container(),
+                    ) : Container(),
 
                     /// Выбор сферы деятельности
-                    Prefs.getString(Prefs.USER_TYPE) == "COMPANY"
-                        ? Column(
+                    Prefs.getString(Prefs.USER_TYPE) == "COMPANY" ?
+                    Column(
                       children: <Widget>[
                         Align(
-                            widthFactor: 10,
-                            heightFactor: 1.5,
-                            alignment: Alignment.topLeft,
-                            child: Text(
-                              'job_type'.tr(),
-                              style: TextStyle(fontSize: 16, color: Colors.black),
-                            )),
+                          widthFactor: 10,
+                          heightFactor: 1.5,
+                          alignment: Alignment.topLeft,
+                          child: Text(
+                            'job_type'.tr().toString().toUpperCase() + '*',
+                            style: TextStyle(fontSize: 12, color: Colors.black, fontWeight: FontWeight.w700),
+                          )
+                        ),
                         DropdownSearch<String>(
                             showSelectedItem: true,
                             items: spheres,
@@ -631,35 +658,35 @@ class _EditProfileScreenState extends State<EditProfileScreen> {
                               });
                             },
                             dropdownSearchDecoration: InputDecoration(
-                                border: OutlineInputBorder(
-                                  borderRadius: BorderRadius.circular(10),
-                                  borderSide: BorderSide.none,
-                                ),
-                                filled: true,
-                                fillColor: Colors.grey[200],
-                                contentPadding: EdgeInsets.symmetric(vertical: 5, horizontal: 12)),
-                            selectedItem: selectedJobSphere),
+                              contentPadding: EdgeInsets.symmetric(vertical: 10, horizontal: 20),
+                              border: OutlineInputBorder(),
+                              enabledBorder: OutlineInputBorder(borderSide: BorderSide(color: Colors.grey[200], width: 2.0)),
+                              errorBorder: OutlineInputBorder(borderSide: BorderSide(color: kColorPrimary, width: 2.0)),
+                              errorStyle: TextStyle(color: kColorPrimary, fontWeight: FontWeight.w500),
+                              floatingLabelBehavior: FloatingLabelBehavior.always,
+                              filled: true,
+                              fillColor: kColorWhite,
+                            ),
+                            selectedItem: selectedJobSphere
+                        ),
                         SizedBox(height: 20),
                       ],
-                    )
-                        : Container(),
+                    ) : Container(),
 
                     /// Выбор Отрасли
-                    Prefs.getString(Prefs.ROUTE) != "PRODUCT_LAB"
-                        ? selectedJobSphere != null
-                        ? Align(
+                    selectedJobSphere != null ?
+                    Align(
                         widthFactor: 10,
                         heightFactor: 1.5,
                         alignment: Alignment.topLeft,
                         child: Text(
-                          'industry'.tr(),
-                          style: TextStyle(fontSize: 16, color: Colors.black),
-                        ))
-                        : Container()
-                        : Container(),
-                    Prefs.getString(Prefs.ROUTE) != "PRODUCT_LAB"
-                        ? selectedJobSphere != null
-                        ? DropdownSearch<String>(
+                          'industry'.tr().toString().toUpperCase() + '*',
+                          style: TextStyle(fontSize: 12, color: Colors.black, fontWeight: FontWeight.w700),
+                        )
+                    ) : Container(),
+
+                    selectedJobSphere != null ?
+                    DropdownSearch<String>(
                         showSelectedItem: true,
                         items: departments,
                         onChanged: (value) {
@@ -668,30 +695,32 @@ class _EditProfileScreenState extends State<EditProfileScreen> {
                           });
                         },
                         dropdownSearchDecoration: InputDecoration(
-                            border: OutlineInputBorder(
-                              borderRadius: BorderRadius.circular(10),
-                              borderSide: BorderSide.none,
-                            ),
-                            filled: true,
-                            fillColor: Colors.grey[200],
-                            contentPadding: EdgeInsets.symmetric(vertical: 5, horizontal: 12)),
-                        selectedItem: selectedDepartment)
-                        : Container()
-                        : Container(),
+                          contentPadding: EdgeInsets.symmetric(vertical: 0, horizontal: 20),
+                          border: OutlineInputBorder(),
+                          enabledBorder: OutlineInputBorder(borderSide: BorderSide(color: Colors.grey[200], width: 2.0)),
+                          errorBorder: OutlineInputBorder(borderSide: BorderSide(color: kColorPrimary, width: 2.0)),
+                          errorStyle: TextStyle(color: kColorPrimary, fontWeight: FontWeight.w500),
+                          floatingLabelBehavior: FloatingLabelBehavior.always,
+                          filled: true,
+                          fillColor: kColorWhite,
+                        ),
+                        selectedItem: selectedDepartment
+                    ) : Container(),
                     SizedBox(height: 20),
 
                     /// Социально-ориентированность
-                    Prefs.getString(Prefs.USER_TYPE) == "COMPANY"
-                        ? Column(
+                    Prefs.getString(Prefs.USER_TYPE) == "COMPANY" ?
+                    Column(
                       children: <Widget>[
                         Align(
                             widthFactor: 10,
                             heightFactor: 1.5,
                             alignment: Alignment.topLeft,
                             child: Text(
-                              'social_orientation'.tr(),
-                              style: TextStyle(fontSize: 16, color: Colors.black),
-                            )),
+                              'social_orientation'.tr().toString().toUpperCase() + '*',
+                              style: TextStyle(fontSize: 12, color: Colors.black, fontWeight: FontWeight.w700),
+                            )
+                        ),
                         DropdownSearch<String>(
                             showSelectedItem: true,
                             items: socialOrientations,
@@ -701,62 +730,77 @@ class _EditProfileScreenState extends State<EditProfileScreen> {
                               });
                             },
                             dropdownSearchDecoration: InputDecoration(
-                                border: OutlineInputBorder(
-                                  borderRadius: BorderRadius.circular(10),
-                                  borderSide: BorderSide.none,
-                                ),
-                                filled: true,
-                                fillColor: Colors.grey[200],
-                                contentPadding: EdgeInsets.symmetric(vertical: 5, horizontal: 12)),
+                              contentPadding: EdgeInsets.symmetric(vertical: 0, horizontal: 20),
+                              border: OutlineInputBorder(),
+                              enabledBorder: OutlineInputBorder(borderSide: BorderSide(color: Colors.grey[200], width: 2.0)),
+                              errorBorder: OutlineInputBorder(borderSide: BorderSide(color: kColorPrimary, width: 2.0)),
+                              errorStyle: TextStyle(color: kColorPrimary, fontWeight: FontWeight.w500),
+                              floatingLabelBehavior: FloatingLabelBehavior.always,
+                              filled: true,
+                              fillColor: kColorWhite,
+                            ),
                             selectedItem: selectedSocialOrientation),
                         SizedBox(height: 20),
                       ],
-                    )
-                        : Container(),
+                    ) : Container(),
 
-                    Prefs.getString(Prefs.USER_TYPE) == "USER"
-                        ? Align(
+                    Prefs.getString(Prefs.USER_TYPE) == "USER" ?
+                    Align(
                         widthFactor: 10,
                         heightFactor: 1.5,
                         alignment: Alignment.topLeft,
                         child: Text(
-                          'birth_date'.tr(),
-                          style: TextStyle(fontSize: 16, color: Colors.black),
-                        ))
-                        : Container(),
-                    Prefs.getString(Prefs.USER_TYPE) == "USER"
-                        ? CustomButton(
-                        mainAxisAlignment: MainAxisAlignment.start,
-                        width: MediaQuery.of(context).size.width * 1,
-                        height: 60.0,
-                        color: Colors.grey[100],
-                        textColor: kColorPrimary.withOpacity(0.6),
-                        textSize: 16,
-                        fontWeight: FontWeight.w400,
-                        textAlign: TextAlign.right,
-                        text: _birth_date_controller.text,
-                        onPressed: null)
-                        : Container(),
+                          'birth_date'.tr().toString().toUpperCase() + '*',
+                          style: TextStyle(fontSize: 12, color: Colors.black, fontWeight: FontWeight.w700),
+                        )
+                    ) : Container(),
+
+                    Prefs.getString(Prefs.USER_TYPE) == "USER" ?
+                    TextFormField(
+                      controller: _birth_date_controller,
+                      decoration: InputDecoration(
+                        enabled: false,
+                        contentPadding: EdgeInsets.symmetric(vertical: 10, horizontal: 20),
+                        border: OutlineInputBorder(),
+                        disabledBorder: OutlineInputBorder(borderSide: BorderSide(color: Colors.grey[200], width: 2.0)),
+                        enabledBorder: OutlineInputBorder(borderSide: BorderSide(color: Colors.grey[200], width: 2.0)),
+                        errorBorder: OutlineInputBorder(borderSide: BorderSide(color: kColorPrimary, width: 2.0)),
+                        errorStyle: TextStyle(color: kColorPrimary, fontWeight: FontWeight.w500),
+                        floatingLabelBehavior: FloatingLabelBehavior.always,
+                        filled: true,
+                        fillColor: kColorWhite,
+                      ),
+                      validator: (name) {
+                        // Basic validation
+//                      if (name.isEmpty) {
+//                        return "please_fill_this_field".tr();
+//                      }
+                        return null;
+                      },
+                      style: TextStyle(color: kColorPrimary.withOpacity(0.6)),
+                    ) : Container(),
                     SizedBox(height: 20),
 
-                    Prefs.getString(Prefs.USER_TYPE) == "USER"
-                        ? Align(
+                    Prefs.getString(Prefs.USER_TYPE) == "USER" ?
+                    Align(
                         widthFactor: 10,
                         heightFactor: 1.5,
                         alignment: Alignment.topLeft,
                         child: Text(
-                          'gender'.tr() + '  ',
-                          style: TextStyle(fontSize: 16, color: Colors.black),
-                        ))
-                        : Container(),
-                    Prefs.getString(Prefs.USER_TYPE) == "USER"
-                        ? Row(
+                          'gender'.tr().toString().toUpperCase() + '  ' + '*',
+                          style: TextStyle(fontSize: 12, color: Colors.black, fontWeight: FontWeight.w700),
+                        )
+                    ) : Container(),
+
+                    Prefs.getString(Prefs.USER_TYPE) == "USER" ?
+                    Row(
                       mainAxisAlignment: MainAxisAlignment.start,
                       children: [
+
                         Radio(
                           value: user_gender.Male,
                           groupValue: gender,
-                          activeColor: Colors.grey,
+                          activeColor: kColorPrimary,
                           onChanged: (user_gender value) {
                             setState(() {
                               gender = value;
@@ -767,7 +811,7 @@ class _EditProfileScreenState extends State<EditProfileScreen> {
                         Radio(
                           value: user_gender.Female,
                           groupValue: gender,
-                          activeColor: Colors.grey,
+                          activeColor: kColorPrimary,
                           onChanged: (user_gender value) {
                             setState(() {
                               gender = value;
@@ -776,42 +820,44 @@ class _EditProfileScreenState extends State<EditProfileScreen> {
                         ),
                         Text('female'.tr(), style: TextStyle(color: Colors.black)),
                       ],
-                    )
-                        : Container(),
+                    ) : Container(),
                     SizedBox(height: 20),
-                    Prefs.getString(Prefs.ROUTE) != "PRODUCT_LAB"
-                        ? Column(
+
+                    Column(
                       children: <Widget>[
-                        user_cv == null
-                            ? Container()
-                            : Align(
+                        user_cv == null ?
+                        Container() :
+                        Align(
                             widthFactor: 10,
                             heightFactor: 1.5,
                             alignment: Alignment.topLeft,
                             child: Text(
-                              'attachment'.tr(),
-                              style: TextStyle(fontSize: 16, color: Colors.black),
-                            )),
-                        user_cv == null
-                            ? Container()
-                            : CustomButton(
+                              'attachment'.tr().toString().toUpperCase()+' ',
+                              style: TextStyle(fontSize: 12, color: Colors.black, fontWeight: FontWeight.w700),
+                            )
+                        ),
+                        user_cv == null ? Container() :
+                        CustomButton(
+                            borderSide: BorderSide(
+                                color: kColorPrimary,
+                                width: 2.0
+                            ),
+                            padding: EdgeInsets.all(0),
+                            color: Colors.transparent,
                             text: attachment != null ? basename(attachment.path) : 'upload_new_file'.tr(),
-                            width: MediaQuery.of(context).size.width * 1,
-                            color: Colors.grey[200],
                             textColor: kColorPrimary,
                             onPressed: () {
                               // _pickAttachment();
-                            }),
+                            }
+                        ),
                         user_cv == null ? Container() : SizedBox(height: 30),
                       ],
-                    )
-                        : Container(),
+                    ),
 
                     SizedBox(
                       width: double.maxFinite,
                       child: CustomButton(
-                        padding: EdgeInsets.all(15),
-                        color: Prefs.getString(Prefs.ROUTE) == "PRODUCT_LAB" ? kColorProductLab : kColorPrimary,
+                        color: kColorPrimary,
                         textColor: Colors.white,
                         onPressed: () {
                           Navigator.pushNamed(context, Routes.new_password);
@@ -823,8 +869,7 @@ class _EditProfileScreenState extends State<EditProfileScreen> {
                     SizedBox(
                       width: double.maxFinite,
                       child: CustomButton(
-                        padding: EdgeInsets.all(15),
-                        color: Prefs.getString(Prefs.ROUTE) == "PRODUCT_LAB" ? kColorProductLab : kColorPrimary,
+                        color: kColorPrimary,
                         textColor: Colors.white,
                         onPressed: () {
                           if (_formKey.currentState.validate()) {
@@ -874,8 +919,6 @@ class _EditProfileScreenState extends State<EditProfileScreen> {
                           } else {
                             return;
                           }
-
-                          /// Remove previous screens
                         },
                         text: 'save'.tr(),
                       ),

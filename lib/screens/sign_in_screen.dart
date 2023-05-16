@@ -286,7 +286,7 @@ class _SignInScreenState extends State<SignInScreen> {
                   SizedBox(
                     width: double.maxFinite,
                     child: CustomButton(
-                      color: Prefs.getString(Prefs.ROUTE) == "PRODUCT_LAB" ? kColorProductLab : kColorPrimary,
+                      color: kColorPrimary,
                       textColor: Colors.white,
                       onPressed: () {
                         if (_formKey.currentState.validate()) {
@@ -297,26 +297,16 @@ class _SignInScreenState extends State<SignInScreen> {
                           company == is_company.Company ?
                           user.login(_usernameController.text.trim(), _passwordController.text.trim()).then((value) {
                             if (value == "OK") {
-                              if (Prefs.getString(Prefs.ROUTE) == "PRODUCT_LAB") {
-                                Navigator.of(context).popUntil((route) => route.isFirst);
-                                Navigator.of(context).pushNamed(Routes.product_lab_home);
-                              } else {
-                                Navigator.of(context).popUntil((route) => route.isFirst);
-                                Navigator.of(context).pushNamed(Routes.home);
-                              }
+                              Navigator.of(context).popUntil((route) => route.isFirst);
+                              Navigator.of(context).pushNamed(Routes.home);
                             } else {
                               _showDialog(context,"password_or_email_is_incorrect".tr());
                             }
                           }) :
                           user.loginPhone(phoneNumber.trim(), _passwordController.text.trim()).then((value) {
                             if (value == "OK") {
-                              if (Prefs.getString(Prefs.ROUTE) == "PRODUCT_LAB") {
-                                Navigator.of(context).popUntil((route) => route.isFirst);
-                                Navigator.of(context).pushNamed(Routes.product_lab_home);
-                              } else {
-                                Navigator.of(context).popUntil((route) => route.isFirst);
-                                Navigator.of(context).pushNamed(Routes.home);
-                              }
+                              Navigator.of(context).popUntil((route) => route.isFirst);
+                              Navigator.of(context).pushNamed(Routes.home);
                             } else {
                               _showDialog(context, "invalid_phone_number_or_password".tr());
                             }

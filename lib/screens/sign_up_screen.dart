@@ -7,16 +7,19 @@ import 'package:email_validator/email_validator.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_datetime_picker/flutter_datetime_picker.dart';
+import 'package:geocoding/geocoding.dart';
 import 'package:http/http.dart' as http;
 import 'package:image_picker/image_picker.dart';
 import 'package:intl/intl.dart';
 import 'package:intl_phone_number_input/intl_phone_number_input.dart';
 import 'package:ishtapp/components/custom_button.dart';
 import 'package:ishtapp/constants/configs.dart';
+import 'package:ishtapp/datas/app_lat_long.dart';
 import 'package:ishtapp/datas/pref_manager.dart';
 import 'package:ishtapp/datas/user.dart';
 import 'package:ishtapp/datas/vacancy.dart';
 import 'package:ishtapp/routes/routes.dart';
+import 'package:ishtapp/services/location_service.dart';
 import 'package:ishtapp/utils/common_services.dart';
 import 'package:ishtapp/utils/constants.dart';
 import 'package:ishtapp/widgets/svg_icon.dart';
@@ -62,6 +65,8 @@ class _SignUpScreenState extends State<SignUpScreen> {
   List<String> districts = [];
   String selectedRegion;
   String selectedDistrict;
+
+  String _currentAddress;
 
   void _showDataPicker(context) {
     var date = DateTime.now();
@@ -153,18 +158,16 @@ class _SignUpScreenState extends State<SignUpScreen> {
   }
 
   void _onImageButtonPressed(ImageSource source, {BuildContext context}) async {
-    {
-      try {
-        final pickedFile = await _picker.getImage(
-          source: source,
-        );
+    try {
+      final pickedFile = await _picker.getImage(
+        source: source,
+      );
 
-        setState(() {
-          _imageFile = pickedFile;
-        });
-      } catch (e) {
-        print(e);
-      }
+      setState(() {
+        _imageFile = pickedFile;
+      });
+    } catch (e) {
+      print(e);
     }
   }
 
@@ -211,6 +214,7 @@ class _SignUpScreenState extends State<SignUpScreen> {
   void initState() {
     setMode();
     getRegions();
+    _initPermission();
     super.initState();
   }
 
@@ -256,7 +260,7 @@ class _SignUpScreenState extends State<SignUpScreen> {
                 _showPicker(context);
               },
             ),
-            SizedBox(height: 22),
+            SizedBox(height: 20),
 
             /// Form
             Form(
@@ -264,38 +268,42 @@ class _SignUpScreenState extends State<SignUpScreen> {
               child: Column(
                 children: <Widget>[
                   /// Название организации
-                  company == is_company.Company
-                      ? Flex(
-                          direction: Axis.vertical,
-                          children: <Widget>[
-                            Align(
-                                widthFactor: 10,
-                                heightFactor: 1.5,
-                                alignment: Alignment.topLeft,
-                                child: Text(
-                                  'organization_name'.tr().toString().toUpperCase() + '*',
-                                  style: TextStyle(fontSize: 12, color: Colors.black, fontWeight: FontWeight.w700),
-                                )),
-                            TextFormField(
-                              controller: _nameController,
-                              textInputAction: TextInputAction.next,
-                              decoration: InputDecoration(
-                                border: OutlineInputBorder(borderRadius: BorderRadius.circular(10), borderSide: BorderSide.none),
-                                floatingLabelBehavior: FloatingLabelBehavior.always,
-                                filled: true,
-                                fillColor: Colors.grey[200],
-                              ),
-                              validator: (name) {
-                                if (name.isEmpty) {
-                                  return "please_fill_this_field".tr();
-                                }
-                                return null;
-                              },
-                            ),
-                            SizedBox(height: 20),
-                          ],
-                        )
-                      : Container(),
+                  company == is_company.Company ?
+                  Flex(
+                    direction: Axis.vertical,
+                    children: <Widget>[
+                      Align(
+                          widthFactor: 10,
+                          heightFactor: 1.5,
+                          alignment: Alignment.topLeft,
+                          child: Text(
+                            'organization_name'.tr().toString().toUpperCase() + '*',
+                            style: TextStyle(fontSize: 12, color: Colors.black, fontWeight: FontWeight.w700),
+                          )
+                      ),
+                      TextFormField(
+                        controller: _nameController,
+                        textInputAction: TextInputAction.next,
+                        decoration: InputDecoration(
+                          contentPadding: EdgeInsets.symmetric(vertical: 10, horizontal: 20),
+                          border: OutlineInputBorder(),
+                          enabledBorder: OutlineInputBorder(borderSide: BorderSide(color: Colors.grey[200], width: 2.0)),
+                          errorBorder: OutlineInputBorder(borderSide: BorderSide(color: kColorPrimary, width: 2.0)),
+                          errorStyle: TextStyle(color: kColorPrimary, fontWeight: FontWeight.w500),
+                          floatingLabelBehavior: FloatingLabelBehavior.always,
+                          filled: true,
+                          fillColor: kColorWhite,
+                        ),
+                        validator: (name) {
+                          if (name.isEmpty) {
+                            return "please_fill_this_field".tr();
+                          }
+                          return null;
+                        },
+                      ),
+                      SizedBox(height: 20),
+                    ],
+                  ) : Container(),
 
                   /// Контакный Телефон
                   Align(
@@ -305,7 +313,8 @@ class _SignUpScreenState extends State<SignUpScreen> {
                       child: Text(
                         'phone_number'.tr().toString().toUpperCase() + '*',
                         style: TextStyle(fontSize: 12, color: Colors.black, fontWeight: FontWeight.w700),
-                      )),
+                      )
+                  ),
                   Container(
                     margin: EdgeInsets.only(bottom: 16),
                     child: InternationalPhoneNumberInput(
@@ -373,6 +382,8 @@ class _SignUpScreenState extends State<SignUpScreen> {
                             contentPadding: EdgeInsets.symmetric(vertical: 10, horizontal: 20),
                             border: OutlineInputBorder(),
                             enabledBorder: OutlineInputBorder(borderSide: BorderSide(color: Colors.grey[200], width: 2.0)),
+                            errorBorder: OutlineInputBorder(borderSide: BorderSide(color: kColorPrimary, width: 2.0)),
+                            errorStyle: TextStyle(color: kColorPrimary, fontWeight: FontWeight.w500),
                             floatingLabelBehavior: FloatingLabelBehavior.always,
                             filled: true,
                             fillColor: kColorWhite,
@@ -427,6 +438,8 @@ class _SignUpScreenState extends State<SignUpScreen> {
                             contentPadding: EdgeInsets.symmetric(vertical: 10, horizontal: 20),
                             border: OutlineInputBorder(),
                             enabledBorder: OutlineInputBorder(borderSide: BorderSide(color: Colors.grey[200], width: 2.0)),
+                            errorBorder: OutlineInputBorder(borderSide: BorderSide(color: kColorPrimary, width: 2.0)),
+                            errorStyle: TextStyle(color: kColorPrimary, fontWeight: FontWeight.w500),
                             floatingLabelBehavior: FloatingLabelBehavior.always,
                             filled: true,
                             fillColor: kColorWhite,
@@ -478,6 +491,8 @@ class _SignUpScreenState extends State<SignUpScreen> {
                             contentPadding: EdgeInsets.symmetric(vertical: 10, horizontal: 20),
                             border: OutlineInputBorder(),
                             enabledBorder: OutlineInputBorder(borderSide: BorderSide(color: Colors.grey[200], width: 2.0)),
+                            errorBorder: OutlineInputBorder(borderSide: BorderSide(color: kColorPrimary, width: 2.0)),
+                            errorStyle: TextStyle(color: kColorPrimary, fontWeight: FontWeight.w500),
                             floatingLabelBehavior: FloatingLabelBehavior.always,
                             filled: true,
                             fillColor: kColorWhite,
@@ -533,6 +548,8 @@ class _SignUpScreenState extends State<SignUpScreen> {
                                   contentPadding: EdgeInsets.symmetric(vertical: 10, horizontal: 20),
                                   border: OutlineInputBorder(),
                                   enabledBorder: OutlineInputBorder(borderSide: BorderSide(color: Colors.grey[200], width: 2.0)),
+                                  errorBorder: OutlineInputBorder(borderSide: BorderSide(color: kColorPrimary, width: 2.0)),
+                                  errorStyle: TextStyle(color: kColorPrimary, fontWeight: FontWeight.w500),
                                   floatingLabelBehavior: FloatingLabelBehavior.always,
                                   filled: true,
                                   fillColor: kColorWhite,
@@ -577,6 +594,8 @@ class _SignUpScreenState extends State<SignUpScreen> {
                                     contentPadding: EdgeInsets.symmetric(vertical: 10, horizontal: 20),
                                     border: OutlineInputBorder(),
                                     enabledBorder: OutlineInputBorder(borderSide: BorderSide(color: Colors.grey[200], width: 2.0)),
+                                    errorBorder: OutlineInputBorder(borderSide: BorderSide(color: kColorPrimary, width: 2.0)),
+                                    errorStyle: TextStyle(color: kColorPrimary, fontWeight: FontWeight.w500),
                                     floatingLabelBehavior: FloatingLabelBehavior.always,
                                     filled: true,
                                     fillColor: kColorWhite,
@@ -615,6 +634,8 @@ class _SignUpScreenState extends State<SignUpScreen> {
                                     contentPadding: EdgeInsets.symmetric(vertical: 0, horizontal: 20),
                                     border: OutlineInputBorder(),
                                     enabledBorder: OutlineInputBorder(borderSide: BorderSide(color: Colors.grey[200], width: 2.0)),
+                                    errorBorder: OutlineInputBorder(borderSide: BorderSide(color: kColorPrimary, width: 2.0)),
+                                    errorStyle: TextStyle(color: kColorPrimary, fontWeight: FontWeight.w500),
                                     floatingLabelBehavior: FloatingLabelBehavior.always,
                                     filled: true,
                                     fillColor: kColorWhite,
@@ -639,7 +660,8 @@ class _SignUpScreenState extends State<SignUpScreen> {
                                   child: Text(
                                     'district'.tr().toString().toUpperCase(),
                                     style: TextStyle(fontSize: 12, color: Colors.black, fontWeight: FontWeight.w700),
-                                  )),
+                                  ),
+                              ),
                               DropdownSearch<String>(
                                 showSelectedItem: true,
                                 items: districts,
@@ -652,6 +674,8 @@ class _SignUpScreenState extends State<SignUpScreen> {
                                   contentPadding: EdgeInsets.symmetric(vertical: 0, horizontal: 20),
                                   border: OutlineInputBorder(),
                                   enabledBorder: OutlineInputBorder(borderSide: BorderSide(color: Colors.grey[200], width: 2.0)),
+                                  errorBorder: OutlineInputBorder(borderSide: BorderSide(color: kColorPrimary, width: 2.0)),
+                                  errorStyle: TextStyle(color: kColorPrimary, fontWeight: FontWeight.w500),
                                   floatingLabelBehavior: FloatingLabelBehavior.always,
                                   filled: true,
                                   fillColor: kColorWhite,
@@ -734,6 +758,7 @@ class _SignUpScreenState extends State<SignUpScreen> {
                           user.is_product_lab_user = Prefs.getString(Prefs.ROUTE) == "PRODUCT_LAB";
 
                           if (company == is_company.User) {
+                            debugPrint(phoneNumber);
                             await otpRegister(phoneNumber: phoneNumber, context: context, users: user, imageFile: _imageFile);
                           } else {
                             await Users.checkUsername(_emailController.text).then((value) async {
@@ -811,4 +836,77 @@ class _SignUpScreenState extends State<SignUpScreen> {
     ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(backgroundColor: Colors.red, content: Text(message)));
   }
+
+  Future<void> _initPermission() async {
+    if (!await LocationService().checkPermission()) {
+      await LocationService().requestPermission();
+    }
+    await _fetchCurrentLocation();
+  }
+
+  Future<void> _fetchCurrentLocation() async {
+    AppLatLong location;
+    const defLocation = MoscowLocation();
+    try {
+      location = await LocationService().getCurrentLocation();
+      // location = AppLatLong(
+      //     lat: 56.321639975018435,
+      //     long: 43.99102901753601
+      // );
+    } catch (_) {
+      location = defLocation;
+    }
+
+    _getAddressFromLatLng(location);
+  }
+
+  Future<void> _getAddressFromLatLng(AppLatLong location) async {
+    
+    final response = await http.get(Uri.parse('https://geocode-maps.yandex.ru/1.x?geocode=${location.long},${location.lat}&apikey=d88902f6-178b-4bba-82ed-0a1f4707031d&format=json'));
+
+    if (response.statusCode == 200) {
+      Map<dynamic, dynamic> responseData = json.decode(response.body);
+      String countryCode = responseData['response']['GeoObjectCollection']['featureMember'][0]['GeoObject']['metaDataProperty']['GeocoderMetaData']['AddressDetails']['Country']['CountryNameCode'];
+      String region = responseData['response']['GeoObjectCollection']['featureMember'][0]['GeoObject']['metaDataProperty']['GeocoderMetaData']['AddressDetails']['Country']['AdministrativeArea']['AdministrativeAreaName'];
+      String district = responseData['response']['GeoObjectCollection']['featureMember'][0]['GeoObject']['metaDataProperty']['GeocoderMetaData']['AddressDetails']['Country']['AdministrativeArea']['SubAdministrativeArea']['Locality']['LocalityName'];
+
+      setState(() {
+
+        if(countryCode != '' && countryCode != null){
+          initialCountry = countryCode;
+          number = PhoneNumber(isoCode: countryCode);
+        }
+
+        if(region != '' && region != null){
+          selectedRegion = region;
+        }
+
+        getDistricts(region);
+
+        if(district != '' && district != null){
+          selectedDistrict = district;
+        }
+      });
+    } else {
+      throw Exception('Failed to load data');
+    }
+
+    // await placemarkFromCoordinates(
+    //     location.lat, location.long)
+    //     .then((List<Placemark> placemarks) {
+    //   Placemark place = placemarks[0];
+    //   setState(() {
+    //     if(place.administrativeArea != null && place.administrativeArea != ''){
+    //       selectedRegion = place.administrativeArea;
+    //     }
+    //     getDistricts(place.administrativeArea);
+    //     selectedDistrict = place.locality;
+    //     initialCountry = place.isoCountryCode;
+    //     number = PhoneNumber(isoCode: place.isoCountryCode);
+    //   });
+    // }).catchError((e) {
+    //   debugPrint(e);
+    // });
+  }
+
 }
