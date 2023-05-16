@@ -50,21 +50,23 @@ class VacanciesTab extends StatelessWidget {
                       Flexible(
                         child: UsersGrid(
                             children: data.map((vacancy) {
-                          return GestureDetector(
-                            child: Container(
-                                margin: EdgeInsets.only(bottom: 20),
-                                child: ProfileCard(vacancy: vacancy, page: "submit")),
-                            onTap: () {
-                              Navigator.of(context).push(MaterialPageRoute(
-                                  builder: (BuildContext context) {
-                                return VacancyView(
-                                    page: "submitted",
-                                    vacancy: vacancy,
-                                );
-                              }));
-                            },
-                          );
-                        }).toList()),
+                              return GestureDetector(
+                                child: Container(
+                                    child: ProfileCard(vacancy: vacancy, page: "submit")
+                                ),
+                                onTap: () {
+                                  Navigator.of(context).push(
+                                      MaterialPageRoute(
+                                          builder: (BuildContext context) {
+                                            return VacancyView(
+                                              page: "submitted",
+                                              vacancy: vacancy,
+                                            );
+                                          }));
+                                  },
+                              );
+                            }).toList()
+                        ),
                       )
                     ],
                   ),
@@ -72,7 +74,7 @@ class VacanciesTab extends StatelessWidget {
               }
 
               return Scaffold(
-                backgroundColor: Prefs.getString(Prefs.ROUTE) == "PRODUCT_LAB" ? kColorProductLab : kColorPrimary,
+                backgroundColor: kColorPrimary,
                 body: body,
               );
             },

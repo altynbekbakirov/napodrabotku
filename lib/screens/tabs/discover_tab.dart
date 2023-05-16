@@ -8,6 +8,8 @@ import 'package:ishtapp/datas/app_lat_long.dart';
 import 'package:ishtapp/datas/app_state.dart';
 import 'package:ishtapp/datas/pref_manager.dart';
 import 'package:ishtapp/services/location_service.dart';
+import 'package:ishtapp/widgets/default_card_border.dart';
+import 'package:ishtapp/widgets/profile_card__map.dart';
 import 'package:redux/redux.dart';
 import 'package:flutter_redux/flutter_redux.dart';
 import 'package:ishtapp/datas/vacancy.dart';
@@ -52,6 +54,59 @@ class _DiscoverTabState extends State<DiscoverTab> with SingleTickerProviderStat
     _currentLocation();
   }
 
+  Future<void> openVacancyDialog(context, props, Vacancy vacancy) async {
+
+    return await showDialog(
+        context: context,
+        builder: (context) {
+          return StatefulBuilder(builder: (context, setState) {
+            return Dialog(
+              insetPadding: EdgeInsets.all(20),
+              shape: defaultCardBorder(),
+              child: Container(
+                constraints: BoxConstraints(maxHeight: MediaQuery.of(context).size.height * 0.6),
+                width: double.maxFinite,
+                child: GestureDetector(
+                  child: ProfileCardMap(
+                    props: props,
+                    page: 'discover',
+                    vacancy: vacancy,
+                    cardController: cardController,
+                  ),
+                  onTap: () {
+                    VacancySkill.getVacancySkills(vacancy.id).then((value) {
+                      List<VacancySkill> vacancySkills = [];
+
+                      for (var i in value) {
+                        vacancySkills.add(new VacancySkill(
+                          id: i.id,
+                          name: i.name,
+                          vacancyId: i.vacancyId,
+                          isRequired: i.isRequired,
+                        ));
+                      }
+                      Navigator.of(context).push(MaterialPageRoute(builder: (BuildContext context) {
+                        return Scaffold(
+                          backgroundColor: kColorPrimary,
+                          appBar: AppBar(
+                            title: Text("vacancy_view".tr()),
+                          ),
+                          body: VacancyView(
+                            page: "view",
+                            vacancy: vacancy,
+                            vacancySkill: vacancySkills,
+                          ),
+                        );
+                      }));
+                    });
+                  },
+                ),
+              ),
+            );
+          });
+        });
+  }
+
   @override
   Widget build(BuildContext context) {
 
@@ -74,9 +129,11 @@ class _DiscoverTabState extends State<DiscoverTab> with SingleTickerProviderStat
                 body = Column(
                   children: [
                     Expanded(
-                      child: StoreProvider.of<AppState>(context).state.vacancy.list.data.length > 0
-                          ? UsersGrid(
-                              children: StoreProvider.of<AppState>(context).state.vacancy.list.data.map((vacancy) {
+                      child: StoreProvider.of<AppState>(context).state.vacancy.list.data.length > 0 ?
+                      Container(
+                        padding: EdgeInsets.symmetric(horizontal: 20),
+                        child: UsersGrid(
+                            children: StoreProvider.of<AppState>(context).state.vacancy.list.data.map((vacancy) {
                               return GestureDetector(
                                 child: ProfileCard(vacancy: vacancy, page: 'company', offset: offset),
                                 onTap: () {
@@ -108,8 +165,10 @@ class _DiscoverTabState extends State<DiscoverTab> with SingleTickerProviderStat
                                   });
                                 },
                               );
-                            }).toList())
-                          : Container(
+                            }
+                            ).toList()),
+                      ) :
+                      Container(
                               padding: EdgeInsets.fromLTRB(40, 0, 40, 0),
                               child: Center(
                                 child: Text(
@@ -166,7 +225,7 @@ class _DiscoverTabState extends State<DiscoverTab> with SingleTickerProviderStat
                               opacity: 1.0
                           ),
                           onTap: (Point point) {
-                            print(point);
+                            openVacancyDialog(context, props, data[i]);
                           }
                       )
                   );

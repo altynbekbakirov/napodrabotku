@@ -13,7 +13,7 @@ class UsersGrid extends StatelessWidget {
       shrinkWrap: true,
       crossAxisCount: 1,
       childAspectRatio: 2.15 / 2,
-      mainAxisSpacing: 4,
+      mainAxisSpacing: 20,
       crossAxisSpacing: 4,
       children: children
   ):Container();

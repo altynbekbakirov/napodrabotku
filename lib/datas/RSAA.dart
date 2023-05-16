@@ -422,10 +422,10 @@ ThunkAction<AppState> getChatList() =>
 const GET_MESSAGE_LIST_REQUEST = 'GET_MESSAGE_LIST_REQUEST';
 const GET_MESSAGE_LIST_SUCCESS = 'GET_MESSAGE_LIST_SUCCESS';
 const GET_MESSAGE_LIST_FAILURE = 'GET_MESSAGE_LIST_FAILURE';
-RSAA getMessageListRequest(int receiver_id) {
+RSAA getMessageListRequest(int receiver_id, int vacancy_id) {
   return RSAA(
     method: 'GET',
-    endpoint: API_IP + API_MESSAGE_LIST + "/" + receiver_id.toString(),
+    endpoint: API_IP + API_MESSAGE_LIST + "/" + receiver_id.toString() + "/" + vacancy_id.toString(),
     types: [
       GET_MESSAGE_LIST_REQUEST,
       GET_MESSAGE_LIST_SUCCESS,
@@ -438,6 +438,6 @@ RSAA getMessageListRequest(int receiver_id) {
   );
 }
 
-ThunkAction<AppState> getMessageList(int receiver_id) =>
+ThunkAction<AppState> getMessageList(int receiver_id, int vacancy_id) =>
     (Store<AppState> store) =>
-        store.dispatch(getMessageListRequest(receiver_id));
+        store.dispatch(getMessageListRequest(receiver_id, vacancy_id));

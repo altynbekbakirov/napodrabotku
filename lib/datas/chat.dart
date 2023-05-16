@@ -38,6 +38,8 @@ class ListChatViewState {
 class ChatView {
   int user_id;
   String name;
+  int vacancy_id;
+  String vacancy;
   String avatar;
   String last_message;
   int num_of_unreads;
@@ -47,11 +49,15 @@ class ChatView {
       this.avatar,
       this.last_message,
       this.name,
+      this.vacancy_id,
+      this.vacancy,
       this.num_of_unreads});
 
   factory ChatView.fromJson(Map<String, dynamic> json) => new ChatView(
       user_id: json["id"],
       name: json["name"],
+      vacancy_id: json["vacancy_id"],
+      vacancy: json["vacancy"],
       avatar: json["avatar"],
       last_message: json["last_message"],
       num_of_unreads: json["unread_messages"]);
@@ -112,7 +118,7 @@ class Message {
       type: json["from"],
       read: json["read"]);
 
-  static Future<String> sendMessage(String message, int receiver_id) async {
+  static Future<String> sendMessage(String message, int receiver_id, int vacancy_id) async {
     final url = API_IP + API_SEND_MESSAGE;
     try {
       Map<String, String> headers = {
@@ -122,7 +128,7 @@ class Message {
       final response = await http.post(
         url,
         headers: headers,
-        body: json.encode({'message': message, 'receiver_id': receiver_id}),
+        body: json.encode({'message': message, 'receiver_id': receiver_id, 'vacancy_id': vacancy_id}),
       );
       json.decode(response.body);
       return "OK";

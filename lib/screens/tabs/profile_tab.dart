@@ -166,9 +166,7 @@ class _ProfileTabState extends State<ProfileTab> {
                                 margin: EdgeInsets.only(right: 10),
                                 child: CustomButton(
                                   padding: EdgeInsets.all(0),
-                                  color: Prefs.getString(Prefs.ROUTE) == "PRODUCT_LAB"
-                                      ? kColorProductLab
-                                      : kColorPrimary,
+                                  color: kColorPrimary,
                                   textColor: Colors.white,
                                   onPressed: () {
                                     Navigator.of(context).pushNamed(Routes.user_details);

@@ -676,7 +676,7 @@ class Users {
     try {
       Map<String, String> headers = {"Content-type": "application/json"};
       final response = await http.get(url, headers: headers);
-      // print(model + ' - ' + utf8.decode(response.bodyBytes));
+      print(model + ' - ' + utf8.decode(response.bodyBytes));
       return json.decode(utf8.decode(response.bodyBytes));
     } catch (error) {
       throw error;

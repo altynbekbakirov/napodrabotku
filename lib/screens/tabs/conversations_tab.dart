@@ -82,29 +82,36 @@ class _ConversationsTabState extends State<ConversationsTab> {
                           /// Get user object
                           return Container(
                             padding: EdgeInsets.symmetric(vertical: 10, horizontal: 0),
-//                color: !_isReadNotifDemo[index]
-//                    ? kColorPrimary.withAlpha(40)
-//                    : null,
                             child: ListTile(
                               leading: CircleAvatar(
                                 backgroundColor: Colors.white,
-                                backgroundImage: data[index].avatar != null
-                                    ? NetworkImage(SERVER_IP + data[index].avatar,
-                                        headers: {"Authorization": Prefs.getString(Prefs.TOKEN)})
-                                    : AssetImage('assets/images/default-user.jpg'),
+                                backgroundImage: data[index].avatar != null ?
+                                NetworkImage(
+                                    SERVER_IP + data[index].avatar,
+                                    headers: {"Authorization": Prefs.getString(Prefs.TOKEN)}
+                                ) :
+                                AssetImage('assets/images/default-user.jpg'),
                               ),
-                              title: Text(data[index].name, style: TextStyle(fontSize: 18, color: Colors.black)),
+                              title: Text(
+                                  data[index].name + ' (' + data[index].vacancy + ')',
+                                  style: TextStyle(fontSize: 18, color: Colors.black)
+                              ),
                               subtitle: Text(data[index].last_message),
-                              trailing: data[index].num_of_unreads > 0
-                                  ? Badge(text: data[index].num_of_unreads.toString())
-                                  : null,
+                              trailing: data[index].num_of_unreads > 0 ?
+                              Badge(text: data[index].num_of_unreads.toString()) : null,
                               onTap: () {
                                 /// Go to chat screen
-                                Navigator.of(context).push(MaterialPageRoute(
-                                    builder: (context) => ChatScreen(
-                                        user_id: data[index].user_id,
-                                        name: data[index].name,
-                                        avatar: data[index].avatar)));
+                                Navigator.of(context).push(
+                                    MaterialPageRoute(
+                                        builder: (context) => ChatScreen(
+                                            user_id: data[index].user_id,
+                                            name: data[index].name,
+                                            vacancy_id: data[index].vacancy_id,
+                                            vacancy: data[index].vacancy,
+                                            avatar: data[index].avatar
+                                        )
+                                    )
+                                );
                               },
                             ),
                           );

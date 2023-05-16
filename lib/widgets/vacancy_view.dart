@@ -483,8 +483,6 @@ class _VacancyViewState extends State<VacancyView> {
                               widget.page == 'inactive' ? Container() :
                               Center(
                                 child: CustomButton(
-                                  width: MediaQuery.of(context).size.width * 0.35,
-                                  padding: EdgeInsets.all(5),
                                   color: kColorPrimary,
                                   textColor: Colors.white,
                                   onPressed: () {

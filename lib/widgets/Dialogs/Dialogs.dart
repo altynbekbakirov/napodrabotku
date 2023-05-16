@@ -53,6 +53,27 @@ class Dialogs {
       ),
     );
   }
+  static showDialogBoxMap(context, String message) {
+    showDialog(
+      context: context,
+      builder: (ctx) => Center(
+        child: AlertDialog(
+          title: Text(''),
+          content: Text(message),
+          actions: <Widget>[
+            FlatButton(
+              child: Text('okay'.tr()),
+              onPressed: () {
+                Navigator.of(ctx).pop();
+                Navigator.of(ctx).pop();
+                Navigator.of(ctx).pop();
+              },
+            )
+          ],
+        ),
+      ),
+    );
+  }
 
   /// Диалоговое окно Удаления
   static showOnDeleteDialog(context, String message, Vacancy vacancy) {

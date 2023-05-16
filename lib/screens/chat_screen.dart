@@ -19,9 +19,11 @@ class ChatScreen extends StatefulWidget {
   /// Get user object
   final int user_id;
   String name;
+  String vacancy;
+  int vacancy_id;
   String avatar;
 
-  ChatScreen({@required this.user_id, this.name, this.avatar});
+  ChatScreen({@required this.user_id, this.name, this.vacancy_id, this.vacancy, this.avatar});
 
   @override
   _ChatScreenState createState() => _ChatScreenState();
@@ -29,7 +31,7 @@ class ChatScreen extends StatefulWidget {
 
 class _ChatScreenState extends State<ChatScreen> {
   void handleInitialBuild(MessageListProps props) {
-    props.getMessageList(widget.user_id);
+    props.getMessageList(widget.user_id, widget.vacancy_id);
   }
 
   // Variables
@@ -46,7 +48,7 @@ class _ChatScreenState extends State<ChatScreen> {
   @override
   Widget build(BuildContext context) {
     return StoreConnector<AppState, MessageListProps>(
-      converter: (store) => mapStateToMessageProps(store, widget.user_id),
+      converter: (store) => mapStateToMessageProps(store, widget.user_id, widget.vacancy_id),
       onInitialBuild: (props) => this.handleInitialBuild(props),
       builder: (context, props) {
         List<Message> data = props.list.data;
@@ -63,20 +65,24 @@ class _ChatScreenState extends State<ChatScreen> {
           body = Column(
             children: <Widget>[
               Expanded(
-                child: ListView.builder(
-                    shrinkWrap: true,
-                    itemCount: data == null ? 0 : data.length,
-                    itemBuilder: (context, index) {
-                      // SchedulerBinding.instance.addPostFrameCallback((_) {
-                      //   _scrollController.jumpTo(_scrollController.position.maxScrollExtent);
-                      // });
-                      return ChatMessage(
-                        isUserSender: data[index].type,
-                        body: data[index].body,
-                        date_time: data[index].date_time,
-                        read: data[index].read,
-                      );
-                    }),
+                child: Container(
+                  padding: EdgeInsets.symmetric(horizontal: 20, vertical: 10),
+                  child: ListView.builder(
+                      shrinkWrap: true,
+                      itemCount: data == null ? 0 : data.length,
+                      itemBuilder: (context, index) {
+                        // SchedulerBinding.instance.addPostFrameCallback((_) {
+                        //   _scrollController.jumpTo(_scrollController.position.maxScrollExtent);
+                        // });
+                        return ChatMessage(
+                          isUserSender: data[index].type,
+                          body: data[index].body,
+                          date_time: data[index].date_time,
+                          read: data[index].read,
+                        );
+                      }
+                  ),
+                ),
               ),
               Container(
                 color: Colors.grey.withAlpha(50),
@@ -100,17 +106,19 @@ class _ChatScreenState extends State<ChatScreen> {
                                 : Colors.grey),
                         onPressed: _isComposing
                             ? () async {
-                                Message.sendMessage(
-                                    _textController.text, widget.user_id);
+                                Message.sendMessage(_textController.text, widget.user_id, widget.vacancy_id);
                                 data.add(Message(
                                     body: _textController.text,
                                     date_time: DateTime.now(),
                                     type: true,
-                                    read: true));
+                                    read: true)
+                                );
                                 _textController.clear();
                                 setState(() => _isComposing = false);
                               }
-                            : null)),
+                            : null
+                    )
+                ),
               ),
             ],
           );
@@ -128,14 +136,12 @@ class _ChatScreenState extends State<ChatScreen> {
                           })
                         : AssetImage('assets/images/default-user.jpg'),
                   ),
-                  title: Text(widget.name, style: TextStyle(fontSize: 18)),
+                  title: Text(
+                      widget.name + ' (' + widget.vacancy + ')',
+                      style: TextStyle(fontSize: 16)
+                  ),
                 ),
                 onTap: () {
-//                   /// Go to profile screen
-//                   Navigator.of(context).push(
-//                       MaterialPageRoute(builder: (context) => ProfileScreen(
-// //                    user: widget.user,
-//                       )));
                 },
               ),
               actions: <Widget>[
@@ -183,11 +189,10 @@ class MessageListProps {
   });
 }
 
-MessageListProps mapStateToMessageProps(
-    Store<AppState> store, int receiver_id) {
+MessageListProps mapStateToMessageProps(Store<AppState> store, int receiver_id, int vacancy_id) {
   return MessageListProps(
     list: store.state.chat.message_list,
-    getMessageList: (int receiver_id) =>
-        store.dispatch(getMessageList(receiver_id)),
+    getMessageList: (int receiver_id, int vacancy_id) =>
+        store.dispatch(getMessageList(receiver_id, vacancy_id)),
   );
 }

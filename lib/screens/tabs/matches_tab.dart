@@ -142,15 +142,8 @@ class _MatchesTabState extends State<MatchesTab> {
                             children: StoreProvider.of<AppState>(context).state.vacancy.liked_list.data.map((vacancy) {
                               return GestureDetector(
                                 child: Container(
-                                    margin: EdgeInsets.only(bottom: 20),
-                                    child: Prefs.getString(Prefs.ROUTE) != "PRODUCT_LAB" ?
-                                    !vacancy.isProductLabVacancy ?
-                                    ProfileCard(
-                                      vacancy: vacancy,
-                                      page: 'match',
-                                    ) :
-                                    Container() :
-                                    ProfileCardProductLab(
+                                    // margin: EdgeInsets.only(bottom: 20),
+                                    child: ProfileCard(
                                       vacancy: vacancy,
                                       page: 'match',
                                     ),
@@ -170,14 +163,12 @@ class _MatchesTabState extends State<MatchesTab> {
 
                                     Navigator.of(context).push(MaterialPageRoute(builder: (BuildContext context) {
                                       return Scaffold(
-                                        backgroundColor: Prefs.getString(Prefs.ROUTE) == "PRODUCT_LAB"
-                                            ? kColorProductLab
-                                            : kColorPrimary,
+                                        backgroundColor: kColorPrimary,
                                         appBar: AppBar(
                                           title: Text("vacancy_view".tr()),
                                         ),
                                         body: VacancyView(
-                                          page: Prefs.getString(Prefs.ROUTE) != 'PRODUCT_LAB' ? "user_match" : "view",
+                                          page: "user_match",
                                           vacancy: vacancy,
                                           vacancySkill: vacancySkills,
                                         ),
