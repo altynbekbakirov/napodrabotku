@@ -5,6 +5,7 @@ import 'package:ishtapp/routes/routes.dart';
 import 'package:ishtapp/screens/change_language_screen.dart';
 import 'package:ishtapp/screens/edit_profile_screen.dart';
 import 'package:ishtapp/screens/home_screen.dart';
+import 'package:ishtapp/screens/otp_sms_screen.dart';
 import 'package:ishtapp/screens/profile_screen.dart';
 import 'package:ishtapp/screens/school_screen.dart';
 import 'package:ishtapp/screens/screens_product_lab/home_screen.dart';

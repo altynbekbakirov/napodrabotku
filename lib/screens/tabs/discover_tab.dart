@@ -2,6 +2,7 @@ import 'dart:async';
 
 import 'package:flutter/material.dart';
 import 'package:easy_localization/easy_localization.dart';
+import 'package:flutter_boxicons/flutter_boxicons.dart';
 import 'package:ishtapp/components/custom_button.dart';
 import 'package:ishtapp/datas/RSAA.dart';
 import 'package:ishtapp/datas/app_lat_long.dart';
@@ -209,34 +210,70 @@ class _DiscoverTabState extends State<DiscoverTab> with SingleTickerProviderStat
           body = onMap ?
           Container(
             color: kColorGray,
-            child: YandexMap(
-              onMapCreated: (YandexMapController controller) async {
-                _yandexMapController = controller;
+            child: Stack(
+              children: [
+                YandexMap(
+                  onMapCreated: (YandexMapController controller) async {
+                    _yandexMapController = controller;
 
-                for (var i = 0; i < data.length; i++) {
-                  await _yandexMapController.addPlacemark(
-                      Placemark(
-                          point: Point(
-                              latitude: double.parse(data[i].latitude),
-                              longitude: double.parse(data[i].longitude)
-                          ),
-                          style: PlacemarkStyle(
-                              iconName: 'assets/marker.png',
-                              opacity: 1.0
-                          ),
-                          onTap: (Point point) {
-                            openVacancyDialog(context, props, data[i]);
-                          }
-                      )
-                  );
-                }
+                    for (var i = 0; i < data.length; i++) {
+                      await _yandexMapController.addPlacemark(
+                          Placemark(
+                              point: Point(
+                                  latitude: double.parse(data[i].latitude),
+                                  longitude: double.parse(data[i].longitude)
+                              ),
+                              style: PlacemarkStyle(
+                                  iconName: 'assets/marker.png',
+                                  opacity: 1.0
+                              ),
+                              onTap: (Point point) {
+                                openVacancyDialog(context, props, data[i]);
+                              }
+                          )
+                      );
+                    }
 
-                await _yandexMapController.move(
-                    point: _point,
-                    animation: const MapAnimation(smooth: true, duration: 2.0),
-                    zoom: 8
-                );
-              },
+                    await _yandexMapController.move(
+                        point: _point,
+                        animation: const MapAnimation(smooth: true, duration: 2.0),
+                        zoom: 8
+                    );
+                  },
+                ),
+                Positioned(
+                    right: 10.0,
+                    bottom: 10.0,
+                    child: new Container(
+                      width: 40.0,
+                      height: 40.0,
+                      decoration: new BoxDecoration(
+                        color: kColorWhite,
+                        borderRadius: BorderRadius.circular(8),
+                        boxShadow: [
+                          BoxShadow(
+                            offset: Offset(0, 1),
+                            blurRadius: 10,
+                            color: Colors.black.withOpacity(0.2),
+                          ),
+                        ],
+                      ),
+                      child: GestureDetector(
+                        child: Icon(
+                          Boxicons.bx_navigation,
+                          color: kColorPrimary,
+                        ),
+                        onTap: () async {
+                          await _yandexMapController.move(
+                              point: _point,
+                              animation: const MapAnimation(smooth: true, duration: 2.0),
+                              zoom: 8
+                          );
+                        },
+                      ),
+                    )
+                ),
+              ],
             ),
           ) : data != null && data.isNotEmpty ?
           Container(
@@ -554,14 +591,14 @@ class _DiscoverTabState extends State<DiscoverTab> with SingleTickerProviderStat
     Placemark placemark;
     try {
       appLatLong = await LocationService().getCurrentLocation();
-      appLatLong = AppLatLong(
-        lat: 56.321639975018435,
-        long: 43.99102901753601
-      );
+      // appLatLong = AppLatLong(
+      //   lat: 56.321639975018435,
+      //   long: 43.99102901753601
+      // );
       placemark = Placemark(
         point: Point(
-            latitude: 56.321639975018435,
-            longitude: 43.99102901753601
+            latitude: appLatLong.lat,
+            longitude: appLatLong.long
         ),
         style: PlacemarkStyle(
           iconName: 'assets/marker.png',

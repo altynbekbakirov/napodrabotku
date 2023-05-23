@@ -1,13 +1,13 @@
 import 'dart:convert';
 import 'dart:io';
+import 'dart:math';
 import 'package:async/async.dart';
 import 'package:dropdown_search/dropdown_search.dart';
 import 'package:easy_localization/easy_localization.dart';
-import 'package:email_validator/email_validator.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_datetime_picker/flutter_datetime_picker.dart';
-import 'package:geocoding/geocoding.dart';
+import 'package:flutter_typeahead/flutter_typeahead.dart';
 import 'package:http/http.dart' as http;
 import 'package:image_picker/image_picker.dart';
 import 'package:intl/intl.dart';
@@ -19,8 +19,8 @@ import 'package:ishtapp/datas/pref_manager.dart';
 import 'package:ishtapp/datas/user.dart';
 import 'package:ishtapp/datas/vacancy.dart';
 import 'package:ishtapp/routes/routes.dart';
+import 'package:ishtapp/screens/otp_sms_screen.dart';
 import 'package:ishtapp/services/location_service.dart';
-import 'package:ishtapp/utils/common_services.dart';
 import 'package:ishtapp/utils/constants.dart';
 import 'package:ishtapp/widgets/svg_icon.dart';
 import 'package:path/path.dart';
@@ -37,15 +37,16 @@ class _SignUpScreenState extends State<SignUpScreen> {
   // Variables
   final _formKey = GlobalKey<FormState>();
   final _nameController = TextEditingController();
-  final _surnameController = TextEditingController();
+  final _lastnameController = TextEditingController();
   final _emailController = TextEditingController();
-  final _linkedinController = TextEditingController();
-  final _passwordController = TextEditingController();
-  final _passwordConfirmController = TextEditingController();
+  // final _linkedinController = TextEditingController();
+  // final _passwordController = TextEditingController();
+  // final _passwordConfirmController = TextEditingController();
   final _birthDateController = TextEditingController();
   final _phoneNumberController = TextEditingController();
+  final _typeAheadController = TextEditingController();
 
-  bool _obscureText = true;
+  // bool _obscureText = true;
   PickedFile _imageFile;
   final ImagePicker _picker = ImagePicker();
   String initialCountry = 'RU';
@@ -57,6 +58,10 @@ class _SignUpScreenState extends State<SignUpScreen> {
   bool isMigrant = false;
   bool isPhoneCorrect = false;
   bool isUserExists = false;
+  String _selectedCity;
+  // int _phoneNumberMaxLength;
+
+  List<dynamic> _suggestions = [];
 
   List<dynamic> regionList = [];
   List<dynamic> districtList = [];
@@ -66,7 +71,12 @@ class _SignUpScreenState extends State<SignUpScreen> {
   String selectedRegion;
   String selectedDistrict;
 
-  String _currentAddress;
+  // String _currentAddress;
+
+  // SMSC.RU credentials
+  String smscRuLogin = 'pobed-a';
+  String smscRuPassword = 'podrab-180523';
+  String smscRuMessage = '';
 
   void _showDataPicker(context) {
     var date = DateTime.now();
@@ -267,6 +277,7 @@ class _SignUpScreenState extends State<SignUpScreen> {
               key: _formKey,
               child: Column(
                 children: <Widget>[
+
                   /// Название организации
                   company == is_company.Company ?
                   Flex(
@@ -327,13 +338,17 @@ class _SignUpScreenState extends State<SignUpScreen> {
                         isPhoneCorrect = value;
                       },
                       selectorConfig:
-                          const SelectorConfig(selectorType: PhoneInputSelectorType.BOTTOM_SHEET, setSelectorButtonAsPrefixIcon: true, useEmoji: true),
+                          const SelectorConfig(
+                              selectorType: PhoneInputSelectorType.BOTTOM_SHEET,
+                              setSelectorButtonAsPrefixIcon: true, useEmoji: true
+                          ),
                       ignoreBlank: true,
-                      autoValidateMode: AutovalidateMode.disabled,
+                      autoValidateMode: AutovalidateMode.always,
                       selectorTextStyle: TextStyle(color: Colors.black),
                       initialValue: number,
                       textFieldController: _phoneNumberController,
                       formatInput: true,
+                      // maxLength: initialCountry ==,
                       validator: (value) {
                         if (value.isEmpty) {
                           return "please_fill_this_field".tr();
@@ -359,64 +374,8 @@ class _SignUpScreenState extends State<SignUpScreen> {
                     ),
                   ),
 
-                  /// Электронный адрес
-                  Container(
-                    margin: EdgeInsets.only(bottom: 16),
-                    child: Flex(
-                      direction: Axis.vertical,
-                      children: [
-                        Align(
-                          widthFactor: 10,
-                          heightFactor: 1.5,
-                          alignment: Alignment.topLeft,
-                          child: Text(
-                            'email'.tr().toString().toUpperCase() + '*',
-                            style: TextStyle(fontSize: 12, color: Colors.black, fontWeight: FontWeight.w700),
-                          ),
-                        ),
-                        TextFormField(
-                          controller: _emailController,
-                          keyboardType: TextInputType.emailAddress,
-                          textInputAction: TextInputAction.next,
-                          decoration: InputDecoration(
-                            contentPadding: EdgeInsets.symmetric(vertical: 10, horizontal: 20),
-                            border: OutlineInputBorder(),
-                            enabledBorder: OutlineInputBorder(borderSide: BorderSide(color: Colors.grey[200], width: 2.0)),
-                            errorBorder: OutlineInputBorder(borderSide: BorderSide(color: kColorPrimary, width: 2.0)),
-                            errorStyle: TextStyle(color: kColorPrimary, fontWeight: FontWeight.w500),
-                            floatingLabelBehavior: FloatingLabelBehavior.always,
-                            filled: true,
-                            fillColor: kColorWhite,
-                          ),
-                          onChanged: (value) async {
-                            if (value.isEmpty) {
-                              setState(() {
-                                isUserExists = false;
-                              });
-                            } else {
-                              await Users.checkUsername(value.trim()).then((value) {
-                                setState(() {
-                                  isUserExists = value;
-                                });
-                              });
-                            }
-                          },
-                          validator: (value) {
-                            if (value.isEmpty) {
-                              return "please_fill_this_field".tr();
-                            } else if (!EmailValidator.validate(value.trim())) {
-                              return "please_write_valid_email".tr();
-                            } else if (isUserExists) {
-                              return "this_email_already_registered".tr();
-                            }
-                            return null;
-                          },
-                        ),
-                      ],
-                    ),
-                  ),
-
-                  /// Пароль
+                  /// Имя user
+                  company == is_company.Company ? Container() :
                   Container(
                     margin: EdgeInsets.only(bottom: 16),
                     child: Flex(
@@ -427,65 +386,13 @@ class _SignUpScreenState extends State<SignUpScreen> {
                             heightFactor: 1.5,
                             alignment: Alignment.topLeft,
                             child: Text(
-                              'password'.tr().toString().toUpperCase() + '*',
+                              'name'.tr().toString().toUpperCase() + '*    ',
                               style: TextStyle(fontSize: 12, color: Colors.black, fontWeight: FontWeight.w700),
-                            )),
-                        TextFormField(
-                          obscureText: _obscureText,
-                          controller: _passwordController,
-                          textInputAction: TextInputAction.next,
-                          decoration: InputDecoration(
-                            contentPadding: EdgeInsets.symmetric(vertical: 10, horizontal: 20),
-                            border: OutlineInputBorder(),
-                            enabledBorder: OutlineInputBorder(borderSide: BorderSide(color: Colors.grey[200], width: 2.0)),
-                            errorBorder: OutlineInputBorder(borderSide: BorderSide(color: kColorPrimary, width: 2.0)),
-                            errorStyle: TextStyle(color: kColorPrimary, fontWeight: FontWeight.w500),
-                            floatingLabelBehavior: FloatingLabelBehavior.always,
-                            filled: true,
-                            fillColor: kColorWhite,
-                            suffixIcon: IconButton(
-                              icon: Icon(
-                                // Based on passwordVisible state choose the icon
-                                _obscureText ? Icons.visibility : Icons.visibility_off,
-                                color: kColorSecondary,
-                              ),
-                              onPressed: () {
-                                // Update the state i.e. toogle the state of passwordVisible variable
-                                setState(() {
-                                  _obscureText = !_obscureText;
-                                });
-                              },
-                            ),
-                          ),
-                          validator: (password) {
-                            // Basic validation
-                            if (password.isEmpty) {
-                              return "please_fill_this_field".tr();
-                            }
-                            return null;
-                          },
+                            )
                         ),
-                      ],
-                    ),
-                  ),
-
-                  /// Подверждение пароли
-                  Container(
-                    margin: EdgeInsets.only(bottom: 16),
-                    child: Flex(
-                      direction: Axis.vertical,
-                      children: [
-                        Align(
-                            widthFactor: 10,
-                            heightFactor: 1.5,
-                            alignment: Alignment.topLeft,
-                            child: Text(
-                              'password_confirm'.tr().toString().toUpperCase() + '*',
-                              style: TextStyle(fontSize: 12, color: Colors.black, fontWeight: FontWeight.w700),
-                            )),
                         TextFormField(
-                          controller: _passwordConfirmController,
-                          obscureText: _obscureText,
+                          controller: _nameController,
+                          keyboardType: TextInputType.name,
                           textInputAction: TextInputAction.next,
                           decoration: InputDecoration(
                             contentPadding: EdgeInsets.symmetric(vertical: 10, horizontal: 20),
@@ -496,26 +403,11 @@ class _SignUpScreenState extends State<SignUpScreen> {
                             floatingLabelBehavior: FloatingLabelBehavior.always,
                             filled: true,
                             fillColor: kColorWhite,
-                            suffixIcon: IconButton(
-                              icon: Icon(
-                                // Based on passwordVisible state choose the icon
-                                _obscureText ? Icons.visibility : Icons.visibility_off,
-                                color: kColorSecondary,
-                              ),
-                              onPressed: () {
-                                // Update the state i.e. toogle the state of passwordVisible variable
-                                setState(() {
-                                  _obscureText = !_obscureText;
-                                });
-                              },
-                            ),
                           ),
                           validator: (name) {
                             // Basic validation
-                            if (name.isEmpty) {
+                            if (name.isEmpty && company == is_company.User) {
                               return "please_fill_this_field".tr();
-                            } else if (_passwordConfirmController.text != _passwordController.text) {
-                              return "passwords_dont_satisfy".tr();
                             }
                             return null;
                           },
@@ -524,213 +416,304 @@ class _SignUpScreenState extends State<SignUpScreen> {
                     ),
                   ),
 
-                  /// ФИО user
-                  company == is_company.Company
-                      ? Container()
-                      : Container(
-                          margin: EdgeInsets.only(bottom: 16),
-                          child: Flex(
-                            direction: Axis.vertical,
-                            children: [
-                              Align(
-                                  widthFactor: 10,
-                                  heightFactor: 1.5,
-                                  alignment: Alignment.topLeft,
-                                  child: Text(
-                                    'name'.tr().toString().toUpperCase() + '*',
-                                    style: TextStyle(fontSize: 12, color: Colors.black, fontWeight: FontWeight.w700),
-                                  )),
-                              TextFormField(
-                                controller: _nameController,
-                                keyboardType: TextInputType.name,
-                                textInputAction: TextInputAction.next,
-                                decoration: InputDecoration(
-                                  contentPadding: EdgeInsets.symmetric(vertical: 10, horizontal: 20),
-                                  border: OutlineInputBorder(),
-                                  enabledBorder: OutlineInputBorder(borderSide: BorderSide(color: Colors.grey[200], width: 2.0)),
-                                  errorBorder: OutlineInputBorder(borderSide: BorderSide(color: kColorPrimary, width: 2.0)),
-                                  errorStyle: TextStyle(color: kColorPrimary, fontWeight: FontWeight.w500),
-                                  floatingLabelBehavior: FloatingLabelBehavior.always,
-                                  filled: true,
-                                  fillColor: kColorWhite,
-                                ),
-                                validator: (name) {
-                                  // Basic validation
-                                  if (name.isEmpty && company == is_company.User) {
-                                    return "please_fill_this_field".tr();
-                                  }
-                                  return null;
-                                },
-                              ),
-                            ],
-                          ),
+                  /// Фамилия user
+                  company == is_company.Company ? Container() :
+                  Container(
+                    margin: EdgeInsets.only(bottom: 16),
+                    child: Flex(
+                      direction: Axis.vertical,
+                      children: [
+                        Align(
+                            widthFactor: 10,
+                            heightFactor: 1.5,
+                            alignment: Alignment.topLeft,
+                            child: Text(
+                              'lastname'.tr().toString().toUpperCase() + '*',
+                              style: TextStyle(fontSize: 12, color: Colors.black, fontWeight: FontWeight.w700),
+                            )
                         ),
+                        TextFormField(
+                          controller: _lastnameController,
+                          keyboardType: TextInputType.name,
+                          textInputAction: TextInputAction.next,
+                          decoration: InputDecoration(
+                            contentPadding: EdgeInsets.symmetric(vertical: 10, horizontal: 20),
+                            border: OutlineInputBorder(),
+                            enabledBorder: OutlineInputBorder(borderSide: BorderSide(color: Colors.grey[200], width: 2.0)),
+                            errorBorder: OutlineInputBorder(borderSide: BorderSide(color: kColorPrimary, width: 2.0)),
+                            errorStyle: TextStyle(color: kColorPrimary, fontWeight: FontWeight.w500),
+                            floatingLabelBehavior: FloatingLabelBehavior.always,
+                            filled: true,
+                            fillColor: kColorWhite,
+                          ),
+                          validator: (name) {
+                            // Basic validation
+                            if (name.isEmpty && company == is_company.User) {
+                              return "please_fill_this_field".tr();
+                            }
+                            return null;
+                          },
+                        ),
+                      ],
+                    ),
+                  ),
 
                   /// Дата рождения
-                  company == is_company.Company
-                      ? Container()
-                      : Container(
-                          margin: EdgeInsets.only(bottom: 16),
-                          child: Flex(
-                            direction: Axis.vertical,
-                            children: [
-                              Align(
-                                  widthFactor: 10,
-                                  heightFactor: 1.5,
-                                  alignment: Alignment.topLeft,
-                                  child: Text(
-                                    'birth_date'.tr().toString().toUpperCase() + '*',
-                                    style: TextStyle(fontSize: 12, color: Colors.black, fontWeight: FontWeight.w700),
-                                  )),
-                              TextFormField(
-                                  controller: _birthDateController,
-                                  keyboardType: TextInputType.datetime,
-                                  textInputAction: TextInputAction.next,
-                                  readOnly: true,
-                                  onTap: () {
-                                    _showDataPicker(context);
-                                  },
-                                  decoration: InputDecoration(
-                                    contentPadding: EdgeInsets.symmetric(vertical: 10, horizontal: 20),
-                                    border: OutlineInputBorder(),
-                                    enabledBorder: OutlineInputBorder(borderSide: BorderSide(color: Colors.grey[200], width: 2.0)),
-                                    errorBorder: OutlineInputBorder(borderSide: BorderSide(color: kColorPrimary, width: 2.0)),
-                                    errorStyle: TextStyle(color: kColorPrimary, fontWeight: FontWeight.w500),
-                                    floatingLabelBehavior: FloatingLabelBehavior.always,
-                                    filled: true,
-                                    fillColor: kColorWhite,
-                                  ),
-                                  validator: (value) => value.isEmpty ? "please_fill_this_field".tr() : null),
-                            ],
-                          ),
+                  company == is_company.Company ? Container() :
+                  Container(
+                    margin: EdgeInsets.only(bottom: 16),
+                    child: Flex(
+                      direction: Axis.vertical,
+                      children: [
+                        Align(
+                            widthFactor: 10,
+                            heightFactor: 1.5,
+                            alignment: Alignment.topLeft,
+                            child: Text(
+                              'birth_date'.tr().toString().toUpperCase() + '*',
+                              style: TextStyle(fontSize: 12, color: Colors.black, fontWeight: FontWeight.w700),
+                            )
                         ),
+                        TextFormField(
+                            controller: _birthDateController,
+                            keyboardType: TextInputType.datetime,
+                            textInputAction: TextInputAction.next,
+                            readOnly: true,
+                            onTap: () {
+                              _showDataPicker(context);
+                            },
+                            decoration: InputDecoration(
+                              contentPadding: EdgeInsets.symmetric(vertical: 10, horizontal: 20),
+                              border: OutlineInputBorder(),
+                              enabledBorder: OutlineInputBorder(borderSide: BorderSide(color: Colors.grey[200], width: 2.0)),
+                              errorBorder: OutlineInputBorder(borderSide: BorderSide(color: kColorPrimary, width: 2.0)),
+                              errorStyle: TextStyle(color: kColorPrimary, fontWeight: FontWeight.w500),
+                              floatingLabelBehavior: FloatingLabelBehavior.always,
+                              filled: true,
+                              fillColor: kColorWhite,
+                            ),
+                            validator: (value) => value.isEmpty ? "please_fill_this_field".tr() : null),
+                      ],
+                    ),
+                  ),
 
-                  /// Область видна только для User
-                  company == is_company.Company
-                      ? Container()
-                      : Container(
-                          margin: EdgeInsets.only(bottom: 16),
-                          child: Flex(
-                            direction: Axis.vertical,
-                            children: [
-                              Align(
-                                  widthFactor: 10,
-                                  heightFactor: 1.5,
-                                  alignment: Alignment.topLeft,
-                                  child: Text(
-                                    'region'.tr().toString().toUpperCase(),
-                                    style: TextStyle(fontSize: 12, color: Colors.black, fontWeight: FontWeight.w700),
-                                  )),
-                              DropdownSearch<String>(
-                                  showSelectedItem: true,
-                                  items: items,
-                                  onChanged: (value) {
-                                    setState(() {
-                                      selectedRegion = value;
-                                      getDistricts(value);
-                                    });
-                                  },
-                                  dropdownSearchDecoration: InputDecoration(
-                                    contentPadding: EdgeInsets.symmetric(vertical: 0, horizontal: 20),
-                                    border: OutlineInputBorder(),
-                                    enabledBorder: OutlineInputBorder(borderSide: BorderSide(color: Colors.grey[200], width: 2.0)),
-                                    errorBorder: OutlineInputBorder(borderSide: BorderSide(color: kColorPrimary, width: 2.0)),
-                                    errorStyle: TextStyle(color: kColorPrimary, fontWeight: FontWeight.w500),
-                                    floatingLabelBehavior: FloatingLabelBehavior.always,
-                                    filled: true,
-                                    fillColor: kColorWhite,
-                                  ),
-                                  selectedItem: selectedRegion),
-                            ],
-                          ),
+                  /// Адрес для User
+                  company == is_company.Company ? Container() :
+                  Container(
+                    margin: EdgeInsets.only(bottom: 16),
+                    child: Flex(
+                      direction: Axis.vertical,
+                      children: [
+                        Align(
+                            widthFactor: 10,
+                            heightFactor: 1.5,
+                            alignment: Alignment.topLeft,
+                            child: Text(
+                              'location'.tr().toString().toUpperCase(),
+                              style: TextStyle(fontSize: 12, color: Colors.black, fontWeight: FontWeight.w700),
+                            )
                         ),
-
-                  /// Район виден только для User
-                  company == is_company.Company
-                      ? Container()
-                      : Container(
-                          margin: EdgeInsets.only(bottom: 16),
-                          child: Flex(
-                            direction: Axis.vertical,
-                            children: [
-                              Align(
-                                  widthFactor: 10,
-                                  heightFactor: 1.5,
-                                  alignment: Alignment.topLeft,
-                                  child: Text(
-                                    'district'.tr().toString().toUpperCase(),
-                                    style: TextStyle(fontSize: 12, color: Colors.black, fontWeight: FontWeight.w700),
-                                  ),
+                        TypeAheadFormField(
+                          textFieldConfiguration: TextFieldConfiguration(
+                              controller: _typeAheadController,
+                              decoration: InputDecoration(
+                                contentPadding: EdgeInsets.symmetric(vertical: 10, horizontal: 20),
+                                border: OutlineInputBorder(),
+                                enabledBorder: OutlineInputBorder(borderSide: BorderSide(color: Colors.grey[200], width: 2.0)),
+                                errorBorder: OutlineInputBorder(borderSide: BorderSide(color: kColorPrimary, width: 2.0)),
+                                errorStyle: TextStyle(color: kColorPrimary, fontWeight: FontWeight.w500),
+                                floatingLabelBehavior: FloatingLabelBehavior.always,
+                                filled: true,
+                                fillColor: kColorWhite,
                               ),
-                              DropdownSearch<String>(
-                                showSelectedItem: true,
-                                items: districts,
-                                onChanged: (value) {
-                                  setState(() {
-                                    selectedDistrict = value;
-                                  });
-                                },
-                                dropdownSearchDecoration: InputDecoration(
-                                  contentPadding: EdgeInsets.symmetric(vertical: 0, horizontal: 20),
-                                  border: OutlineInputBorder(),
-                                  enabledBorder: OutlineInputBorder(borderSide: BorderSide(color: Colors.grey[200], width: 2.0)),
-                                  errorBorder: OutlineInputBorder(borderSide: BorderSide(color: kColorPrimary, width: 2.0)),
-                                  errorStyle: TextStyle(color: kColorPrimary, fontWeight: FontWeight.w500),
-                                  floatingLabelBehavior: FloatingLabelBehavior.always,
-                                  filled: true,
-                                  fillColor: kColorWhite,
+                          ),
+                          suggestionsCallback: (pattern) async {
+                            print(pattern);
+                            if(pattern.length > 3) {
+                              _suggestions = await _fetchAddressSuggestions(pattern);
+                              // for(int i=0; i<suggestionsFull.length; i++){
+                              //   _suggestions.add(suggestionsFull[i]['value']);
+                              // }
+                            }
+                            return _suggestions;
+                          },
+                          itemBuilder: (context, suggestion) {
+                            return ListTile(
+                              title: Text(suggestion['value']),
+                            );
+                          },
+                          noItemsFoundBuilder: (context) {
+                            return Container(
+                              padding: EdgeInsets.symmetric(vertical: 10, horizontal: 20),
+                              child: Text(
+                                'address_not_found',
+                                style: TextStyle(
+                                    fontSize: 14,
+                                    fontWeight: FontWeight.w500,
+                                    color: Colors.black54
                                 ),
-                                selectedItem: selectedDistrict,
                               ),
-                            ],
-                          ),
+                            );
+                          },
+                          transitionBuilder: (context, suggestionsBox, controller) {
+                            return suggestionsBox;
+                          },
+                          onSuggestionSelected: (suggestion) {
+                            _typeAheadController.text = suggestion['value'];
+
+                            // if(suggestion['data']['country_iso_code'] != '' && suggestion['data']['country_iso_code'] != null){
+                            //   initialCountry = suggestion['data']['country_iso_code'];
+                            //   number = PhoneNumber(isoCode: suggestion['data']['country_iso_code']);
+                            // }
+
+                            if(suggestion['data']['region_with_type'] != '' && suggestion['data']['region_with_type'] != null){
+                              selectedRegion = suggestion['data']['region_with_type'];
+                              getDistricts(suggestion['data']['region_with_type']);
+                            }
+
+                            if(suggestion['data']['city_with_type'] != '' && suggestion['data']['city_with_type'] != null){
+                              selectedDistrict = suggestion['data']['city'];
+                            }
+
+                            print(suggestion);
+                          },
+                          validator: (value) {
+                            if (value.isEmpty) {
+                              return 'Введите адрес';
+                            }
+                            return null;
+                          },
+                          onSaved: (value) => _selectedCity = value,
                         ),
+                      ],
+                    ),
+                  ),
+
+                  /// Область для User
+                  company == is_company.Company ? Container() :
+                  Container(
+                    margin: EdgeInsets.only(bottom: 16),
+                    child: Flex(
+                      direction: Axis.vertical,
+                      children: [
+                        Align(
+                            widthFactor: 10,
+                            heightFactor: 1.5,
+                            alignment: Alignment.topLeft,
+                            child: Text(
+                              'region'.tr().toString().toUpperCase(),
+                              style: TextStyle(fontSize: 12, color: Colors.black, fontWeight: FontWeight.w700),
+                            )),
+                        DropdownSearch<String>(
+                            showSelectedItem: true,
+                            items: items,
+                            onChanged: (value) {
+                              setState(() {
+                                selectedRegion = value;
+                                getDistricts(value);
+                              });
+                            },
+                            dropdownSearchDecoration: InputDecoration(
+                              contentPadding: EdgeInsets.symmetric(vertical: 0, horizontal: 20),
+                              border: OutlineInputBorder(),
+                              enabledBorder: OutlineInputBorder(borderSide: BorderSide(color: Colors.grey[200], width: 2.0)),
+                              errorBorder: OutlineInputBorder(borderSide: BorderSide(color: kColorPrimary, width: 2.0)),
+                              errorStyle: TextStyle(color: kColorPrimary, fontWeight: FontWeight.w500),
+                              floatingLabelBehavior: FloatingLabelBehavior.always,
+                              filled: true,
+                              fillColor: kColorWhite,
+                            ),
+                            selectedItem: selectedRegion
+                        ),
+                      ],
+                    ),
+                  ),
+
+                  /// Район для User
+                  // company == is_company.Company ? Container() :
+                  // Container(
+                  //   margin: EdgeInsets.only(bottom: 16),
+                  //   child: Flex(
+                  //     direction: Axis.vertical,
+                  //     children: [
+                  //       Align(
+                  //           widthFactor: 10,
+                  //           heightFactor: 1.5,
+                  //           alignment: Alignment.topLeft,
+                  //           child: Text(
+                  //             'district'.tr().toString().toUpperCase(),
+                  //             style: TextStyle(fontSize: 12, color: Colors.black, fontWeight: FontWeight.w700),
+                  //           ),
+                  //       ),
+                  //       DropdownSearch<String>(
+                  //         showSelectedItem: true,
+                  //         items: districts,
+                  //         onChanged: (value) {
+                  //           setState(() {
+                  //             selectedDistrict = value;
+                  //           });
+                  //         },
+                  //         dropdownSearchDecoration: InputDecoration(
+                  //           contentPadding: EdgeInsets.symmetric(vertical: 0, horizontal: 20),
+                  //           border: OutlineInputBorder(),
+                  //           enabledBorder: OutlineInputBorder(borderSide: BorderSide(color: Colors.grey[200], width: 2.0)),
+                  //           errorBorder: OutlineInputBorder(borderSide: BorderSide(color: kColorPrimary, width: 2.0)),
+                  //           errorStyle: TextStyle(color: kColorPrimary, fontWeight: FontWeight.w500),
+                  //           floatingLabelBehavior: FloatingLabelBehavior.always,
+                  //           filled: true,
+                  //           fillColor: kColorWhite,
+                  //         ),
+                  //         selectedItem: selectedDistrict,
+                  //       ),
+                  //     ],
+                  //   ),
+                  // ),
 
                   /// Пол
-                  company == is_company.Company
-                      ? Container()
-                      : Container(
-                          margin: EdgeInsets.only(bottom: 40),
-                          child: Column(
-                            children: [
-                              Align(
-                                  widthFactor: 10,
-                                  heightFactor: 1.5,
-                                  alignment: Alignment.topLeft,
-                                  child: Text(
-                                    'gender'.tr().toString().toUpperCase(),
-                                    style: TextStyle(fontSize: 12, color: Colors.black, fontWeight: FontWeight.w700),
-                                  )),
-                              Row(
-                                mainAxisAlignment: MainAxisAlignment.start,
-                                children: [
-                                  Radio(
-                                    value: user_gender.Male,
-                                    groupValue: gender,
-                                    activeColor: kColorPrimary,
-                                    onChanged: (user_gender value) {
-                                      setState(() {
-                                        gender = value;
-                                      });
-                                    },
-                                  ),
-                                  Text('male'.tr(), style: TextStyle(color: Colors.black)),
-                                  Radio(
-                                    value: user_gender.Female,
-                                    groupValue: gender,
-                                    activeColor: kColorPrimary,
-                                    onChanged: (user_gender value) {
-                                      setState(() {
-                                        gender = value;
-                                      });
-                                    },
-                                  ),
-                                  Text('female'.tr(), style: TextStyle(color: Colors.black)),
-                                ],
-                              ),
-                            ],
-                          ),
+                  company == is_company.Company ? Container() :
+                  Container(
+                    margin: EdgeInsets.only(bottom: 40),
+                    child: Column(
+                      children: [
+                        Align(
+                            widthFactor: 10,
+                            heightFactor: 1.5,
+                            alignment: Alignment.topLeft,
+                            child: Text(
+                              'gender'.tr().toString().toUpperCase()+'     ',
+                              style: TextStyle(fontSize: 12, color: Colors.black, fontWeight: FontWeight.w700),
+                            )
                         ),
+                        Row(
+                          mainAxisAlignment: MainAxisAlignment.start,
+                          children: [
+                            Radio(
+                              value: user_gender.Male,
+                              groupValue: gender,
+                              activeColor: kColorPrimary,
+                              onChanged: (user_gender value) {
+                                setState(() {
+                                  gender = value;
+                                });
+                              },
+                            ),
+                            Text('male'.tr(), style: TextStyle(color: Colors.black)),
+                            Radio(
+                              value: user_gender.Female,
+                              groupValue: gender,
+                              activeColor: kColorPrimary,
+                              onChanged: (user_gender value) {
+                                setState(() {
+                                  gender = value;
+                                });
+                              },
+                            ),
+                            Text('female'.tr(), style: TextStyle(color: Colors.black)),
+                          ],
+                        ),
+                      ],
+                    ),
+                  ),
 
                   /// Sign Up button
                   SizedBox(
@@ -745,21 +728,46 @@ class _SignUpScreenState extends State<SignUpScreen> {
                           Users user = Users();
                           user.name = _nameController.text;
                           user.phone_number = phoneNumber;
-                          user.email = _emailController.text;
-                          user.password = _passwordController.text;
+                          // user.email = _emailController.text;
+                          // user.password = _passwordController.text;
                           user.birth_date = company == is_company.Company ? DateTime.now() : formatter.parse(_birthDateController.text);
-                          user.surname = _surnameController.text;
+                          user.surname = _lastnameController.text;
                           user.is_company = company == is_company.Company;
-                          user.is_migrant = isMigrant ? 1 : 0;
-                          user.linkedin = _linkedinController.text;
+                          // user.is_migrant = isMigrant ? 1 : 0;
+                          // user.linkedin = _linkedinController.text;
                           user.gender = gender == user_gender.Male ? "male" : "female";
                           user.region = selectedRegion;
                           user.district = selectedDistrict;
-                          user.is_product_lab_user = Prefs.getString(Prefs.ROUTE) == "PRODUCT_LAB";
 
                           if (company == is_company.User) {
                             debugPrint(phoneNumber);
-                            await otpRegister(phoneNumber: phoneNumber, context: context, users: user, imageFile: _imageFile);
+
+                            int min = 100000;
+                            int max = 999999;
+                            var randomizer = new Random();
+                            var rNum = min + randomizer.nextInt(max - min);
+
+                            smscRuMessage = 'Код подтверждения - $rNum';
+
+                            final response = await http.get(Uri.parse('https://smsc.ru/sys/send.php?login=$smscRuLogin&psw=$smscRuPassword&phones=$phoneNumber&mes=$smscRuMessage'));
+
+                            if (response.statusCode == 200) {
+                              Navigator.of(context).push(MaterialPageRoute(
+                                  builder: (context) => OtpSmsScreen(
+                                    verificationId: rNum.toString(),
+                                    users: user,
+                                    phone: phoneNumber,
+                                    login: false,
+                                    imageFile: _imageFile,
+                                  )
+                              ));
+                            } else {
+                              throw Exception('Не удалось отправить СМС-сообщение с кодом.');
+                            }
+
+
+
+                            // await otpRegister(phoneNumber: phoneNumber, context: context, users: user, imageFile: _imageFile);
                           } else {
                             await Users.checkUsername(_emailController.text).then((value) async {
                               /// Validate form
@@ -829,12 +837,35 @@ class _SignUpScreenState extends State<SignUpScreen> {
     );
   }
 
-  void showSnackBar(
-      {@required BuildContext context,
-        @required String message,
-        @required Color backgroundColor}) {
-    ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(backgroundColor: Colors.red, content: Text(message)));
+  Future<List<dynamic>> _fetchAddressSuggestions(String pattern) async {
+    List<dynamic> suggestions = [];
+    String token = "132a62a4c888a776c87241ed9e615638651f14a8";
+
+    if(pattern.length > 3) {
+      final response = await http.post(
+        Uri.parse('https://suggestions.dadata.ru/suggestions/api/4_1/rs/suggest/address'),
+        headers: <String, String>{
+          'Content-Type': 'application/json',
+          'Accept': 'application/json',
+          'Authorization': 'Token ' + token
+        },
+        body: jsonEncode(<String, String>{
+          'query': pattern,
+          'count': '3'
+        }),
+      );
+
+      if (response.statusCode == 200) {
+        Map<dynamic, dynamic> responseData = json.decode(response.body);
+        for(int i = 0; i < responseData['suggestions'].length; i++) {
+          suggestions.add(responseData['suggestions'][i]);
+        }
+      } else {
+        throw Exception('Не удается найти адрес.');
+      }
+
+    }
+    return suggestions;
   }
 
   Future<void> _initPermission() async {
@@ -881,32 +912,15 @@ class _SignUpScreenState extends State<SignUpScreen> {
           selectedRegion = region;
         }
 
-        getDistricts(region);
-
-        if(district != '' && district != null){
-          selectedDistrict = district;
-        }
+        // getDistricts(region);
+        //
+        // if(district != '' && district != null){
+        //   selectedDistrict = district;
+        // }
       });
     } else {
       throw Exception('Failed to load data');
     }
-
-    // await placemarkFromCoordinates(
-    //     location.lat, location.long)
-    //     .then((List<Placemark> placemarks) {
-    //   Placemark place = placemarks[0];
-    //   setState(() {
-    //     if(place.administrativeArea != null && place.administrativeArea != ''){
-    //       selectedRegion = place.administrativeArea;
-    //     }
-    //     getDistricts(place.administrativeArea);
-    //     selectedDistrict = place.locality;
-    //     initialCountry = place.isoCountryCode;
-    //     number = PhoneNumber(isoCode: place.isoCountryCode);
-    //   });
-    // }).catchError((e) {
-    //   debugPrint(e);
-    // });
   }
 
 }

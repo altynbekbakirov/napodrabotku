@@ -7,6 +7,7 @@ class Prefs {
   static const String TOKEN = 'token';
   static const String USER_ID = 'user_id';
   static const String EMAIL = 'email';
+  static const String PHONE_NUMBER = 'phone_number';
   static const String PROFILEIMAGE = 'proflie_image';
   static const String PASSWORD = 'password';
   static const String USER_TYPE = 'user_type';

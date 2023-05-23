@@ -18,7 +18,7 @@ import 'datas/logger.dart';
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
-  await Firebase.initializeApp();
+  // await Firebase.initializeApp();
 
   /// Initializing the AppMetrica SDK.
   // await AppmetricaSdk().activate(apiKey: '082bf9ad-5946-46d0-9e51-d6588c68bc1f');

@@ -1,3 +1,5 @@
+import 'dart:math';
+
 import 'package:email_validator/email_validator.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
@@ -6,9 +8,13 @@ import 'package:intl_phone_number_input/intl_phone_number_input.dart';
 
 import 'package:ishtapp/datas/user.dart';
 import 'package:ishtapp/routes/routes.dart';
+import 'package:ishtapp/screens/otp_sms_screen.dart';
+import 'package:ishtapp/screens/otp_sms_screen_login.dart';
 import 'package:ishtapp/utils/constants.dart';
 import 'package:ishtapp/components/custom_button.dart';
 import 'package:ishtapp/datas/pref_manager.dart';
+
+import 'package:http/http.dart' as http;
 
 enum is_company { Company, User }
 
@@ -33,6 +39,11 @@ class _SignInScreenState extends State<SignInScreen> {
   String initialCountry = 'RU';
   PhoneNumber number = PhoneNumber(isoCode: 'RU');
   String phoneNumber = '';
+
+  // SMSC.RU credentials
+  String smscRuLogin = 'pobed-a';
+  String smscRuPassword = 'podrab-180523';
+  String smscRuMessage = '';
 
   void _showDialog(context, String message) {
     showDialog(
@@ -153,7 +164,7 @@ class _SignInScreenState extends State<SignInScreen> {
                               await Users.checkPhone(phoneNumber.trim()).then((value) {
                                 print(phoneNumber);
                                 setState(() {
-                                  isPhoneExists = value;
+                                  isPhoneExists = !value;
                                 });
                               });
                             },
@@ -223,64 +234,65 @@ class _SignInScreenState extends State<SignInScreen> {
                           ),
                         ),
 
-                  Align(
-                      widthFactor: 10,
-                      heightFactor: 1.5,
-                      alignment: Alignment.topLeft,
-                      child: Text(
-                        'password'.tr().toString().toUpperCase() + '*',
-                        style: TextStyle(fontSize: 12, color: Colors.black, fontWeight: FontWeight.w700),
-                      )),
-                  Container(
-                    margin: EdgeInsets.only(bottom: 20),
-                    child: TextFormField(
-                      obscureText: _obscureText,
-                      controller: _passwordController,
-                      decoration: InputDecoration(
-                        contentPadding: EdgeInsets.symmetric(vertical: 10, horizontal: 20),
-                        border: OutlineInputBorder(),
-                        enabledBorder: OutlineInputBorder(borderSide: BorderSide(color: Colors.grey[200], width: 2.0)),
-                        floatingLabelBehavior: FloatingLabelBehavior.always,
-                        filled: true,
-                        fillColor: kColorWhite,
-                        errorBorder: OutlineInputBorder(borderSide: BorderSide(color: kColorPrimary, width: 2.0)),
-                        errorStyle: TextStyle(color: kColorPrimary, fontWeight: FontWeight.w500),
-                        suffixIcon: IconButton(
-                          icon: Icon(
-                            _obscureText ? Icons.visibility : Icons.visibility_off,
-                            color: kColorSecondary,
-                          ),
-                          onPressed: () {
-                            setState(() {
-                              _obscureText = !_obscureText;
-                            });
-                          },
-                        ),
-                      ),
-                      validator: (password) {
-                        if (password.isEmpty) {
-                          return "please_fill_this_field".tr();
-                        }
-//                      else if (password.length <5) {
-//                        return "password_must_at_least_5_chars".tr();
-//                      }
-                        return null;
-                      },
-                    ),
-                  ),
-                  Align(
-                    alignment: Alignment.bottomRight,
-                    child: GestureDetector(
-                      onTap: () {
-                        Navigator.pushNamed(context, Routes.forgot_password);
-                      },
-                      child: Text(
-                        'forgot_password'.tr(),
-                        style: TextStyle(fontSize: 14, color: kColorDark, fontWeight: FontWeight.w500),
-                      ),
-                    ),
-                  ),
-                  SizedBox(height: 30),
+//                   Align(
+//                       widthFactor: 10,
+//                       heightFactor: 1.5,
+//                       alignment: Alignment.topLeft,
+//                       child: Text(
+//                         'password'.tr().toString().toUpperCase() + '*',
+//                         style: TextStyle(fontSize: 12, color: Colors.black, fontWeight: FontWeight.w700),
+//                       )),
+//                   Container(
+//                     margin: EdgeInsets.only(bottom: 20),
+//                     child: TextFormField(
+//                       obscureText: _obscureText,
+//                       controller: _passwordController,
+//                       decoration: InputDecoration(
+//                         contentPadding: EdgeInsets.symmetric(vertical: 10, horizontal: 20),
+//                         border: OutlineInputBorder(),
+//                         enabledBorder: OutlineInputBorder(borderSide: BorderSide(color: Colors.grey[200], width: 2.0)),
+//                         floatingLabelBehavior: FloatingLabelBehavior.always,
+//                         filled: true,
+//                         fillColor: kColorWhite,
+//                         errorBorder: OutlineInputBorder(borderSide: BorderSide(color: kColorPrimary, width: 2.0)),
+//                         errorStyle: TextStyle(color: kColorPrimary, fontWeight: FontWeight.w500),
+//                         suffixIcon: IconButton(
+//                           icon: Icon(
+//                             _obscureText ? Icons.visibility : Icons.visibility_off,
+//                             color: kColorSecondary,
+//                           ),
+//                           onPressed: () {
+//                             setState(() {
+//                               _obscureText = !_obscureText;
+//                             });
+//                           },
+//                         ),
+//                       ),
+//                       validator: (password) {
+//                         if (password.isEmpty) {
+//                           return "please_fill_this_field".tr();
+//                         }
+// //                      else if (password.length <5) {
+// //                        return "password_must_at_least_5_chars".tr();
+// //                      }
+//                         return null;
+//                       },
+//                     ),
+//                   ),
+
+                  // Align(
+                  //   alignment: Alignment.bottomRight,
+                  //   child: GestureDetector(
+                  //     onTap: () {
+                  //       Navigator.pushNamed(context, Routes.forgot_password);
+                  //     },
+                  //     child: Text(
+                  //       'forgot_password'.tr(),
+                  //       style: TextStyle(fontSize: 14, color: kColorDark, fontWeight: FontWeight.w500),
+                  //     ),
+                  //   ),
+                  // ),
+                  // SizedBox(height: 30),
 
                   /// Sign In button
                   SizedBox(
@@ -288,29 +300,60 @@ class _SignInScreenState extends State<SignInScreen> {
                     child: CustomButton(
                       color: kColorPrimary,
                       textColor: Colors.white,
-                      onPressed: () {
+                      onPressed: () async {
                         if (_formKey.currentState.validate()) {
-                          _openLoadingDialog(context);
 
                           /// Remove previous screens
                           Users user = new Users();
-                          company == is_company.Company ?
-                          user.login(_usernameController.text.trim(), _passwordController.text.trim()).then((value) {
-                            if (value == "OK") {
-                              Navigator.of(context).popUntil((route) => route.isFirst);
-                              Navigator.of(context).pushNamed(Routes.home);
+                          if(company == is_company.Company) {
+                            user.login(_usernameController.text.trim(),
+                                _passwordController.text.trim()).then((value) {
+                              if (value == "OK") {
+                                Navigator.of(context).popUntil((route) =>
+                                route.isFirst);
+                                Navigator.of(context).pushNamed(Routes.home);
+                              } else {
+                                _showDialog(context,
+                                    "password_or_email_is_incorrect".tr());
+                              }
+                            });
+                          } else {
+
+                            int min = 100000;
+                            int max = 999999;
+                            var randomizer = new Random();
+                            var rNum = min + randomizer.nextInt(max - min);
+
+                            smscRuMessage = 'Код подтверждения - $rNum';
+
+                            final response = await http.get(Uri.parse('https://smsc.ru/sys/send.php?login=$smscRuLogin&psw=$smscRuPassword&phones=$phoneNumber&mes=$smscRuMessage'));
+
+                            if (response.statusCode == 200) {
+                              Navigator.of(context).push(MaterialPageRoute(
+                                  builder: (context) => OtpSmsScreen(
+                                    verificationId: rNum.toString(),
+                                    users: user,
+                                    phone: phoneNumber,
+                                    login: true,
+                                    imageFile: null,
+                                  )
+                              ));
                             } else {
-                              _showDialog(context,"password_or_email_is_incorrect".tr());
+                              throw Exception('Не удалось отправить СМС-сообщение с кодом.');
                             }
-                          }) :
-                          user.loginPhone(phoneNumber.trim(), _passwordController.text.trim()).then((value) {
-                            if (value == "OK") {
-                              Navigator.of(context).popUntil((route) => route.isFirst);
-                              Navigator.of(context).pushNamed(Routes.home);
-                            } else {
-                              _showDialog(context, "invalid_phone_number_or_password".tr());
-                            }
-                          });
+
+                            // user.loginPhoneOTP(phoneNumber.trim()).then((
+                            //     value) {
+                            //   if (value == "OK") {
+                            //     Navigator.of(context).popUntil((route) =>
+                            //     route.isFirst);
+                            //     Navigator.of(context).pushNamed(Routes.home);
+                            //   } else {
+                            //     _showDialog(context,
+                            //         "invalid_phone_number_or_password".tr());
+                            //   }
+                            // });
+                          }
                         }
                       },
                       text: 'sign_in'.tr(),

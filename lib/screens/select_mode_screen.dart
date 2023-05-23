@@ -67,6 +67,7 @@ class _SelectModeState extends State<SelectMode> {
                             mainAxisAlignment: MainAxisAlignment.center,
                             children: <Widget>[
                               CustomButton(
+                                height: 64.0,
                                 color: kColorWhite,
                                 textColor: kColorPrimary,
                                 textAlign: TextAlign.center,
@@ -76,20 +77,38 @@ class _SelectModeState extends State<SelectMode> {
                                 },
                                 text: 'looking_for_a_job'.tr(),
                               ),
+                              // SizedBox(
+                              //   height: 20,
+                              // ),
+                              // CustomButton(
+                              //   color: kColorWhite,
+                              //   textColor: kColorPrimary,
+                              //   onPressed: () {
+                              //     Prefs.setString(Prefs.ROUTE, "COMPANY");
+                              //     Navigator.of(context).pushNamed(Routes.start);
+                              //   },
+                              //   text: 'company_login'.tr(),
+                              // ),
                               SizedBox(
                                 height: 20,
                               ),
-                              CustomButton(
-                                color: kColorWhite,
-                                textColor: kColorPrimary,
-                                onPressed: () {
+                              GestureDetector(
+                                child: Padding(
+                                  padding: const EdgeInsets.all(10),
+                                  child: Text(
+                                      'company_login'.tr(),
+                                      style: TextStyle(
+                                          decoration: TextDecoration.underline,
+                                          color: kColorWhite,
+                                          fontWeight: FontWeight.normal,
+                                          fontSize: 16
+                                      )
+                                  ),
+                                ),
+                                onTap: () {
                                   Prefs.setString(Prefs.ROUTE, "COMPANY");
                                   Navigator.of(context).pushNamed(Routes.start);
                                 },
-                                text: 'company_login'.tr(),
-                              ),
-                              SizedBox(
-                                height: 20,
                               ),
                             ],
                           ),

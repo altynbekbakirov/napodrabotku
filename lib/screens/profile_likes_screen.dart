@@ -43,19 +43,11 @@ class ProfileLikesScreen extends StatelessWidget {
                 body = data == null || data.isEmpty ? Container() : Column(
                   children: [
                     Expanded(
-                      child: StoreProvider.of<AppState>(context)
-                                  .state
-                                  .vacancy
-                                  .list
-                                  .data !=
-                              null
-                          ? UsersGrid(
-                              children: StoreProvider.of<AppState>(context)
-                                  .state
-                                  .vacancy
-                                  .list
-                                  .data
-                                  .map((vacancy) {
+                      child: StoreProvider.of<AppState>(context).state.vacancy.list.data !=null ?
+                      Container(
+                        padding: EdgeInsets.all(20),
+                        child: UsersGrid(
+                            children: StoreProvider.of<AppState>(context).state.vacancy.list.data.map((vacancy) {
                               return GestureDetector(
                                 child: ProfileCard(
                                   vacancy: vacancy,
@@ -63,20 +55,22 @@ class ProfileLikesScreen extends StatelessWidget {
                                 ),
                                 onTap: () {},
                               );
-                            }).toList())
-                          : Center(
-                              child: Text(
-                                'empty'.tr(),
-                                style: TextStyle(color: Colors.white),
-                              ),
-                            ),
+                            }).toList()
+                        ),
+                      ) :
+                      Center(
+                        child: Text(
+                          'empty'.tr(),
+                          style: TextStyle(color: Colors.white),
+                        ),
+                      ),
                     ),
                   ],
                 );
               }
 
               return Scaffold(
-                backgroundColor: Prefs.getString(Prefs.ROUTE) == "PRODUCT_LAB" ? kColorProductLab : kColorPrimary,
+                backgroundColor: kColorPrimary,
                 appBar: AppBar(
                   title: Text("active_vacancies".tr()),
                 ),
@@ -117,7 +111,7 @@ class ProfileLikesScreen extends StatelessWidget {
               }
 
               return Scaffold(
-                backgroundColor: Prefs.getString(Prefs.ROUTE) == "PRODUCT_LAB" ? kColorProductLab : kColorPrimary,
+                backgroundColor: kColorPrimary,
                 appBar: AppBar(
                   title: Text("likeds".tr()),
                 ),

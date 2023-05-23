@@ -20,10 +20,12 @@ Future otpRegister(
                 child: Center(
                     child: CircularProgressIndicator(
                   valueColor: new AlwaysStoppedAnimation<Color>(kColorPrimary),
-                ))),
+                ))
+            ),
           ),
         );
-      }));
+      })
+  );
   try {
     await FirebaseAuth.instance.verifyPhoneNumber(
       phoneNumber: phoneNumber,
@@ -41,7 +43,8 @@ Future otpRegister(
                   phone: phoneNumber,
                   login: login,
                   imageFile: imageFile,
-                )));
+                )
+        ));
       },
       codeAutoRetrievalTimeout: (String verificationId) {},
     );

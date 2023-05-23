@@ -143,7 +143,7 @@ class _ProfileTabState extends State<ProfileTab> {
                       Container(
                         margin: EdgeInsets.only(top: 15),
                         child: Text(
-                          Prefs.getString(Prefs.TOKEN) != null ? Prefs.getString(Prefs.EMAIL) : 'guest_user'.tr(),
+                          Prefs.getString(Prefs.TOKEN) != null ? Prefs.getString(Prefs.PHONE_NUMBER) : 'guest_user'.tr(),
                           style: TextStyle(
                               fontSize: 18,
                               fontWeight: FontWeight.bold,
@@ -428,6 +428,7 @@ class _ProfileTabState extends State<ProfileTab> {
                         ),
                         onTap: () async {
                           Prefs.setString(Prefs.EMAIL, null);
+                          Prefs.setString(Prefs.PHONE_NUMBER, null);
                           Prefs.setString(Prefs.PROFILEIMAGE, null);
                           Prefs.setString(Prefs.PASSWORD, null);
                           Prefs.setString(Prefs.TOKEN, null);

@@ -75,7 +75,7 @@ class BasicUserCvInfo extends StatelessWidget {
                   softWrap: true,
                   style:
                       TextStyle(fontSize: 16, color: Colors.grey, height: 2)),
-              Text(user.email,
+              Text(user.email != null ? user.email : '-',
                   softWrap: true,
                   style: TextStyle(fontSize: 16, color: kColorDark)),
             ],

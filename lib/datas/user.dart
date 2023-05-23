@@ -385,6 +385,41 @@ class Users {
     }
   }
 
+  Future<String> _authenticatePhoneOTP(String phone) async {
+    final url = API_IP + API_LOGIN_PHONE;
+    try {
+      Map<String, String> headers = {"Content-type": "application/json"};
+      final response = await http.post(
+        url,
+        headers: headers,
+        body: json.encode(loginPhoneOTPRequestBodyToJsonPhone(phone)),
+      );
+      final responseData = json.decode(response.body);
+      if (responseData['status'] == 999) {
+        return "ERROR";
+      } else if (responseData['status'] == 888) {
+        return "ERROR";
+      } else if (responseData['token'] != null) {
+        this.password = password;
+        Prefs.setString('password', password);
+        Prefs.setString(Prefs.EMAIL, responseData["email"]);
+        Prefs.setString(Prefs.PHONE_NUMBER, responseData["phone_number"]);
+        Prefs.setString(Prefs.PASSWORD, password);
+        Prefs.setInt(Prefs.USER_ID, responseData["id"]);
+        Prefs.setString(Prefs.TOKEN, responseData["token"]);
+        Prefs.setString(Prefs.PROFILEIMAGE, responseData["avatar"]);
+        Prefs.setString(Prefs.USER_TYPE, responseData["user_type"]);
+        Prefs.setString(Prefs.USER_LAT, responseData["lat"]);
+        Prefs.setString(Prefs.USER_LONG, responseData["long"]);
+        return "OK";
+      } else {
+        return "FAILED";
+      }
+    } catch (error) {
+      throw error;
+    }
+  }
+
   static Map<String, dynamic> loginRequestBodyToJson(String email, String password) => {
         'email': email,
         'password': password,
@@ -393,6 +428,10 @@ class Users {
   static Map<String, dynamic> loginRequestBodyToJsonPhone(String phone, String password) => {
     'phone_number': phone,
     'password': password,
+  };
+
+  static Map<String, dynamic> loginPhoneOTPRequestBodyToJsonPhone(String phone) => {
+    'phone_number': phone
   };
 
   static Future<bool> checkUsername(String email) async {
@@ -423,7 +462,11 @@ class Users {
           'phone_number': phone,
         }),
       );
-      return json.decode(response.body);
+      print(response.body);
+      if(json.decode(response.body) > 0){
+        return true;
+      }
+      return false;
     } catch (error) {
       throw error;
     }
@@ -552,6 +595,10 @@ class Users {
 
   Future<String> loginPhone(String phone, String password) async {
     return _authenticatePhone(phone.trim(), password.trim());
+  }
+
+  Future<String> loginPhoneOTP(String phone) async {
+    return _authenticatePhoneOTP(phone.trim());
   }
 
   Future<void> setPassword(String password) async {
