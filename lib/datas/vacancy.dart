@@ -20,11 +20,15 @@ class Vacancy {
   String schedule;
   String region;
   String district;
+  String street;
+  String houseNumber;
   String latitude;
   String longitude;
   String job_type;
   String currency;
   String period;
+  String experience;
+  String payPeriod;
   String type;
   int company;
   int is_disability_person_vacancy;
@@ -55,10 +59,14 @@ class Vacancy {
     this.job_type,
     this.region,
     this.district,
+    this.street,
+    this.houseNumber,
     this.latitude,
     this.longitude,
     this.currency,
     this.period,
+    this.experience,
+    this.payPeriod,
     this.type,
     this.company,
     this.is_disability_person_vacancy,
@@ -184,11 +192,15 @@ class Vacancy {
         job_type: json['job_type'],
         region: json['region'],
         district: json['district'],
+        street: json['street'],
+        houseNumber: json['house_number'],
         latitude: json['latitude'],
         longitude: json['longitude'],
         type: json['type'],
         currency: json['currency'],
         period: json['period'],
+        experience: json['experience'],
+        payPeriod: json['pay_period'],
         opportunity: json['opportunity'],
         opportunityType: json['opportunity_type'],
         internshipLanguage: json['internship_language'],
@@ -212,6 +224,8 @@ class Vacancy {
         'description': vacancy.description,
         'region': vacancy.region,
         'district': vacancy.district,
+        'street': vacancy.street,
+        'house_number': vacancy.houseNumber,
         'latitude': vacancy.latitude,
         'longitude': vacancy.longitude,
         'busyness': vacancy.busyness,
@@ -219,6 +233,8 @@ class Vacancy {
         'job_type': vacancy.job_type,
         'currency': vacancy.currency,
         'period': vacancy.period,
+        'experience': vacancy.experience,
+        'pay_period': vacancy.payPeriod,
         'type': vacancy.type,
         'opportunity': vacancy.opportunity,
         'opportunity_type': vacancy.opportunityType,

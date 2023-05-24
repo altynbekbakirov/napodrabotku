@@ -9,7 +9,6 @@ import 'package:intl_phone_number_input/intl_phone_number_input.dart';
 import 'package:ishtapp/datas/user.dart';
 import 'package:ishtapp/routes/routes.dart';
 import 'package:ishtapp/screens/otp_sms_screen.dart';
-import 'package:ishtapp/screens/otp_sms_screen_login.dart';
 import 'package:ishtapp/utils/constants.dart';
 import 'package:ishtapp/components/custom_button.dart';
 import 'package:ishtapp/datas/pref_manager.dart';

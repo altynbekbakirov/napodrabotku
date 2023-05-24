@@ -4,6 +4,7 @@ import 'dart:math';
 import 'package:async/async.dart';
 import 'package:dropdown_search/dropdown_search.dart';
 import 'package:easy_localization/easy_localization.dart';
+import 'package:email_validator/email_validator.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_datetime_picker/flutter_datetime_picker.dart';
@@ -40,8 +41,8 @@ class _SignUpScreenState extends State<SignUpScreen> {
   final _lastnameController = TextEditingController();
   final _emailController = TextEditingController();
   // final _linkedinController = TextEditingController();
-  // final _passwordController = TextEditingController();
-  // final _passwordConfirmController = TextEditingController();
+  final _passwordController = TextEditingController();
+  final _passwordConfirmController = TextEditingController();
   final _birthDateController = TextEditingController();
   final _phoneNumberController = TextEditingController();
   final _typeAheadController = TextEditingController();
@@ -73,6 +74,7 @@ class _SignUpScreenState extends State<SignUpScreen> {
   String selectedDistrict;
 
   // String _currentAddress;
+  bool _obscureText = true;
 
   // SMSC.RU credentials
   String smscRuLogin = 'pobed-a';
@@ -284,36 +286,205 @@ class _SignUpScreenState extends State<SignUpScreen> {
                   Flex(
                     direction: Axis.vertical,
                     children: <Widget>[
-                      Align(
-                          widthFactor: 10,
-                          heightFactor: 1.5,
-                          alignment: Alignment.topLeft,
-                          child: Text(
-                            'organization_name'.tr().toString().toUpperCase() + '*',
-                            style: TextStyle(fontSize: 12, color: Colors.black, fontWeight: FontWeight.w700),
-                          )
-                      ),
-                      TextFormField(
-                        controller: _nameController,
-                        textInputAction: TextInputAction.next,
-                        decoration: InputDecoration(
-                          contentPadding: EdgeInsets.symmetric(vertical: 10, horizontal: 20),
-                          border: OutlineInputBorder(),
-                          enabledBorder: OutlineInputBorder(borderSide: BorderSide(color: Colors.grey[200], width: 2.0)),
-                          errorBorder: OutlineInputBorder(borderSide: BorderSide(color: kColorPrimary, width: 2.0)),
-                          errorStyle: TextStyle(color: kColorPrimary, fontWeight: FontWeight.w500),
-                          floatingLabelBehavior: FloatingLabelBehavior.always,
-                          filled: true,
-                          fillColor: kColorWhite,
+                      Container(
+                        margin: EdgeInsets.only(bottom: 16),
+                        child: Column(
+                          children: [
+                            Align(
+                                widthFactor: 10,
+                                heightFactor: 1.5,
+                                alignment: Alignment.topLeft,
+                                child: Text(
+                                  'organization_name'.tr().toString().toUpperCase() + '*',
+                                  style: TextStyle(fontSize: 12, color: Colors.black, fontWeight: FontWeight.w700),
+                                )
+                            ),
+                            TextFormField(
+                              controller: _nameController,
+                              textInputAction: TextInputAction.next,
+                              decoration: InputDecoration(
+                                contentPadding: EdgeInsets.symmetric(vertical: 10, horizontal: 20),
+                                border: OutlineInputBorder(),
+                                enabledBorder: OutlineInputBorder(borderSide: BorderSide(color: Colors.grey[200], width: 2.0)),
+                                errorBorder: OutlineInputBorder(borderSide: BorderSide(color: kColorPrimary, width: 2.0)),
+                                errorStyle: TextStyle(color: kColorPrimary, fontWeight: FontWeight.w500),
+                                floatingLabelBehavior: FloatingLabelBehavior.always,
+                                filled: true,
+                                fillColor: kColorWhite,
+                              ),
+                              validator: (name) {
+                                if (name.isEmpty) {
+                                  return "please_fill_this_field".tr();
+                                }
+                                return null;
+                              },
+                            ),
+                          ],
                         ),
-                        validator: (name) {
-                          if (name.isEmpty) {
-                            return "please_fill_this_field".tr();
-                          }
-                          return null;
-                        },
                       ),
-                      SizedBox(height: 20),
+                      /// Электронный адрес
+                      Container(
+                        margin: EdgeInsets.only(bottom: 16),
+                        child: Column(
+                          children: [
+                            Align(
+                              widthFactor: 10,
+                              heightFactor: 1.5,
+                              alignment: Alignment.topLeft,
+                              child: Text(
+                                'email'.tr().toString().toUpperCase() + '*',
+                                style: TextStyle(fontSize: 12, color: Colors.black, fontWeight: FontWeight.w700),
+                              ),
+                            ),
+                            TextFormField(
+                              controller: _emailController,
+                              keyboardType: TextInputType.emailAddress,
+                              textInputAction: TextInputAction.next,
+                              decoration: InputDecoration(
+                                contentPadding: EdgeInsets.symmetric(vertical: 10, horizontal: 20),
+                                border: OutlineInputBorder(),
+                                enabledBorder: OutlineInputBorder(borderSide: BorderSide(color: Colors.grey[200], width: 2.0)),
+                                errorBorder: OutlineInputBorder(borderSide: BorderSide(color: kColorPrimary, width: 2.0)),
+                                errorStyle: TextStyle(color: kColorPrimary, fontWeight: FontWeight.w500),
+                                floatingLabelBehavior: FloatingLabelBehavior.always,
+                                filled: true,
+                                fillColor: kColorWhite,
+                              ),
+                              onChanged: (value) async {
+                                if (value.isEmpty) {
+                                  setState(() {
+                                    isUserExists = false;
+                                  });
+                                } else {
+                                  await Users.checkUsername(value.trim()).then((value) {
+                                    setState(() {
+                                      isUserExists = value;
+                                    });
+                                  });
+                                }
+                              },
+                              validator: (value) {
+                                if (value.isEmpty) {
+                                  return "please_fill_this_field".tr();
+                                } else if (!EmailValidator.validate(value.trim())) {
+                                  return "please_write_valid_email".tr();
+                                } else if (isUserExists) {
+                                  return "this_email_already_registered".tr();
+                                }
+                                return null;
+                              },
+                            ),
+                          ],
+                        ),
+                      ),
+                      /// Пароль
+                      Container(
+                        margin: EdgeInsets.only(bottom: 16),
+                        child: Flex(
+                          direction: Axis.vertical,
+                          children: [
+                            Align(
+                                widthFactor: 10,
+                                heightFactor: 1.5,
+                                alignment: Alignment.topLeft,
+                                child: Text(
+                                  'password'.tr().toString().toUpperCase() + '*',
+                                  style: TextStyle(fontSize: 12, color: Colors.black, fontWeight: FontWeight.w700),
+                                )),
+                            TextFormField(
+                              obscureText: _obscureText,
+                              controller: _passwordController,
+                              textInputAction: TextInputAction.next,
+                              decoration: InputDecoration(
+                                contentPadding: EdgeInsets.symmetric(vertical: 10, horizontal: 20),
+                                border: OutlineInputBorder(),
+                                enabledBorder: OutlineInputBorder(borderSide: BorderSide(color: Colors.grey[200], width: 2.0)),
+                                errorBorder: OutlineInputBorder(borderSide: BorderSide(color: kColorPrimary, width: 2.0)),
+                                errorStyle: TextStyle(color: kColorPrimary, fontWeight: FontWeight.w500),
+                                floatingLabelBehavior: FloatingLabelBehavior.always,
+                                filled: true,
+                                fillColor: kColorWhite,
+                                suffixIcon: IconButton(
+                                  icon: Icon(
+                                    // Based on passwordVisible state choose the icon
+                                    _obscureText ? Icons.visibility : Icons.visibility_off,
+                                    color: kColorSecondary,
+                                  ),
+                                  onPressed: () {
+                                    // Update the state i.e. toogle the state of passwordVisible variable
+                                    setState(() {
+                                      _obscureText = !_obscureText;
+                                    });
+                                  },
+                                ),
+                              ),
+                              validator: (password) {
+                                // Basic validation
+                                if (password.isEmpty) {
+                                  return "please_fill_this_field".tr();
+                                }
+                                return null;
+                              },
+                            ),
+                          ],
+                        ),
+                      ),
+
+                      /// Подверждение пароли
+                      Container(
+                        margin: EdgeInsets.only(bottom: 16),
+                        child: Flex(
+                          direction: Axis.vertical,
+                          children: [
+                            Align(
+                                widthFactor: 10,
+                                heightFactor: 1.5,
+                                alignment: Alignment.topLeft,
+                                child: Text(
+                                  'password_confirm'.tr().toString().toUpperCase() + '*',
+                                  style: TextStyle(fontSize: 12, color: Colors.black, fontWeight: FontWeight.w700),
+                                )),
+                            TextFormField(
+                              controller: _passwordConfirmController,
+                              obscureText: _obscureText,
+                              textInputAction: TextInputAction.next,
+                              decoration: InputDecoration(
+                                contentPadding: EdgeInsets.symmetric(vertical: 10, horizontal: 20),
+                                border: OutlineInputBorder(),
+                                enabledBorder: OutlineInputBorder(borderSide: BorderSide(color: Colors.grey[200], width: 2.0)),
+                                errorBorder: OutlineInputBorder(borderSide: BorderSide(color: kColorPrimary, width: 2.0)),
+                                errorStyle: TextStyle(color: kColorPrimary, fontWeight: FontWeight.w500),
+                                floatingLabelBehavior: FloatingLabelBehavior.always,
+                                filled: true,
+                                fillColor: kColorWhite,
+                                suffixIcon: IconButton(
+                                  icon: Icon(
+                                    // Based on passwordVisible state choose the icon
+                                    _obscureText ? Icons.visibility : Icons.visibility_off,
+                                    color: kColorSecondary,
+                                  ),
+                                  onPressed: () {
+                                    // Update the state i.e. toogle the state of passwordVisible variable
+                                    setState(() {
+                                      _obscureText = !_obscureText;
+                                    });
+                                  },
+                                ),
+                              ),
+                              validator: (name) {
+                                // Basic validation
+                                if (name.isEmpty) {
+                                  return "please_fill_this_field".tr();
+                                } else if (_passwordConfirmController.text != _passwordController.text) {
+                                  return "passwords_dont_satisfy".tr();
+                                }
+                                return null;
+                              },
+                            ),
+                          ],
+                        ),
+                      ),
+
                     ],
                   ) : Container(),
 
@@ -681,7 +852,7 @@ class _SignUpScreenState extends State<SignUpScreen> {
                   /// Пол
                   company == is_company.Company ? Container() :
                   Container(
-                    margin: EdgeInsets.only(bottom: 40),
+                    margin: EdgeInsets.only(bottom: 16),
                     child: Column(
                       children: [
                         Align(
@@ -725,115 +896,111 @@ class _SignUpScreenState extends State<SignUpScreen> {
                   ),
 
                   /// Sign Up button
-                  SizedBox(
-                    width: double.maxFinite,
-                    child: CustomButton(
-                      color: kColorPrimary,
-                      textColor: Colors.white,
-                      onPressed: () async {
-                        if (_formKey.currentState.validate()) {
+                  Container(
+                    margin: EdgeInsets.only(top: 24),
+                    child: SizedBox(
+                      width: double.maxFinite,
+                      child: CustomButton(
+                        color: kColorPrimary,
+                        textColor: Colors.white,
+                        onPressed: () async {
+                          if (_formKey.currentState.validate()) {
 
-                          final DateFormat formatter = DateFormat('yyyy-MM-dd');
-                          Users user = Users();
-                          user.name = _nameController.text;
-                          user.phone_number = phoneNumber;
-                          user.address = _typeAheadController.text.toString();
-                          // user.email = _emailController.text;
-                          // user.password = _passwordController.text;
-                          user.birth_date = company == is_company.Company ? DateTime.now() : formatter.parse(_birthDateController.text);
-                          user.surname = _lastnameController.text;
-                          user.is_company = company == is_company.Company;
-                          // user.is_migrant = isMigrant ? 1 : 0;
-                          // user.linkedin = _linkedinController.text;
-                          user.gender = gender == user_gender.Male ? "male" : "female";
-                          user.region = selectedRegion;
-                          user.district = selectedDistrict;
+                            final DateFormat formatter = DateFormat('yyyy-MM-dd');
+                            Users user = Users();
+                            user.name = _nameController.text;
+                            user.phone_number = phoneNumber;
+                            user.address = _typeAheadController.text.toString();
+                            user.birth_date = company == is_company.Company ? DateTime.now() : formatter.parse(_birthDateController.text);
+                            user.surname = _lastnameController.text;
+                            user.is_company = company == is_company.Company;
+                            // user.is_migrant = isMigrant ? 1 : 0;
+                            // user.linkedin = _linkedinController.text;
+                            user.gender = gender == user_gender.Male ? "male" : "female";
+                            user.region = selectedRegion;
+                            user.district = selectedDistrict;
+                            user.email = _emailController.text;
+                            user.password = _passwordController.text;
 
-                          if (company == is_company.User) {
-                            debugPrint(phoneNumber);
+                            if (company == is_company.User) {
+                              debugPrint(phoneNumber);
 
-                            int min = 100000;
-                            int max = 999999;
-                            var randomizer = new Random();
-                            var rNum = min + randomizer.nextInt(max - min);
+                              int min = 100000;
+                              int max = 999999;
+                              var randomizer = new Random();
+                              var rNum = min + randomizer.nextInt(max - min);
 
-                            smscRuMessage = 'Код подтверждения - $rNum';
+                              smscRuMessage = 'Код подтверждения - $rNum';
 
-                            final response = await http.get(Uri.parse('https://smsc.ru/sys/send.php?login=$smscRuLogin&psw=$smscRuPassword&phones=$phoneNumber&mes=$smscRuMessage'));
+                              final response = await http.get(Uri.parse('https://smsc.ru/sys/send.php?login=$smscRuLogin&psw=$smscRuPassword&phones=$phoneNumber&mes=$smscRuMessage'));
 
-                            if (response.statusCode == 200) {
-                              Navigator.of(context).push(MaterialPageRoute(
-                                  builder: (context) => OtpSmsScreen(
-                                    verificationId: rNum.toString(),
-                                    users: user,
-                                    phone: phoneNumber,
-                                    login: false,
-                                    imageFile: _imageFile,
-                                  )
-                              ));
-                            } else {
-                              throw Exception('Не удалось отправить СМС-сообщение с кодом.');
-                            }
-
-                            // await otpRegister(phoneNumber: phoneNumber, context: context, users: user, imageFile: _imageFile);
-                          } else {
-                            await Users.checkUsername(_emailController.text).then((value) async {
-                              /// Validate form
-                              _openLoadingDialog(context);
-
-                              var uri = Uri.parse(API_IP + API_REGISTER1 + '?lang=' + Prefs.getString(Prefs.LANGUAGE));
-                              var request = new http.MultipartRequest("POST", uri);
-
-                              // if you need more parameters to parse, add those like this. i added "user_id". here this "user_id" is a key of the API request
-                              request.fields["id"] = user.id.toString();
-                              request.fields["password"] = user.password;
-                              request.fields["name"] = user.name;
-                              request.fields["lastname"] = user.surname;
-                              request.fields["email"] = user.email;
-                              request.fields["birth_date"] = formatter.format(user.birth_date);
-                              request.fields["active"] = '1';
-                              request.fields["phone_number"] = user.phone_number;
-                              request.fields["type"] = user.is_company ? 'COMPANY' : 'USER';
-                              request.fields["linkedin"] = user.linkedin;
-                              request.fields["is_migrant"] = user.is_migrant.toString();
-                              request.fields["gender"] = user.gender.toString();
-                              request.fields["region"] = user.region.toString();
-                              request.fields["district"] = user.district.toString();
-                              request.fields["job_type"] = user.job_type.toString();
-                              request.fields["is_product_lab_user"] = user.is_product_lab_user ? "1" : "0";
-
-                              // open a byteStream
-                              if (_imageFile != null) {
-                                var _image = File(_imageFile.path);
-                                var stream = new http.ByteStream(DelegatingStream.typed(_image.openRead()));
-                                // get file length
-                                var length = await _image.length();
-                                // multipart that takes file.. here this "image_file" is a key of the API request
-                                var multipartFile = new http.MultipartFile('avatar', stream, length, filename: basename(_image.path));
-                                // add file to multipart
-                                request.files.add(multipartFile);
+                              if (response.statusCode == 200) {
+                                Navigator.of(context).push(MaterialPageRoute(
+                                    builder: (context) => OtpSmsScreen(
+                                      verificationId: rNum.toString(),
+                                      users: user,
+                                      phone: phoneNumber,
+                                      login: false,
+                                      imageFile: _imageFile,
+                                    )
+                                ));
+                              } else {
+                                throw Exception('Не удалось отправить СМС-сообщение с кодом.');
                               }
-                              request.send().then((response) {
-                                response.stream.transform(utf8.decoder).listen((value) {
-                                  var response = json.decode(value);
-                                  if (response['status'] == 200) {
-                                    Prefs.setString(Prefs.PASSWORD, user.password);
-                                    Prefs.setString(Prefs.TOKEN, response["token"]);
-                                    Prefs.setString(Prefs.EMAIL, response["email"]);
-                                    Prefs.setInt(Prefs.USER_ID, response["id"]);
-                                    Prefs.setString(Prefs.USER_TYPE, user.is_company ? 'COMPANY' : 'USER');
-                                    Prefs.setString(Prefs.PROFILEIMAGE, response["avatar"]);
-                                    _showDialog(context, 'successfull_sign_up'.tr(), false);
-                                  } else {
-                                    _showDialog(context, 'some_error_occurred_plese_try_again'.tr(), true);
-                                  }
+
+                              // await otpRegister(phoneNumber: phoneNumber, context: context, users: user, imageFile: _imageFile);
+                            } else {
+
+                              await Users.checkUsername(_emailController.text).then((value) async {
+                                /// Validate form
+                                _openLoadingDialog(context);
+
+                                var uri = Uri.parse(API_IP + API_REGISTER1 + '?lang=' + Prefs.getString(Prefs.LANGUAGE));
+                                var request = new http.MultipartRequest("POST", uri);
+
+                                request.fields["id"] = user.id.toString();
+                                request.fields["password"] = user.password;
+                                request.fields["name"] = user.name;
+                                request.fields["email"] = user.email;
+                                request.fields["birth_date"] = formatter.format(user.birth_date);
+                                request.fields["active"] = '1';
+                                request.fields["phone_number"] = user.phone_number;
+                                request.fields["type"] = user.is_company ? 'COMPANY' : 'USER';
+
+                                // open a byteStream
+                                if (_imageFile != null) {
+                                  var _image = File(_imageFile.path);
+                                  var stream = new http.ByteStream(DelegatingStream.typed(_image.openRead()));
+                                  // get file length
+                                  var length = await _image.length();
+                                  // multipart that takes file.. here this "image_file" is a key of the API request
+                                  var multipartFile = new http.MultipartFile('avatar', stream, length, filename: basename(_image.path));
+                                  // add file to multipart
+                                  request.files.add(multipartFile);
+                                }
+
+                                request.send().then((response) {
+                                  response.stream.transform(utf8.decoder).listen((value) {
+                                    var response = json.decode(value);
+                                    if (response['status'] == 200) {
+                                      Prefs.setString(Prefs.PASSWORD, user.password);
+                                      Prefs.setString(Prefs.TOKEN, response["token"]);
+                                      Prefs.setString(Prefs.EMAIL, response["email"]);
+                                      Prefs.setInt(Prefs.USER_ID, response["id"]);
+                                      Prefs.setString(Prefs.USER_TYPE, user.is_company ? 'COMPANY' : 'USER');
+                                      Prefs.setString(Prefs.PROFILEIMAGE, response["avatar"]);
+                                      _showDialog(context, 'successfull_sign_up'.tr(), false);
+                                    } else {
+                                      _showDialog(context, 'some_error_occurred_plese_try_again'.tr(), true);
+                                    }
+                                  });
                                 });
                               });
-                            });
+                            }
                           }
-                        }
-                      },
-                      text: 'create'.tr(),
+                        },
+                        text: 'create'.tr(),
+                      ),
                     ),
                   ),
                 ],

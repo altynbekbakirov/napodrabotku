@@ -623,11 +623,14 @@ class _EditProfileScreenState extends State<EditProfileScreen> {
                           enabled: true,
                           controller: _position_of_contact_person,
                           decoration: InputDecoration(
-                            border: OutlineInputBorder(
-                                borderRadius: BorderRadius.circular(10), borderSide: BorderSide.none),
+                            contentPadding: EdgeInsets.symmetric(vertical: 10, horizontal: 20),
+                            border: OutlineInputBorder(),
+                            enabledBorder: OutlineInputBorder(borderSide: BorderSide(color: Colors.grey[200], width: 2.0)),
+                            errorBorder: OutlineInputBorder(borderSide: BorderSide(color: kColorPrimary, width: 2.0)),
+                            errorStyle: TextStyle(color: kColorPrimary, fontWeight: FontWeight.w500),
                             floatingLabelBehavior: FloatingLabelBehavior.always,
                             filled: true,
-                            fillColor: Colors.grey[200],
+                            fillColor: kColorWhite,
                           ),
                           style: TextStyle(color: kColorPrimary.withOpacity(0.6)),
                         ),
@@ -658,7 +661,7 @@ class _EditProfileScreenState extends State<EditProfileScreen> {
                               });
                             },
                             dropdownSearchDecoration: InputDecoration(
-                              contentPadding: EdgeInsets.symmetric(vertical: 10, horizontal: 20),
+                              contentPadding: EdgeInsets.symmetric(vertical: 0, horizontal: 20),
                               border: OutlineInputBorder(),
                               enabledBorder: OutlineInputBorder(borderSide: BorderSide(color: Colors.grey[200], width: 2.0)),
                               errorBorder: OutlineInputBorder(borderSide: BorderSide(color: kColorPrimary, width: 2.0)),

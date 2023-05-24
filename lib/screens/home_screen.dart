@@ -105,6 +105,9 @@ class _HomeScreenState extends State<HomeScreen> {
   int _regionId;
   int _districtId;
   int _currencyId;
+  int _salaryPeriodId;
+  int _experienceId;
+  int _payPeriodId;
   bool loading = false;
   work_mode work = work_mode.isWork;
 
@@ -131,12 +134,7 @@ class _HomeScreenState extends State<HomeScreen> {
 
   TextEditingController _vacancy_name_controller = TextEditingController();
   TextEditingController _vacancy_salary_controller = TextEditingController();
-  TextEditingController _vacancy_salary_from_controller = TextEditingController();
-  TextEditingController _vacancy_salary_to_controller = TextEditingController();
   TextEditingController _vacancy_description_controller = TextEditingController();
-  TextEditingController _vacancy_link_controller = TextEditingController();
-  TextEditingController _ageFromController = TextEditingController();
-  TextEditingController _ageToController = TextEditingController();
   TextEditingController _vacancyStreetController = TextEditingController();
   TextEditingController _vacancyHouseNumberController = TextEditingController();
   PhoneNumber number = PhoneNumber(isoCode: 'KG');
@@ -159,8 +157,8 @@ class _HomeScreenState extends State<HomeScreen> {
   Timer timer;
   int receivedMessageCount = 0;
 
-  final _typeAheadController = TextEditingController();
-  final _vacancyTypeAheadController = TextEditingController();
+  TextEditingController _typeAheadController = TextEditingController();
+  TextEditingController _vacancyTypeAheadController = TextEditingController();
   List<dynamic> _suggestions = [];
   List<dynamic> _suggestionsAddress = [];
   String _selectedCity;
@@ -863,7 +861,6 @@ class _HomeScreenState extends State<HomeScreen> {
                               ),
                             ),
                             MultiSelectFormField(
-                              border: OutlineInputBorder(),
                               dialogShapeBorder: RoundedRectangleBorder(
                                   borderRadius: BorderRadius.all(Radius.circular(12.0))
                               ),
@@ -1220,8 +1217,7 @@ class _HomeScreenState extends State<HomeScreen> {
                                               )
                                           ),
                                           TextFormField(
-                                            enabled: false,
-                                            controller: _vacancy_salary_from_controller,
+                                            controller: _vacancy_salary_controller,
                                             focusNode: FocusNode(canRequestFocus: false),
                                             decoration: InputDecoration(
                                               contentPadding: EdgeInsets.symmetric(vertical: 10, horizontal: 20),
@@ -1311,10 +1307,10 @@ class _HomeScreenState extends State<HomeScreen> {
                                                   fontSize: 14
                                               ),
                                             ),
-                                            value: _currencyId,
+                                            value: _salaryPeriodId,
                                             onChanged: (int newValue) async {
                                               setState(() {
-                                                _currencyId = newValue;
+                                                _salaryPeriodId = newValue;
                                               });
                                             },
                                             focusNode: FocusNode(canRequestFocus: false),
@@ -1329,13 +1325,24 @@ class _HomeScreenState extends State<HomeScreen> {
                                               filled: true,
                                               fillColor: kColorWhite,
                                             ),
-                                            items: currencyList.map<DropdownMenuItem<int>>((dynamic value) {
-                                              var jj = new JobType(id: value['id'], name: value['name']);
-                                              return DropdownMenuItem<int>(
-                                                value: jj.id,
-                                                child: Text(value['name']),
-                                              );
-                                            }).toList(),
+                                            items: [
+                                              DropdownMenuItem<int>(
+                                                value: 0,
+                                                child: Text('Ставка за час'),
+                                              ),
+                                              DropdownMenuItem<int>(
+                                                value: 1,
+                                                child: Text('Ставка за смену'),
+                                              ),
+                                              DropdownMenuItem<int>(
+                                                value: 2,
+                                                child: Text('В неделю'),
+                                              ),
+                                              DropdownMenuItem<int>(
+                                                value: 3,
+                                                child: Text('В месяц'),
+                                              )
+                                            ],
                                           ),
                                         ],
                                       ),
@@ -1400,7 +1407,7 @@ class _HomeScreenState extends State<HomeScreen> {
                                     ),
                                     TypeAheadFormField(
                                       textFieldConfiguration: TextFieldConfiguration(
-                                        controller: _typeAheadController,
+                                        controller: _vacancyTypeAheadController,
                                         decoration: InputDecoration(
                                           contentPadding: EdgeInsets.symmetric(vertical: 10, horizontal: 20),
                                           border: OutlineInputBorder(),
@@ -1833,17 +1840,17 @@ class _HomeScreenState extends State<HomeScreen> {
                                         heightFactor: 1.5,
                                         alignment: Alignment.topLeft,
                                         child: Text(
-                                          'требуемый опыт работы'.tr().toString().toUpperCase() + '*',
+                                          'required_experience'.tr().toString().toUpperCase() + '*',
                                           style: TextStyle(fontSize: 12, color: Colors.black, fontWeight: FontWeight.w700),
                                         )
                                     ),
                                     DropdownButtonFormField<int>(
                                       isExpanded: true,
                                       hint: Text("select".tr()),
-                                      value: _scheduleId,
+                                      value: _experienceId,
                                       onChanged: (int newValue) {
                                         setState(() {
-                                          _scheduleId = newValue;
+                                          _experienceId = newValue;
                                         });
                                       },
                                       focusNode: FocusNode(canRequestFocus: false),
@@ -1886,17 +1893,17 @@ class _HomeScreenState extends State<HomeScreen> {
                                         heightFactor: 1.5,
                                         alignment: Alignment.topLeft,
                                         child: Text(
-                                          'Частота выплат'.tr().toString().toUpperCase() + '*',
+                                          'payment_frequency'.tr().toString().toUpperCase() + '*',
                                           style: TextStyle(fontSize: 12, color: Colors.black, fontWeight: FontWeight.w700),
                                         )
                                     ),
                                     DropdownButtonFormField<int>(
                                       isExpanded: true,
                                       hint: Text("select".tr()),
-                                      value: _scheduleId,
+                                      value: _payPeriodId,
                                       onChanged: (int newValue) {
                                         setState(() {
-                                          _scheduleId = newValue;
+                                          _payPeriodId = newValue;
                                         });
                                       },
                                       focusNode: FocusNode(canRequestFocus: false),
@@ -1945,6 +1952,13 @@ class _HomeScreenState extends State<HomeScreen> {
                                       color: Colors.transparent,
                                       textColor: kColorPrimary,
                                       onPressed: () {
+                                        _vacancy_name_controller = TextEditingController();
+                                        _vacancy_salary_controller = TextEditingController();
+                                        _vacancy_description_controller = TextEditingController();
+                                        _vacancyTypeAheadController = TextEditingController();
+                                        _vacancyStreetController = TextEditingController();
+                                        _vacancyHouseNumberController = TextEditingController();
+
                                         setState(() {
                                           _scheduleId = null;
                                           _busynessId = null;
@@ -1952,6 +1966,10 @@ class _HomeScreenState extends State<HomeScreen> {
                                           _vacancyTypeId = null;
                                           _regionId = null;
                                           _districtId = null;
+                                          _currencyId = null;
+                                          _salaryPeriodId = null;
+                                          _experienceId = null;
+                                          _payPeriodId = null;
                                         });
                                         Navigator.of(context).pop();
                                       },
@@ -1961,78 +1979,44 @@ class _HomeScreenState extends State<HomeScreen> {
                                       color: kColorPrimary,
                                       textColor: Colors.white,
                                       onPressed: () {
-                                        var linkResultSubstring = "";
                                         if (_vacancyAddFormKey.currentState.validate()) {
                                           setState(() {
                                             loading = true;
                                           });
 
-                                          if (_vacancy_link_controller != null && _vacancy_link_controller.text.isNotEmpty) {
-                                            var vacancySubstring = _vacancy_link_controller.text.substring(0, 4);
-                                            if (vacancySubstring != "http") {
-                                              linkResultSubstring = 'http://${_vacancy_link_controller.text}';
-                                            } else {
-                                              linkResultSubstring = _vacancy_link_controller.text;
-                                            }
-                                          } else {
-                                            linkResultSubstring = "";
-                                          }
-
                                           Vacancy company_vacancy = new Vacancy(
                                             name: _vacancy_name_controller.text,
                                             salary: _vacancy_salary_controller.text,
-                                            salary_from: _vacancy_salary_from_controller.text,
-                                            salary_to: _vacancy_salary_to_controller.text,
-                                            is_disability_person_vacancy: isDisabilityPersonVacancy ? 1 : 0,
+                                            currency: _currencyId != null ? _currencyId.toString() : null,
+                                            period: _salaryPeriodId != null ? _salaryPeriodId.toString() : null,
                                             description: _vacancy_description_controller.text,
                                             type: _vacancyTypeId != null ? _vacancyTypeId.toString() : null,
                                             busyness: _busynessId != null ? _busynessId.toString() : null,
                                             schedule: _scheduleId != null ? _scheduleId.toString() : null,
                                             job_type: _jobTypeId != null ? _jobTypeId.toString() : null,
+                                            experience: _experienceId != null ? _experienceId.toString() : null,
+                                            payPeriod: _payPeriodId != null ? _payPeriodId.toString() : null,
                                             region: _regionId != null ? _regionId.toString() : null,
                                             district: _districtId != null ? _districtId.toString() : null,
-                                            currency: _currencyId != null ? _currencyId.toString() : null,
-                                            opportunity: opportunity,
-                                            opportunityType: opportunityType,
-                                            opportunityDuration: opportunityDuration,
-                                            internshipLanguage: selectedInternshipType,
-                                            typeOfRecommendedLetter: selectedTypeOfRecommendedLetter,
-                                            ageFrom: _ageFromController.text,
-                                            ageTo: _ageToController.text,
-                                            isProductLabVacancy: work_mode.isTraining == work,
-                                            vacancyLink: linkResultSubstring,
-                                            deadline: deadline,
+                                            address: _vacancyTypeAheadController.text,
+                                            street: _vacancyStreetController.text,
+                                            houseNumber: _vacancyHouseNumberController.text,
                                           );
-                                          SkillCategory skillCategory = new SkillCategory();
                                           Vacancy.saveCompanyVacancy(vacancy: company_vacancy).then((value) {
-                                            if (work == work_mode.isTraining) {
-                                              skillCategory.saveVacancySkills(tags, selectedCategoryIdFromFirstChip, value, true);
-                                              skillCategory.saveVacancySkills(tags2, selectedCategoryIdSecondChip, value, false).then((value) {
-                                                StoreProvider.of<AppState>(context).dispatch(getCompanyVacancies());
-                                                setState(() {
-                                                  loading = false;
-                                                });
-                                                Navigator.of(context).pop();
-                                              });
-                                            } else {
-                                              StoreProvider.of<AppState>(context).dispatch(getCompanyVacancies());
-                                              setState(() {
-                                                loading = false;
-                                              });
-                                              Navigator.of(context).pop();
-                                            }
+                                            StoreProvider.of<AppState>(context).dispatch(getCompanyVacancies());
+                                            setState(() {
+                                              loading = false;
+                                            });
+                                            Navigator.of(context).pop();
                                           });
 
                                           _vacancy_name_controller = TextEditingController();
                                           _vacancy_salary_controller = TextEditingController();
-                                          _vacancy_salary_from_controller = TextEditingController();
-                                          _vacancy_salary_to_controller = TextEditingController();
                                           _vacancy_description_controller = TextEditingController();
-                                          _ageFromController = TextEditingController();
-                                          _ageToController = TextEditingController();
-                                          _vacancy_link_controller = TextEditingController();
+                                          _vacancyTypeAheadController = TextEditingController();
+                                          _vacancyStreetController = TextEditingController();
+                                          _vacancyHouseNumberController = TextEditingController();
                                           setState(() {
-                                            deadline = null;
                                             _scheduleId = null;
                                             _busynessId = null;
                                             _jobTypeId = null;
@@ -2040,11 +2024,9 @@ class _HomeScreenState extends State<HomeScreen> {
                                             _regionId = null;
                                             _districtId = null;
                                             _currencyId = null;
-                                            opportunity = null;
-                                            opportunityType = null;
-                                            opportunityDuration = null;
-                                            selectedInternshipType = null;
-                                            selectedTypeOfRecommendedLetter = null;
+                                            _salaryPeriodId = null;
+                                            _experienceId = null;
+                                            _payPeriodId = null;
                                           });
                                         } else {
                                           print('invalid');
@@ -2288,59 +2270,11 @@ class _HomeScreenState extends State<HomeScreen> {
     }
     getLists();
     buildSome(context);
-    if (Prefs.getString(Prefs.ROUTE) == 'COMPANY') {
-      startTimerToCheckNewMessages(timer: timer, duration: Duration(minutes: 10));
-    }
     super.initState();
-  }
-
-  void startTimerToCheckNewMessages({Timer timer, Duration duration}) {
-    timer = Timer.periodic(duration, (Timer t) => checkForNewMessage());
-    if (Prefs.getString(Prefs.ROUTE) != "COMPANY") {
-      if (timer.isActive) {
-        cancelTimer(timer);
-      }
-    }
   }
 
   void cancelTimer(Timer timer) {
     timer.cancel();
-  }
-
-  void checkForNewMessage() async {
-    FlutterLocalNotificationsPlugin flp = FlutterLocalNotificationsPlugin();
-    var android = AndroidInitializationSettings('@mipmap/ic_launcher');
-    var iOS = IOSInitializationSettings();
-    var initSettings = InitializationSettings(android: android, iOS: iOS);
-    flp.initialize(initSettings, onSelectNotification: selectNotification);
-
-    Map<String, String> headers = {"Content-type": "application/json", "Authorization": Prefs.getString(Prefs.TOKEN)};
-
-    var uri = Uri.parse(API_IP + API_MESSAGE_CHECK);
-    await http.post(uri, headers: headers, body: json.encode({"created_message_date": Prefs.getString(Prefs.MESSAGEDATE)})).then((value) {
-      var convert = json.decode(value.body);
-      print(convert);
-      Prefs.setString(Prefs.MESSAGEDATE, convert['created_at']);
-      if (convert["is_exist"]) {
-        setState(() {
-          receivedMessageCount = convert["count"];
-        });
-        showNotification("Уведомления", flp);
-      }
-
-      return convert;
-    });
-  }
-
-  Future selectNotification(String payload) async {
-    if (payload != null) {
-      debugPrint('notification payload: $payload');
-    }
-    print("HHHHHHHHHHHHHHHHHH");
-    // await Navigator.push(
-    //   context,
-    //   MaterialPageRoute<void>(builder: (context) => (payload)),
-    // );
   }
 
   void showNotification(v, flp) async {

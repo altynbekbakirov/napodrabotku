@@ -116,7 +116,7 @@ class _DiscoverTabState extends State<DiscoverTab> with SingleTickerProviderStat
       converter: (store) => mapStateToVacancyProps(store),
       onInitialBuild: (props) => this.handleInitialBuildOfCompanyVacancy(props),
       builder: (context, props) {
-              List<Vacancy> data = props.listResponse.data;
+              List<Vacancy> data = StoreProvider.of<AppState>(context).state.vacancy.list.data;
               bool loading = props.listResponse.loading;
 
               Widget body;
@@ -130,11 +130,11 @@ class _DiscoverTabState extends State<DiscoverTab> with SingleTickerProviderStat
                 body = Column(
                   children: [
                     Expanded(
-                      child: StoreProvider.of<AppState>(context).state.vacancy.list.data.length > 0 ?
+                      child: data != null && data.length > 0 ?
                       Container(
                         padding: EdgeInsets.symmetric(horizontal: 20),
                         child: UsersGrid(
-                            children: StoreProvider.of<AppState>(context).state.vacancy.list.data.map((vacancy) {
+                            children: data.map((vacancy) {
                               return GestureDetector(
                                 child: ProfileCard(vacancy: vacancy, page: 'company', offset: offset),
                                 onTap: () {
