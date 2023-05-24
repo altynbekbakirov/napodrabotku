@@ -188,6 +188,7 @@ class _OtpSmsScreenState extends State<OtpSmsScreen> {
                   request.fields["phone_number"] = widget.users.phone_number;
                   request.fields["type"] = widget.users.is_company ? 'COMPANY' : 'USER';
                   request.fields["linkedin"] = "";
+                  request.fields["address"] = widget.users.address;
                   request.fields["is_migrant"] = "0";
                   request.fields["gender"] = widget.users.gender.toString();
                   request.fields["region"] = widget.users.region.toString();
@@ -210,7 +211,7 @@ class _OtpSmsScreenState extends State<OtpSmsScreen> {
                         Navigator.of(context).pushNamedAndRemoveUntil(Routes.home, (Route<dynamic> route) => false);
                       } else if(response['status'] == 999) {
                         if(response['message'] == 'user_exist'){
-                          showSnackBar(context: context, message: 'Error occurred while registering', backgroundColor: Colors.red);
+                          showSnackBar(context: context, message: ' Error occurred while registering', backgroundColor: Colors.red);
                         }
                       } else {
                         showSnackBar(context: context, message: 'Error occurred while registering', backgroundColor: Colors.red);

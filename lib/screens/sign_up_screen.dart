@@ -737,6 +737,7 @@ class _SignUpScreenState extends State<SignUpScreen> {
                           Users user = Users();
                           user.name = _nameController.text;
                           user.phone_number = phoneNumber;
+                          user.address = _typeAheadController.text.toString();
                           // user.email = _emailController.text;
                           // user.password = _passwordController.text;
                           user.birth_date = company == is_company.Company ? DateTime.now() : formatter.parse(_birthDateController.text);
@@ -773,8 +774,6 @@ class _SignUpScreenState extends State<SignUpScreen> {
                             } else {
                               throw Exception('Не удалось отправить СМС-сообщение с кодом.');
                             }
-
-
 
                             // await otpRegister(phoneNumber: phoneNumber, context: context, users: user, imageFile: _imageFile);
                           } else {
