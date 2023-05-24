@@ -129,8 +129,7 @@ class _ProfileTabState extends State<ProfileTab> {
                       Container(
                         decoration: BoxDecoration(color: Colors.white, shape: BoxShape.circle),
                         child: CircleAvatar(
-                          backgroundColor:
-                          Prefs.getString(Prefs.ROUTE) == "PRODUCT_LAB" ? kColorProductLab : kColorPrimary,
+                          backgroundColor: kColorPrimary,
                           radius: 60,
                           backgroundImage: Prefs.getString(Prefs.PROFILEIMAGE) != null
                               ? NetworkImage(
@@ -140,10 +139,22 @@ class _ProfileTabState extends State<ProfileTab> {
                         ),
                       ),
 
+                      Prefs.getString(Prefs.USER_TYPE) == "USER" ?
                       Container(
                         margin: EdgeInsets.only(top: 15),
                         child: Text(
                           Prefs.getString(Prefs.TOKEN) != null ? Prefs.getString(Prefs.PHONE_NUMBER) : 'guest_user'.tr(),
+                          style: TextStyle(
+                              fontSize: 18,
+                              fontWeight: FontWeight.bold,
+                              color: Colors.black
+                          ),
+                        ),
+                      ) :
+                      Container(
+                        margin: EdgeInsets.only(top: 15),
+                        child: Text(
+                          Prefs.getString(Prefs.TOKEN) != null ? Prefs.getString(Prefs.EMAIL) : 'guest_user'.tr(),
                           style: TextStyle(
                               fontSize: 18,
                               fontWeight: FontWeight.bold,

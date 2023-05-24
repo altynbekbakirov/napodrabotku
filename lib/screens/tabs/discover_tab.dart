@@ -196,7 +196,6 @@ class _DiscoverTabState extends State<DiscoverTab> with SingleTickerProviderStat
       builder: (context, props)  {
         List<Vacancy> data = props.listResponse.data;
         bool loading = props.listResponse.loading;
-        List<Placemark> _placemarks = [];
 
         Widget body;
         if (loading) {
@@ -556,61 +555,12 @@ class _DiscoverTabState extends State<DiscoverTab> with SingleTickerProviderStat
     if (!await LocationService().checkPermission()) {
       await LocationService().requestPermission();
     }
-    await _fetchCurrentLocation();
-  }
-
-  Future<void> _fetchCurrentLocation() async {
-    AppLatLong location;
-    const defLocation = MoscowLocation();
-    try {
-      location = await LocationService().getCurrentLocation();
-      // location = AppLatLong(
-      //     lat: 56.321639975018435,
-      //     long: 43.99102901753601
-      // );
-    } catch (_) {
-      location = defLocation;
-    }
-
-    _moveToCurrentLocation(location);
-  }
-
-  Future<void> _moveToCurrentLocation(AppLatLong appLatLong) async {
-    (await _controller.future).move(
-      point: Point(
-        latitude: appLatLong.lat,
-        longitude: appLatLong.long,
-      ),
-      animation: const MapAnimation(smooth: true, duration: 1),
-      zoom: 5,
-    );
   }
 
   Future<void> _currentLocation() async {
     AppLatLong appLatLong;
-    Placemark placemark;
     try {
       appLatLong = await LocationService().getCurrentLocation();
-      // appLatLong = AppLatLong(
-      //   lat: 56.321639975018435,
-      //   long: 43.99102901753601
-      // );
-      placemark = Placemark(
-        point: Point(
-            latitude: appLatLong.lat,
-            longitude: appLatLong.long
-        ),
-        style: PlacemarkStyle(
-          iconName: 'assets/marker.png',
-          opacity: 1.0
-        ),
-        onTap: (Point point) {
-          print(point);
-        }
-      );
-      setState(() {
-        _placemark = placemark;
-      });
     } catch (_) {
       appLatLong = MoscowLocation();
     }

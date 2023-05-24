@@ -150,6 +150,22 @@ class Vacancy {
     }
   }
 
+  static Future<dynamic> getRegionByName(String region) async {
+
+    String url = '';
+
+    url = API_IP + 'region_by_name' + '?region=$region' + '&lang=' + Prefs.getString(Prefs.LANGUAGE);
+
+    try {
+      Map<String, String> headers = {"Content-type": "application/json"};
+      final response = await http.get(url, headers: headers);
+
+      return json.decode(utf8.decode(response.bodyBytes));
+    } catch (error) {
+      throw error;
+    }
+  }
+
   factory Vacancy.fromJson(Map<String, dynamic> json) => new Vacancy(
         id: json["id"],
         name: json["name"],

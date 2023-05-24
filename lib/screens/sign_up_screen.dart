@@ -57,6 +57,7 @@ class _SignUpScreenState extends State<SignUpScreen> {
   bool isSending = false;
   bool isMigrant = false;
   bool isPhoneCorrect = false;
+  bool isPhoneExists = false;
   bool isUserExists = false;
   String _selectedCity;
   // int _phoneNumberMaxLength;
@@ -331,8 +332,14 @@ class _SignUpScreenState extends State<SignUpScreen> {
                     child: InternationalPhoneNumberInput(
                       countries: ['KG', 'RU', 'KZ', 'UA', 'UZ', 'TJ'],
                       keyboardAction: TextInputAction.next,
-                      onInputChanged: (PhoneNumber number) {
+                      onInputChanged: (PhoneNumber number) async {
                         phoneNumber = number.phoneNumber;
+                        await Users.checkPhone(phoneNumber.trim()).then((value) {
+                          print(phoneNumber);
+                          setState(() {
+                            this.isPhoneExists = !value;
+                          });
+                        });
                       },
                       onInputValidated: (bool value) {
                         isPhoneCorrect = value;
@@ -354,6 +361,8 @@ class _SignUpScreenState extends State<SignUpScreen> {
                           return "please_fill_this_field".tr();
                         } else if (!isPhoneCorrect) {
                           return 'invalid_phone_number'.tr();
+                        } else if (isPhoneExists) {
+                          return 'phone_number_exists'.tr();
                         } else {
                           return null;
                         }
@@ -370,7 +379,7 @@ class _SignUpScreenState extends State<SignUpScreen> {
                         filled: true,
                         fillColor: kColorWhite,
                       ),
-                      locale: 'ru_RU',
+                      locale: 'ru',
                     ),
                   ),
 
@@ -546,7 +555,7 @@ class _SignUpScreenState extends State<SignUpScreen> {
                             return Container(
                               padding: EdgeInsets.symmetric(vertical: 10, horizontal: 20),
                               child: Text(
-                                'address_not_found',
+                                'address_not_found'.tr(),
                                 style: TextStyle(
                                     fontSize: 14,
                                     fontWeight: FontWeight.w500,
@@ -888,7 +897,7 @@ class _SignUpScreenState extends State<SignUpScreen> {
       location = defLocation;
     }
 
-    _getAddressFromLatLng(location);
+    // _getAddressFromLatLng(location);
   }
 
   Future<void> _getAddressFromLatLng(AppLatLong location) async {
