@@ -173,51 +173,102 @@ class _OtpSmsScreenState extends State<OtpSmsScreen> {
                     '${firstController.text.toString()}${secondController.text.trim()}${thirdController.text.trim()}${fourthController.text.trim()}${fifthController.text.trim()}${sixController.text.trim()}';
 
                 if(widget.verificationId == smsCode){
+
                   final DateFormat formatter = DateFormat('yyyy-MM-dd');
 
-                  var uri = Uri.parse(API_IP + API_REGISTER1 + '?lang=' + Prefs.getString(Prefs.LANGUAGE));
-                  var request = new http.MultipartRequest("POST", uri);
+                  if(Prefs.getString(Prefs.ROUTE) == "COMPANY"){
+                    var uri = Uri.parse(API_IP + API_REGISTER1 + '?lang=' + Prefs.getString(Prefs.LANGUAGE));
+                    var request = new http.MultipartRequest("POST", uri);
 
-                  request.fields["id"] = widget.users.id.toString();
-                  request.fields["password"] = Translit().toTranslit(source: widget.users.name).toLowerCase();
-                  request.fields["name"] = widget.users.name;
-                  request.fields["lastname"] = widget.users.surname;
-                  request.fields["email"] = "";
-                  request.fields["birth_date"] = formatter.format(widget.users.birth_date);
-                  request.fields["active"] = '1';
-                  request.fields["phone_number"] = widget.users.phone_number;
-                  request.fields["type"] = widget.users.is_company ? 'COMPANY' : 'USER';
-                  request.fields["linkedin"] = "";
-                  request.fields["address"] = widget.users.address;
-                  request.fields["is_migrant"] = "0";
-                  request.fields["gender"] = widget.users.gender.toString();
-                  request.fields["region"] = widget.users.region.toString();
-                  request.fields["district"] = widget.users.district.toString();
-                  request.fields["job_type"] = "";
-                  request.fields["is_product_lab_user"] = "0";
+                    request.fields["id"] = widget.users.id.toString();
+                    request.fields["password"] = widget.users.password;
+                    request.fields["name"] = widget.users.name;
+                    request.fields["email"] = widget.users.email;
+                    request.fields["birth_date"] = formatter.format(widget.users.birth_date);
+                    request.fields["active"] = '1';
+                    request.fields["phone_number"] = widget.users.phone_number;
+                    request.fields["type"] = widget.users.is_company ? 'COMPANY' : 'USER';
 
-                  request.send().then((response) {
-                    print(response);
-                    response.stream.transform(utf8.decoder).listen((value) {
-                      var response = json.decode(value);
-                      if (response['status'] == 200) {
-                        Prefs.setString(Prefs.PASSWORD, Translit().toTranslit(source: widget.users.name).toLowerCase());
-                        Prefs.setString(Prefs.TOKEN, response["token"]);
-                        Prefs.setString(Prefs.PHONE_NUMBER, response["phone_number"]);
-                        Prefs.setString(Prefs.EMAIL, response["email"]);
-                        Prefs.setInt(Prefs.USER_ID, response["id"]);
-                        Prefs.setString(Prefs.USER_TYPE, widget.users.is_company ? 'COMPANY' : 'USER');
-                        Prefs.setString(Prefs.PROFILEIMAGE, response["avatar"]);
-                        Navigator.of(context).pushNamedAndRemoveUntil(Routes.home, (Route<dynamic> route) => false);
-                      } else if(response['status'] == 999) {
-                        if(response['message'] == 'user_exist'){
-                          showSnackBar(context: context, message: ' Error occurred while registering', backgroundColor: Colors.red);
+                    // open a byteStream
+                    if (widget.imageFile != null) {
+                      var _image = File(widget.imageFile.path);
+                      var stream = new http.ByteStream(DelegatingStream.typed(_image.openRead()));
+                      // get file length
+                      var length = await _image.length();
+                      // multipart that takes file.. here this "image_file" is a key of the API request
+                      var multipartFile = new http.MultipartFile('avatar', stream, length, filename: basename(_image.path));
+                      // add file to multipart
+                      request.files.add(multipartFile);
+                    }
+
+                    request.send().then((response) {
+                      response.stream.transform(utf8.decoder).listen((value) {
+                        var response = json.decode(value);
+                        if (response['status'] == 200) {
+                          Prefs.setString(Prefs.PASSWORD, widget.users.password);
+                          Prefs.setString(Prefs.TOKEN, response["token"]);
+                          Prefs.setString(Prefs.EMAIL, response["email"]);
+                          Prefs.setInt(Prefs.USER_ID, response["id"]);
+                          Prefs.setString(Prefs.USER_TYPE, widget.users.is_company ? 'COMPANY' : 'USER');
+                          Prefs.setString(Prefs.PROFILEIMAGE, response["avatar"]);
+                          Navigator.of(context).pushNamedAndRemoveUntil(Routes.home, (Route<dynamic> route) => false);
+                        } else if(response['status'] == 999) {
+                          if(response['message'] == 'user_exist'){
+                            showSnackBar(context: context, message: ' Error occurred while registering', backgroundColor: Colors.red);
+                          }
+                        } else {
+                          showSnackBar(context: context, message: 'Error occurred while registering', backgroundColor: Colors.red);
                         }
-                      } else {
-                        showSnackBar(context: context, message: 'Error occurred while registering', backgroundColor: Colors.red);
-                      }
+                      });
                     });
-                  });
+
+                  } else {
+
+                    var uri = Uri.parse(API_IP + API_REGISTER1 + '?lang=' + Prefs.getString(Prefs.LANGUAGE));
+                    var request = new http.MultipartRequest("POST", uri);
+
+                    request.fields["id"] = widget.users.id.toString();
+                    request.fields["password"] = Translit().toTranslit(source: widget.users.name).toLowerCase();
+                    request.fields["name"] = widget.users.name;
+                    request.fields["lastname"] = widget.users.surname;
+                    request.fields["email"] = "";
+                    request.fields["birth_date"] = formatter.format(widget.users.birth_date);
+                    request.fields["active"] = '1';
+                    request.fields["phone_number"] = widget.users.phone_number;
+                    request.fields["type"] = widget.users.is_company ? 'COMPANY' : 'USER';
+                    request.fields["linkedin"] = "";
+                    request.fields["address"] = widget.users.address;
+                    request.fields["is_migrant"] = "0";
+                    request.fields["gender"] = widget.users.gender.toString();
+                    request.fields["region"] = widget.users.region.toString();
+                    request.fields["district"] = widget.users.district.toString();
+                    request.fields["job_type"] = "";
+                    request.fields["is_product_lab_user"] = "0";
+
+                    request.send().then((response) {
+                      print(response);
+                      response.stream.transform(utf8.decoder).listen((value) {
+                        var response = json.decode(value);
+                        if (response['status'] == 200) {
+                          Prefs.setString(Prefs.PASSWORD, Translit().toTranslit(source: widget.users.name).toLowerCase());
+                          Prefs.setString(Prefs.TOKEN, response["token"]);
+                          Prefs.setString(Prefs.PHONE_NUMBER, response["phone_number"]);
+                          Prefs.setString(Prefs.EMAIL, response["email"]);
+                          Prefs.setInt(Prefs.USER_ID, response["id"]);
+                          Prefs.setString(Prefs.USER_TYPE, widget.users.is_company ? 'COMPANY' : 'USER');
+                          Prefs.setString(Prefs.PROFILEIMAGE, response["avatar"]);
+                          Navigator.of(context).pushNamedAndRemoveUntil(Routes.home, (Route<dynamic> route) => false);
+                        } else if(response['status'] == 999) {
+                          if(response['message'] == 'user_exist'){
+                            showSnackBar(context: context, message: ' Error occurred while registering', backgroundColor: Colors.red);
+                          }
+                        } else {
+                          showSnackBar(context: context, message: 'Error occurred while registering', backgroundColor: Colors.red);
+                        }
+                      });
+                    });
+
+                  }
                 }
               }
             } else {

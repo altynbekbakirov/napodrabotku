@@ -8,15 +8,14 @@ import 'package:dropdown_search/dropdown_search.dart';
 import 'package:ishtapp/utils/textFormatter/lengthLimitingTextInputFormatter.dart';
 import 'package:flutter/services.dart';
 import 'package:ishtapp/components/custom_button.dart';
-import 'package:chips_choice/chips_choice.dart';
-import 'package:ms_accordion/ms_accordion.dart';
-import 'package:flutter_boxicons/flutter_boxicons.dart';
 import 'package:ishtapp/datas/pref_manager.dart';
 import 'package:flutter_redux/flutter_redux.dart';
 import 'package:ishtapp/datas/RSAA.dart';
 import 'package:ishtapp/datas/app_state.dart';
-import 'package:ishtapp/datas/pref_manager.dart';
 import 'package:flutter_datetime_picker/flutter_datetime_picker.dart';
+import 'package:flutter_typeahead/flutter_typeahead.dart';
+import 'package:http/http.dart' as http;
+import 'dart:convert';
 
 enum work_mode { work, training }
 
@@ -36,16 +35,8 @@ class _EditVacancyState extends State<EditVacancy> {
   final courseAddFormKey = GlobalKey<FormState>();
 
   var data = [];
-  List<String> opportunities = [];
-  List<String> opportunityTypes = [];
-  List<String> internshipLanguageTypes = [];
-  List<String> opportunityDurations = [];
-  List<String> typeOfRecommendedLetters = [];
   List<String> regions = [];
   List<String> districts = [];
-  List<String> tags = [];
-  List<String> tags2 = [];
-  List skills = [];
 
   List<dynamic> jobTypeList = [];
   List<dynamic> vacancyTypeList = [];
@@ -54,15 +45,6 @@ class _EditVacancyState extends State<EditVacancy> {
   List<dynamic> regionList = [];
   List<dynamic> districtList = [];
   List<dynamic> currencyList = [];
-  List<dynamic> skillList = [];
-
-  List<VacancySkill> vacancyRequiredSkills = [];
-  List<VacancySkill> vacancyCanUpgradeSkills = [];
-  List<Skill> skillSets = [];
-
-  List<Widget> categories = [];
-  List<Widget> skillsV1 = [];
-  List<Widget> skillsV2 = [];
 
   int _job_type_id;
   int _vacancy_type_id;
@@ -71,10 +53,11 @@ class _EditVacancyState extends State<EditVacancy> {
   int _region_id;
   int _district_id;
   int _currency_id;
+  int _salaryPeriodId;
+  int _experienceId;
+  int _payPeriodId;
 
   work_mode work;
-  bool salary_by_agreement;
-  bool by_agreement = false;
   bool loading = false;
   bool isValid = false;
   bool is_disability_person_vacancy = false;
@@ -89,13 +72,17 @@ class _EditVacancyState extends State<EditVacancy> {
   String selectedRegion;
   String selectedDistrict;
 
-  TextEditingController _ageFromController = TextEditingController();
-  TextEditingController _ageToController = TextEditingController();
   TextEditingController _vacancy_name_controller = TextEditingController();
   TextEditingController _vacancy_salary_from_controller = TextEditingController();
   TextEditingController _vacancy_salary_to_controller = TextEditingController();
   TextEditingController _vacancy_salary_controller = TextEditingController();
   TextEditingController _vacancy_description_controller = TextEditingController();
+  TextEditingController _vacancyTypeAheadController = TextEditingController();
+  TextEditingController _vacancyStreetController = TextEditingController();
+  TextEditingController _vacancyHouseNumberController = TextEditingController();
+
+  List<dynamic> _suggestionsAddress = [];
+  String _selectedCity;
 
   String deadline;
   final DateFormat formatter = DateFormat('dd-MM-yyyy');
@@ -116,43 +103,6 @@ class _EditVacancyState extends State<EditVacancy> {
     });
   }
 
-  //region Methods
-  getOpportunities() async {
-    var list = await Vacancy.getLists('opportunity', null);
-    list.forEach((item) {
-      setState(() {
-        opportunities.add(item["name"]);
-      });
-    });
-  }
-
-  getOpportunityTypes() async {
-    var list = await Vacancy.getLists('opportunity_type', null);
-    list.forEach((item) {
-      setState(() {
-        opportunityTypes.add(item["name"]);
-      });
-    });
-  }
-
-  getInternshipLanguages() async {
-    var list = await Vacancy.getLists('intership_language', null);
-    list.forEach((item) {
-      setState(() {
-        internshipLanguageTypes.add(item["name"]);
-      });
-    });
-  }
-
-  getOpportunityDurations() async {
-    var list = await Vacancy.getLists('opportunity_duration', null);
-    list.forEach((item) {
-      setState(() {
-        opportunityDurations.add(item["name"]);
-      });
-    });
-  }
-
   getDistrictsById(region) async {
     this.districtList = await Vacancy.getDistrictsById('districts', region);
   }
@@ -165,407 +115,6 @@ class _EditVacancyState extends State<EditVacancy> {
         districts.add(district['name']);
       });
     });
-  }
-
-  getRecommendationLetterType() async {
-    var list = await Vacancy.getLists('recommendation_letter_type', null);
-    list.forEach((item) {
-      setState(() {
-        typeOfRecommendedLetters.add(item["name"]);
-      });
-    });
-  }
-
-  getVacancySkills(int vacancyId) async {
-    await VacancySkill.getVacancySkills(vacancyId).then((value) {
-      value.forEach((item) {
-        if (item.isRequired) {
-          vacancyRequiredSkills.add(item);
-        } else {
-          vacancyCanUpgradeSkills.add(item);
-        }
-      });
-    });
-  }
-
-  openSkillDialogCategory(context, List<String> options, List<String> listTag, String categoryName) {
-    // List<String> listTag = [];
-    showModalBottomSheet(
-        context: context,
-        builder: (context) {
-          return StatefulBuilder(
-            builder: (context, setState) {
-              return ListView(
-                shrinkWrap: true,
-                children: <Widget>[
-                  Container(
-                    padding: EdgeInsets.all(20),
-                    child: Align(
-                      alignment: Alignment.center,
-                      child: Text(categoryName.toUpperCase(),
-                          style: TextStyle(fontSize: 14, fontWeight: FontWeight.w700, color: kColorDarkBlue)),
-                    ),
-                  ),
-                  Container(
-                    padding: EdgeInsets.all(20),
-                    child:
-
-                        /// Form
-                        Column(
-                      children: <Widget>[
-                        ChipsChoice<String>.multiple(
-                          choiceStyle: C2ChoiceStyle(
-                            margin: EdgeInsets.only(top: 4, bottom: 4),
-                            showCheckmark: false,
-                            borderRadius: BorderRadius.circular(6),
-                          ),
-                          choiceActiveStyle: C2ChoiceStyle(
-                            color: kColorPrimary,
-                          ),
-                          padding: EdgeInsets.zero,
-                          value: listTag,
-                          onChanged: (val) {
-                            return setState(() => listTag = val);
-                          },
-                          choiceItems: C2Choice.listFrom<String, String>(
-                            source: options,
-                            value: (i, v) => v,
-                            label: (i, v) => v,
-                          ),
-                          wrapped: true,
-                          choiceLabelBuilder: (item) {
-                            return Container(
-                              width: MediaQuery.of(context).size.width * 0.95,
-                              height: 60,
-                              child: Align(
-                                alignment: Alignment.centerLeft,
-                                child: Text(
-                                  item.label,
-                                  softWrap: true,
-                                  maxLines: 4,
-                                  style: TextStyle(fontSize: 15),
-                                ),
-                              ),
-                            );
-                          },
-                        ),
-
-                        /// Sign In button
-                        Container(
-                          margin: EdgeInsets.only(top: 20),
-                          child: Row(
-                            mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                            children: [
-                              CustomButton(
-                                width: MediaQuery.of(context).size.width * 0.33,
-                                padding: EdgeInsets.all(10),
-                                color: Colors.grey[200],
-                                textColor: kColorPrimary,
-                                onPressed: () {
-                                  Navigator.of(context).pop();
-                                },
-                                text: 'cancel'.tr(),
-                              ),
-                              CustomButton(
-                                width: MediaQuery.of(context).size.width * 0.33,
-                                padding: EdgeInsets.all(10),
-                                color: Prefs.getString(Prefs.ROUTE) == "PRODUCT_LAB" ? kColorProductLab : kColorPrimary,
-                                textColor: Colors.white,
-                                onPressed: () {
-                                  // SkillCategory skillCategory = new SkillCategory();
-                                  // skillCategory.saveUserSkills(listTag, 1);
-                                  Navigator.of(context).pop();
-                                },
-                                text: 'save'.tr(),
-                              ),
-                            ],
-                          ),
-                        ),
-                      ],
-                    ),
-                  ),
-                ],
-              );
-            },
-          );
-        });
-  }
-
-  getSkillSetCategories() async {
-    List<String> pi = [];
-
-    var list = await Vacancy.getLists('skillset_category', null);
-    list.forEach((item) {
-      List<String> skills = [];
-      item["skills"].forEach((skill) {
-        skills.add(skill);
-      });
-
-      categories.add(
-        StatefulBuilder(builder: (context, setState) {
-          return Container(
-            margin: EdgeInsets.only(bottom: 20),
-            child: Flex(
-              direction: Axis.horizontal,
-              mainAxisAlignment: MainAxisAlignment.spaceBetween,
-              children: [
-                Flexible(
-                  flex: 2,
-                  child: Container(
-                    margin: EdgeInsets.only(right: 20),
-                    width: 40,
-                    height: 40,
-                    child: Icon(
-                      Boxicons.bx_atom,
-                      size: 25,
-                      color: kColorPrimary,
-                    ),
-                    decoration: BoxDecoration(color: Color(0xffF2F2F5), borderRadius: BorderRadius.circular(10)),
-                  ),
-                ),
-                Flexible(
-                  flex: 6,
-                  child: Container(
-                      alignment: Alignment.centerLeft,
-                      padding: EdgeInsets.only(right: 10),
-                      child: Text(
-                        item['name'].toString(),
-                        style: _textStyle,
-                        textAlign: TextAlign.left,
-                      )),
-                ),
-                Flexible(
-                  flex: 3,
-                  child: CustomButton(
-                    height: 40.0,
-                    width: 100.0,
-                    padding: EdgeInsets.all(5),
-                    color: Prefs.getString(Prefs.ROUTE) == "PRODUCT_LAB" ? kColorProductLab : kColorPrimary,
-                    textColor: Colors.white,
-                    textSize: 14,
-                    onPressed: () {
-                      List<String> list = [];
-                      List<String> listTag = [];
-                      int id = item["id"];
-                      setState(() {
-                        skillSets.forEach((item) {
-                          if (item.categoryId == id) {
-                            list.add(item.name);
-                          }
-                        });
-                      });
-
-                      vacancyRequiredSkills.forEach((item) {
-                        if (item.categoryId == id) {
-                          listTag.add(item.name);
-                        }
-                      });
-                      openSkillDialogCategory(context, list, listTag, item["name"].toString());
-                    },
-                    text: 'add'.tr(),
-                  ),
-                ),
-              ],
-            ),
-          );
-        }),
-      );
-
-      skillsV1.add(
-        StatefulBuilder(builder: (context, setState) {
-          return Column(
-            children: <Widget>[
-              MsAccordion(
-                titleChild: Text(item["name"], style: TextStyle(fontSize: 18)),
-                showAccordion: false,
-                margin: const EdgeInsets.all(0),
-                expandedTitleBackgroundColor: Color(0xffF2F2F5),
-                titleBorderRadius: BorderRadius.circular(6),
-                textStyle: TextStyle(color: kColorWhite),
-                collapsedTitleBackgroundColor: Colors.white10,
-                contentBackgroundColor: Colors.white,
-                contentChild: Column(
-                  children: <Widget>[
-                    Wrap(
-                      children: [
-                        ChipsChoice<String>.multiple(
-                          choiceStyle: C2ChoiceStyle(
-                            margin: EdgeInsets.only(top: 4, bottom: 4),
-                            showCheckmark: false,
-                            borderRadius: BorderRadius.circular(6),
-                          ),
-                          choiceActiveStyle: C2ChoiceStyle(
-                            color: kColorPrimary,
-                          ),
-                          mainAxisSize: MainAxisSize.max,
-                          padding: EdgeInsets.zero,
-                          value: tags,
-                          onChanged: (val) => setState(() => tags = val),
-                          choiceItems: C2Choice.listFrom<String, String>(
-                            source: skills,
-                            value: (i, v) {
-                              setState(() => selectedCategoryIdFromFirstChip = item["id"]);
-                              return v;
-                            },
-                            label: (i, v) => v,
-                          ),
-                          wrapped: true,
-                          choiceLabelBuilder: (item) {
-                            return Container(
-                              width: MediaQuery.of(context).size.width * 0.95,
-                              height: 60,
-                              child: Align(
-                                alignment: Alignment.centerLeft,
-                                child: Text(
-                                  item.label,
-                                  softWrap: true,
-                                  maxLines: 4,
-                                  style: TextStyle(fontSize: 15),
-                                ),
-                              ),
-                            );
-                          },
-                        ),
-                      ],
-                    )
-                  ],
-                ),
-              ),
-            ],
-          );
-        }),
-      );
-
-      skillsV2.add(
-        StatefulBuilder(builder: (context, setState) {
-          return Column(
-            children: <Widget>[
-              MsAccordion(
-                titleChild: Text(item["name"], style: TextStyle(fontSize: 18)),
-                showAccordion: false,
-                margin: const EdgeInsets.all(0),
-                expandedTitleBackgroundColor: Color(0xffF2F2F5),
-                titleBorderRadius: BorderRadius.circular(6),
-                textStyle: TextStyle(color: kColorWhite),
-                collapsedTitleBackgroundColor: Colors.white10,
-                contentBackgroundColor: Colors.white,
-                contentChild: Column(
-                  children: <Widget>[
-                    Wrap(
-                      children: [
-                        ChipsChoice<String>.multiple(
-                          choiceStyle: C2ChoiceStyle(
-                            margin: EdgeInsets.only(top: 4, bottom: 4),
-                            showCheckmark: false,
-                            borderRadius: BorderRadius.circular(6),
-                          ),
-                          choiceActiveStyle: C2ChoiceStyle(
-                            color: kColorPrimary,
-                          ),
-                          mainAxisSize: MainAxisSize.max,
-                          padding: EdgeInsets.zero,
-                          value: tags2,
-                          onChanged: (val) => setState(() => tags2 = val),
-                          choiceItems: C2Choice.listFrom<String, String>(
-                            source: skills,
-                            value: (i, v) {
-                              setState(() => selectedCategoryIdSecondChip = item["id"]);
-                              return v;
-                            },
-                            label: (i, v) => v,
-                          ),
-                          wrapped: true,
-                          choiceLabelBuilder: (item) {
-                            return Container(
-                              width: MediaQuery.of(context).size.width * 0.95,
-                              height: 60,
-                              child: Align(
-                                alignment: Alignment.centerLeft,
-                                child: Text(
-                                  item.label,
-                                  softWrap: true,
-                                  maxLines: 4,
-                                  style: TextStyle(fontSize: 15),
-                                ),
-                              ),
-                            );
-                          },
-                        ),
-                      ],
-                    )
-                  ],
-                ),
-              ),
-            ],
-          );
-        }),
-      );
-    });
-  }
-
-  openSkillDialog(context, bool isRequired) {
-    showModalBottomSheet(
-        context: context,
-        builder: (BuildContext context) {
-          return StatefulBuilder(builder: (context, snapshot) {
-            return ListView(
-              shrinkWrap: true,
-              children: [
-                Container(
-                  padding: EdgeInsets.all(20),
-                  child: Align(
-                    alignment: Alignment.center,
-                    child: Text('Навыки'.tr().toUpperCase(),
-                        style: TextStyle(fontSize: 14, fontWeight: FontWeight.w700, color: kColorDarkBlue)),
-                  ),
-                ),
-
-                /// Form
-                Container(
-                  padding: EdgeInsets.all(10),
-                  child: Form(
-                    key: courseAddFormKey,
-                    child: Column(
-                      children: <Widget>[
-                        Column(
-                          children: isRequired ? skillsV1 : skillsV2,
-                        ),
-                        Container(
-                          margin: EdgeInsets.only(top: 20),
-                          child: Row(
-                            mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                            children: [
-                              CustomButton(
-                                width: MediaQuery.of(context).size.width * 0.33,
-                                padding: EdgeInsets.all(10),
-                                color: Colors.grey[200],
-                                textColor: kColorPrimary,
-                                onPressed: () {
-                                  Navigator.of(context).pop();
-                                },
-                                text: 'cancel'.tr(),
-                              ),
-                              CustomButton(
-                                width: MediaQuery.of(context).size.width * 0.33,
-                                padding: EdgeInsets.all(10),
-                                color: kColorPrimary,
-                                textColor: Colors.white,
-                                onPressed: () {
-                                  Navigator.of(context).pop();
-                                },
-                                text: 'save'.tr(),
-                              ),
-                            ],
-                          ),
-                        ),
-                      ],
-                    ),
-                  ),
-                ),
-              ],
-            );
-          });
-        });
   }
 
   getLists() async {
@@ -634,59 +183,41 @@ class _EditVacancyState extends State<EditVacancy> {
   //endregion
 
   void init() {
-    widget.vacancy.isProductLabVacancy ? work = work_mode.training : work = work_mode.work;
-    // work = work_mode.work;
-    //region training init
-
-    opportunity = widget.vacancy.opportunity;
-    opportunityType = widget.vacancy.opportunityType;
-    selectedInternshipType = widget.vacancy.internshipLanguage;
-    opportunityDuration = widget.vacancy.opportunityDuration;
-    selectedTypeOfRecommendedLetter = widget.vacancy.typeOfRecommendedLetter;
-    _ageFromController.text = widget.vacancy.ageFrom;
-    _ageToController.text = widget.vacancy.ageTo;
-
-    //endregion
-
     //region vacancy
-
     _vacancy_name_controller.text = widget.vacancy.name;
     _vacancy_salary_controller.text = widget.vacancy.salary;
     _vacancy_salary_from_controller.text = widget.vacancy.salary_from;
     _vacancy_salary_to_controller.text = widget.vacancy.salary_to;
-    _vacancy_description_controller.text = widget.vacancy.description;
-
-    salary_by_agreement = widget.vacancy.salary != null;
-    by_agreement = widget.vacancy.salary != null && widget.vacancy.salary.toLowerCase() == 'по договоренности';
+    _vacancy_description_controller.text = Bidi.stripHtmlIfNeeded(widget.vacancy.description);
+    _vacancyTypeAheadController.text = widget.vacancy.address;
 
     selectedRegion = widget.vacancy.region;
     selectedDistrict = widget.vacancy.district;
     is_disability_person_vacancy = widget.vacancy.is_disability_person_vacancy == 1;
-    //endregion
-  }
 
-  getVS() {
-    var list = widget.vacancySkill;
-    list.forEach((item) {
-      if (item.isRequired)
-        tags.add(item.name);
-      else
-        tags2.add(item.name);
-    });
+    _experienceId = int.parse(widget.vacancy.experience);
+    _payPeriodId = int.parse(widget.vacancy.payPeriod);
+
+    String _salaryPeriodString = widget.vacancy.period;
+    if(_salaryPeriodString == 'Ставка за час'){
+      _salaryPeriodId = 0;
+    }
+    if(_salaryPeriodString == 'Ставка за смену'){
+      _salaryPeriodId = 1;
+    }
+    if(_salaryPeriodString == 'В неделю'){
+      _salaryPeriodId = 2;
+    }
+    if(_salaryPeriodString == 'В месяц'){
+      _salaryPeriodId = 3;
+    }
+    //endregion
   }
 
   @override
   void initState() {
-    getVS();
     getLists();
     init();
-    getOpportunities();
-    getOpportunityTypes();
-    getInternshipLanguages();
-    getOpportunityDurations();
-    getRecommendationLetterType();
-    getSkillSetCategories();
-
     super.initState();
   }
 
@@ -708,19 +239,13 @@ class _EditVacancyState extends State<EditVacancy> {
         child: ListView(
           shrinkWrap: true,
           children: [
-            work == work_mode.work
-                ? Align(
-                    alignment: Alignment.center,
-                    child: Text(
-                      'work'.tr(),
-                      style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold, color: Colors.black),
-                    ))
-                : Align(
-                    alignment: Alignment.center,
-                    child: Text(
-                      'improve_qualification'.tr(),
-                      style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold, color: Colors.black),
-                    )),
+            Align(
+                alignment: Alignment.center,
+                child: Text(
+                  'work'.tr(),
+                  style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold, color: Colors.black),
+                )
+            ),
             SizedBox(
               height: 20,
             ),
@@ -730,475 +255,109 @@ class _EditVacancyState extends State<EditVacancy> {
               key: _vacancyEditFormKey,
               child: Column(
                 children: <Widget>[
-                  /// Название возможности
-                  work == work_mode.training
-                      ? Column(
-                    children: [
-                      Align(
-                          widthFactor: 10,
-                          heightFactor: 1.5,
-                          alignment: Alignment.topLeft,
-                          child: Text(
-                            'Название возможности'.tr(),
-                            style: TextStyle(fontSize: 16, color: Colors.black),
-                          )),
-                      TextFormField(
-                        controller: _vacancy_name_controller,
-                        focusNode: FocusNode(canRequestFocus: false),
-                        decoration: InputDecoration(
-                          border: OutlineInputBorder(
-                              borderRadius: BorderRadius.circular(10),
-                              borderSide: BorderSide.none),
-                          floatingLabelBehavior: FloatingLabelBehavior.always,
-                          filled: true,
-                          fillColor: Colors.grey[200],
+                  Container(
+                    margin: EdgeInsets.only(bottom: 16),
+                    child: Column(
+                      children: [
+                        Align(
+                            widthFactor: 10,
+                            heightFactor: 1.5,
+                            alignment: Alignment.topLeft,
+                            child: Text(
+                              'vacancy_name'.tr().toString().toUpperCase() + '*',
+                              style: TextStyle(fontSize: 12, color: Colors.black, fontWeight: FontWeight.w700),
+                            )
                         ),
-                        validator: (name) {
-                          if (name.isEmpty) {
-                            return "please_fill_this_field".tr();
-                          }
-                          return null;
-                        },
-                      ),
-                      SizedBox(height: 20)
-                    ],
-                  )
-                      : Container(),
-
-                  /// Выбор возможностей
-                  work == work_mode.training
-                      ? Column(
-                          children: <Widget>[
-                            Align(
-                              widthFactor: 10,
-                              heightFactor: 1.5,
-                              alignment: Alignment.topLeft,
-                              child: Text(
-                                'choice_opportunity_options'.tr(),
-                                style: TextStyle(fontSize: 16, color: Colors.black),
-                              ),
-                            ),
-                            DropdownSearch<String>(
-                              showSelectedItem: true,
-                              items: opportunities,
-                              onChanged: (value) {
-                                setState(() {
-                                  opportunity = value;
-                                });
-                              },
-                              dropdownSearchDecoration: InputDecoration(
-                                  border: OutlineInputBorder(
-                                    borderRadius: BorderRadius.circular(10),
-                                    borderSide: BorderSide.none,
-                                  ),
-                                  filled: true,
-                                  fillColor: Colors.grey[200],
-                                  contentPadding: EdgeInsets.symmetric(vertical: 5, horizontal: 12)),
-                              selectedItem: opportunity,
-                            ),
-                          ],
-                        )
-                      : Container(),
-
-                  /// Вид возможности
-                  work == work_mode.training
-                      ? Column(
-                          children: <Widget>[
-                            SizedBox(height: 20),
-                            Align(
-                              widthFactor: 10,
-                              heightFactor: 1.5,
-                              alignment: Alignment.topLeft,
-                              child: Text(
-                                'opportunity_type'.tr(),
-                                style: TextStyle(fontSize: 16, color: Colors.black),
-                              ),
-                            ),
-                            DropdownSearch<String>(
-                              mode: Mode.MENU,
-                              showSelectedItem: true,
-                              items: opportunityTypes,
-                              onChanged: (value) {
-                                setState(() {
-                                  opportunityType = value;
-                                });
-                              },
-                              dropdownSearchDecoration: InputDecoration(
-                                  border: OutlineInputBorder(
-                                    borderRadius: BorderRadius.circular(10),
-                                    borderSide: BorderSide.none,
-                                  ),
-                                  filled: true,
-                                  fillColor: Colors.grey[200],
-                                  contentPadding: EdgeInsets.symmetric(vertical: 5, horizontal: 12)),
-                              selectedItem: opportunityType,
-                            ),
-                            SizedBox(height: 20),
-                          ],
-                        )
-                      : Container(),
-
-                  /// Язык для стажировки
-                  work == work_mode.training
-                      ? Column(
-                          children: <Widget>[
-                            Align(
-                              widthFactor: 10,
-                              heightFactor: 1.5,
-                              alignment: Alignment.topLeft,
-                              child: Text(
-                                'internship_language'.tr(),
-                                style: TextStyle(fontSize: 16, color: Colors.black),
-                              ),
-                            ),
-                            DropdownSearch<String>(
-                              mode: Mode.MENU,
-                              showSelectedItem: true,
-                              items: internshipLanguageTypes,
-                              onChanged: (value) {
-                                setState(() {
-                                  selectedInternshipType = value;
-                                });
-                              },
-                              dropdownSearchDecoration: InputDecoration(
-                                  border: OutlineInputBorder(
-                                    borderRadius: BorderRadius.circular(10),
-                                    borderSide: BorderSide.none,
-                                  ),
-                                  filled: true,
-                                  fillColor: Colors.grey[200],
-                                  contentPadding: EdgeInsets.symmetric(vertical: 5, horizontal: 12)),
-                              selectedItem: selectedInternshipType,
-                            ),
-                          ],
-                        )
-                      : Container(),
-
-                  /// Продолжительность возможности
-                  work == work_mode.training
-                      ? Column(
-                          children: <Widget>[
-                            SizedBox(height: 20),
-                            Align(
-                              widthFactor: 10,
-                              heightFactor: 1.5,
-                              alignment: Alignment.topLeft,
-                              child: Text(
-                                'opportunity_duration'.tr(),
-                                style: TextStyle(fontSize: 16, color: Colors.black),
-                              ),
-                            ),
-                            DropdownSearch<String>(
-                              showSelectedItem: true,
-                              items: opportunityDurations,
-                              onChanged: (value) {
-                                setState(() {
-                                  opportunityDuration = value;
-                                });
-                              },
-                              dropdownSearchDecoration: InputDecoration(
-                                  border: OutlineInputBorder(
-                                    borderRadius: BorderRadius.circular(10),
-                                    borderSide: BorderSide.none,
-                                  ),
-                                  filled: true,
-                                  fillColor: Colors.grey[200],
-                                  contentPadding: EdgeInsets.symmetric(vertical: 5, horizontal: 12)),
-                              selectedItem: opportunityDuration,
-                            ),
-                            SizedBox(height: 20),
-                          ],
-                        )
-                      : Container(),
-
-                  /// Возраст, для которого предназначена возможность
-                  work == work_mode.training
-                      ? Align(
-                          widthFactor: 10,
-                          heightFactor: 1.5,
-                          alignment: Alignment.topLeft,
-                          child: Text(
-                            'opportunity_age'.tr(),
-                            style: TextStyle(fontSize: 16, color: Colors.black),
-                          ))
-                      : Container(),
-                  work == work_mode.training
-                      ? Row(
-                          children: <Widget>[
-                            Padding(
-                              padding: EdgeInsets.symmetric(horizontal: 10),
-                              child: Text(
-                                'От',
-                                style: TextStyle(fontSize: 16, color: Colors.black),
-                              ),
-                            ),
-                            Expanded(
-                              child: Container(
-                                width: 60,
-                                child: TextFormField(
-                                  controller: _ageFromController,
-                                  keyboardType: TextInputType.number,
-                                  inputFormatters: <TextInputFormatter>[
-                                    FilteringTextInputFormatter.allow(RegExp(r'[0-9]')),
-                                  ],
-                                  decoration: InputDecoration(
-                                    border: OutlineInputBorder(
-                                        borderRadius: BorderRadius.circular(10), borderSide: BorderSide.none),
-                                    floatingLabelBehavior: FloatingLabelBehavior.always,
-                                    filled: true,
-                                    fillColor: Colors.grey[200],
-                                  ),
-                                  validator: (name) {
-                                    // Basic validation
-                                    if (name.isEmpty) {
-                                      return "please_fill_this_field".tr();
-                                    }
-                                    return null;
-                                  },
-                                ),
-                              ),
-                            ),
-                            Padding(
-                              padding: EdgeInsets.symmetric(horizontal: 10),
-                              child: Text(
-                                'До',
-                                style: TextStyle(fontSize: 16, color: Colors.black),
-                              ),
-                            ),
-                            Expanded(
-                              child: Container(
-                                width: 60,
-                                child: TextFormField(
-                                  controller: _ageToController,
-                                  keyboardType: TextInputType.number,
-                                  inputFormatters: <TextInputFormatter>[
-                                    FilteringTextInputFormatter.allow(RegExp(r'[0-9]')),
-                                  ],
-                                  decoration: InputDecoration(
-                                    border: OutlineInputBorder(
-                                        borderRadius: BorderRadius.circular(10), borderSide: BorderSide.none),
-                                    floatingLabelBehavior: FloatingLabelBehavior.always,
-                                    filled: true,
-                                    fillColor: Colors.grey[200],
-                                  ),
-                                  validator: (name) {
-                                    // Basic validation
-                                    if (name.isEmpty) {
-                                      return "please_fill_this_field".tr();
-                                    }
-                                    return null;
-                                  },
-                                ),
-                              ),
-                            ),
-                          ],
-                        )
-                      : Container(),
-
-                  /// Выбор скиллсетов для возможности
-                  work == work_mode.training
-                      ? Column(
-                          children: <Widget>[
-                            SizedBox(height: 20),
-                            Align(
-                              widthFactor: 10,
-                              heightFactor: 1.5,
-                              alignment: Alignment.topLeft,
-                              child: Text(
-                                'choose_opportunity_skill_sets'.tr(),
-                                style: TextStyle(fontSize: 16, color: Colors.black),
-                              ),
-                            ),
-                            Row(
-                              mainAxisAlignment: MainAxisAlignment.spaceAround,
-                              children: <Widget>[
-                                FlatButton(
-                                    color: kColorPrimaryDark,
-                                    onPressed: () => openSkillDialog(context, true),
-                                    child: Text(
-                                      "Требуется",
-                                      style: TextStyle(fontSize: 16, color: Colors.white),
-                                    )),
-                                FlatButton(
-                                    color: kColorPrimaryDark,
-                                    onPressed: () => openSkillDialog(context, false),
-                                    child: Text(
-                                      "Могут развить",
-                                      style: TextStyle(fontSize: 16, color: Colors.white),
-                                    )),
-                              ],
-                            ),
-                          ],
-                        )
-                      : Container(),
-
-                  /// Готовность выдать рекомендательное письмо
-                  work == work_mode.training
-                      ? Column(
-                          children: <Widget>[
-                            SizedBox(height: 20),
-                            Align(
-                              widthFactor: 10,
-                              heightFactor: 1.5,
-                              alignment: Alignment.topLeft,
-                              child: Text(
-                                'Готовность выдать рекомендательное письмо',
-                                style: TextStyle(fontSize: 16, color: Colors.black),
-                              ),
-                            ),
-                            DropdownSearch<String>(
-                              showSelectedItem: true,
-                              items: typeOfRecommendedLetters,
-                              onChanged: (value) {
-                                setState(() {
-                                  selectedTypeOfRecommendedLetter = value;
-                                });
-                              },
-                              dropdownSearchDecoration: InputDecoration(
-                                  border: OutlineInputBorder(
-                                    borderRadius: BorderRadius.circular(10),
-                                    borderSide: BorderSide.none,
-                                  ),
-                                  filled: true,
-                                  fillColor: Colors.grey[200],
-                                  contentPadding: EdgeInsets.symmetric(vertical: 5, horizontal: 12)),
-                              selectedItem: selectedTypeOfRecommendedLetter,
-                            ),
-                            SizedBox(height: 20),
-                          ],
-                        )
-                      : Container(),
-
-                  /// Название вакансии
-                  work_mode.work == work
-                      ? Column(
-                          children: [
-                            Align(
-                                widthFactor: 10,
-                                heightFactor: 1.5,
-                                alignment: Alignment.topLeft,
-                                child: Text(
-                                  'vacancy_name'.tr(),
-                                  style: TextStyle(fontSize: 16, color: Colors.black),
-                                )),
-                            TextFormField(
-                              controller: _vacancy_name_controller,
-                              focusNode: FocusNode(canRequestFocus: false),
-                              decoration: InputDecoration(
-                                border: OutlineInputBorder(
-                                    borderRadius: BorderRadius.circular(10), borderSide: BorderSide.none),
-                                floatingLabelBehavior: FloatingLabelBehavior.always,
-                                filled: true,
-                                fillColor: Colors.grey[200],
-                              ),
-                              validator: (name) {
-                                if (name.isEmpty) {
-                                  return "please_fill_this_field".tr();
-                                }
-                                return null;
-                              },
-                            ),
-                          ],
-                        )
-                      : Container(),
+                        TextFormField(
+                          controller: _vacancy_name_controller,
+                          keyboardType: TextInputType.name,
+                          textInputAction: TextInputAction.next,
+                          focusNode: FocusNode(canRequestFocus: false),
+                          decoration: InputDecoration(
+                            contentPadding: EdgeInsets.symmetric(vertical: 10, horizontal: 20),
+                            border: OutlineInputBorder(),
+                            enabledBorder: OutlineInputBorder(borderSide: BorderSide(color: Colors.grey[200], width: 2.0)),
+                            errorBorder: OutlineInputBorder(borderSide: BorderSide(color: kColorPrimary, width: 2.0)),
+                            errorStyle: TextStyle(color: kColorPrimary, fontWeight: FontWeight.w500),
+                            floatingLabelBehavior: FloatingLabelBehavior.always,
+                            filled: true,
+                            fillColor: kColorWhite,
+                          ),
+                          validator: (name) {
+                            if (name.isEmpty) {
+                              return "please_fill_this_field".tr();
+                            }
+                            return null;
+                          },
+                        ),
+                      ],
+                    ),
+                  ),
 
                   /// Salary
-                  work == work_mode.work
-                      ? Column(
-                          children: [
-                            SizedBox(height: 20),
-                            Flex(
-                              direction: Axis.horizontal,
-                              mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                              children: <Widget>[
-                                Flexible(
-                                  child: Align(
-                                      widthFactor: 10,
-                                      heightFactor: 1.5,
-                                      alignment: Alignment.topLeft,
-                                      child: Text(
-                                        'vacancy_salary'.tr(),
-                                        style: TextStyle(fontSize: 16, color: Colors.black),
-                                      )),
-                                ),
-                              ],
-                            ),
-                            salary_by_agreement
-                                ? DropdownButtonFormField<int>(
-                                    hint: Text("currency".tr()),
-                                    value: _currency_id,
-                                    onChanged: (int newValue) async {
-                                      setState(() {
-                                        _currency_id = newValue;
-                                      });
-                                    },
-                                    focusNode: FocusNode(canRequestFocus: false),
-                                    decoration: InputDecoration(
-                                      enabledBorder: UnderlineInputBorder(
-                                        borderSide: BorderSide(color: Colors.grey),
-                                      ),
-                                    ),
-                                    items: currencyList.map<DropdownMenuItem<int>>((dynamic value) {
-                                      var jj = new JobType(id: value['id'], name: value['name']);
-                                      return DropdownMenuItem<int>(
-                                        value: jj.id,
-                                        child: Text(value['name']),
-                                      );
-                                    }).toList(),
+                  Container(
+                    child: Column(
+                      children: [
+                        Container(
+                          margin: EdgeInsets.only(bottom: 16),
+                          child: Column(
+                            children: [
+                              Align(
+                                  widthFactor: 10,
+                                  heightFactor: 1.5,
+                                  alignment: Alignment.topLeft,
+                                  child: Text(
+                                    'vacancy_salary'.tr().toString().toUpperCase() + '*',
+                                    style: TextStyle(fontSize: 12, color: Colors.black, fontWeight: FontWeight.w700),
                                   )
-                                : DropdownButtonFormField<int>(
-                                    hint: Text("currency".tr()),
-                                    value: _currency_id,
-                                    onChanged: (int newValue) async {
-                                      setState(() {
-                                        _currency_id = newValue;
-                                      });
-                                    },
-                                    focusNode: FocusNode(canRequestFocus: false),
-                                    validator: (value) => value == null ? "please_fill_this_field".tr() : null,
-                                    decoration: InputDecoration(
-                                      enabledBorder: UnderlineInputBorder(
-                                        borderSide: BorderSide(color: Colors.grey),
+                              ),
+                              Row(
+                                  crossAxisAlignment: CrossAxisAlignment.center,
+                                  children: [
+                                    Expanded(
+                                      // optional flex property if flex is 1 because the default flex is 1
+                                      flex: 1,
+                                      child: TextFormField(
+                                        controller: _vacancy_salary_from_controller,
+                                        focusNode: FocusNode(canRequestFocus: false),
+                                        decoration: InputDecoration(
+                                          contentPadding: EdgeInsets.symmetric(vertical: 10, horizontal: 20),
+                                          border: OutlineInputBorder(),
+                                          enabledBorder: OutlineInputBorder(borderSide: BorderSide(color: Colors.grey[200], width: 2.0)),
+                                          errorBorder: OutlineInputBorder(borderSide: BorderSide(color: kColorPrimary, width: 2.0)),
+                                          errorStyle: TextStyle(color: kColorPrimary, fontWeight: FontWeight.w500),
+                                          floatingLabelBehavior: FloatingLabelBehavior.always,
+                                          filled: true,
+                                          fillColor: kColorWhite,
+                                        ),
+                                        inputFormatters: [Utf8LengthLimitingTextInputFormatter(20)],
+                                        validator: (name) {
+                                          if (name.isEmpty) {
+                                            return "please_fill_this_field".tr();
+                                          }
+                                          return null;
+                                        },
                                       ),
                                     ),
-                                    items: currencyList.map<DropdownMenuItem<int>>((dynamic value) {
-                                      var jj = new JobType(id: value['id'], name: value['name']);
-                                      return DropdownMenuItem<int>(
-                                        value: jj.id,
-                                        child: Text(value['name']),
-                                      );
-                                    }).toList(),
-                                  ),
-                            SizedBox(height: 20),
-                            Row(crossAxisAlignment: CrossAxisAlignment.center, children: [
-                              Expanded(
-                                // optional flex property if flex is 1 because the default flex is 1
-                                flex: 1,
-                                child: salary_by_agreement
-                                    ? TextFormField(
-                                        controller: _vacancy_salary_from_controller,
+                                    Container(
+                                      padding: EdgeInsets.fromLTRB(10, 0, 10, 0),
+                                      child: Text('__'),
+                                    ),
+                                    Expanded(
+                                      // optional flex property if flex is 1 because the default flex is 1
+                                      flex: 1,
+                                      child: TextFormField(
+                                        controller: _vacancy_salary_to_controller,
                                         focusNode: FocusNode(canRequestFocus: false),
                                         decoration: InputDecoration(
-                                          border: OutlineInputBorder(
-                                              borderRadius: BorderRadius.circular(10), borderSide: BorderSide.none),
+                                          contentPadding: EdgeInsets.symmetric(vertical: 10, horizontal: 20),
+                                          border: OutlineInputBorder(),
+                                          enabledBorder: OutlineInputBorder(borderSide: BorderSide(color: Colors.grey[200], width: 2.0)),
+                                          errorBorder: OutlineInputBorder(borderSide: BorderSide(color: kColorPrimary, width: 2.0)),
+                                          errorStyle: TextStyle(color: kColorPrimary, fontWeight: FontWeight.w500),
                                           floatingLabelBehavior: FloatingLabelBehavior.always,
                                           filled: true,
-                                          fillColor: Colors.grey[200],
-                                        ),
-                                        inputFormatters: [Utf8LengthLimitingTextInputFormatter(20)],
-                                        validator: (name) {
-                                          return null;
-                                        },
-                                      )
-                                    : TextFormField(
-                                        controller: _vacancy_salary_from_controller,
-                                        focusNode: FocusNode(canRequestFocus: false),
-                                        decoration: InputDecoration(
-                                          border: OutlineInputBorder(
-                                              borderRadius: BorderRadius.circular(10), borderSide: BorderSide.none),
-                                          floatingLabelBehavior: FloatingLabelBehavior.always,
-                                          filled: true,
-                                          fillColor: Colors.grey[200],
+                                          fillColor: kColorWhite,
                                         ),
                                         inputFormatters: [Utf8LengthLimitingTextInputFormatter(20)],
                                         validator: (name) {
@@ -1208,366 +367,581 @@ class _EditVacancyState extends State<EditVacancy> {
                                           return null;
                                         },
                                       ),
+                                    ),
+                                  ]
                               ),
-                              Container(
-                                padding: EdgeInsets.fromLTRB(10, 0, 10, 0),
-                                child: Text('__'),
-                              ),
-                              Expanded(
-                                // optional flex property if flex is 1 because the default flex is 1
-                                flex: 1,
-                                child: salary_by_agreement
-                                    ? TextFormField(
-                                        controller: _vacancy_salary_to_controller,
-                                        focusNode: FocusNode(canRequestFocus: false),
-                                        decoration: InputDecoration(
-                                          border: OutlineInputBorder(
-                                              borderRadius: BorderRadius.circular(10), borderSide: BorderSide.none),
-                                          floatingLabelBehavior: FloatingLabelBehavior.always,
-                                          filled: true,
-                                          fillColor: Colors.grey[200],
-                                        ),
-                                        inputFormatters: [Utf8LengthLimitingTextInputFormatter(20)],
-                                        validator: (name) {
-                                          return null;
-                                        },
-                                      )
-                                    : TextFormField(
-                                        controller: _vacancy_salary_to_controller,
-                                        focusNode: FocusNode(canRequestFocus: false),
-                                        decoration: InputDecoration(
-                                          border: OutlineInputBorder(
-                                              borderRadius: BorderRadius.circular(10), borderSide: BorderSide.none),
-                                          floatingLabelBehavior: FloatingLabelBehavior.always,
-                                          filled: true,
-                                          fillColor: Colors.grey[200],
-                                        ),
-                                        inputFormatters: [Utf8LengthLimitingTextInputFormatter(20)],
-                                        validator: (name) {
-                                          if (name.isEmpty) {
-                                            return "please_fill_this_field".tr();
-                                          }
-                                          return null;
-                                        },
-                                      ),
-                              ),
-                            ]),
-                            SizedBox(height: 20),
-                            CustomButton(
-                              width: MediaQuery.of(context).size.width * 1,
-                              padding: EdgeInsets.all(10),
-                              color: by_agreement ? kColorPrimary : Colors.grey[200],
-                              textColor: by_agreement ? Colors.white : kColorPrimary,
-                              onPressed: () {
-                                setState(() {
-                                  by_agreement = !by_agreement;
-                                });
-                                by_agreement
-                                    ? _vacancy_salary_controller.text = 'По договоренности'
-                                    : _vacancy_salary_controller = TextEditingController();
-                              },
-                              text: 'by_agreement'.tr(),
-                            ),
-                          ],
-                        )
-                      : Container(),
-
-                  work == work_mode.training
-                      ? Container()
-                      : Column(
-                          children: <Widget>[
-                            SizedBox(height: 20),
-                            Align(
-                                widthFactor: 10,
-                                heightFactor: 1.5,
-                                alignment: Alignment.topLeft,
-                                child: Text(
-                                  'vacancy_description'.tr(),
-                                  style: TextStyle(fontSize: 16, color: Colors.black),
-                                )),
-                            TextFormField(
-                              controller: _vacancy_description_controller,
-                              maxLines: 5,
-                              focusNode: FocusNode(canRequestFocus: false),
-                              decoration: InputDecoration(
-                                border: OutlineInputBorder(
-                                    borderRadius: BorderRadius.circular(10), borderSide: BorderSide.none),
-                                floatingLabelBehavior: FloatingLabelBehavior.always,
-                                filled: true,
-                                fillColor: Colors.grey[200],
-                              ),
-                              validator: (name) {
-                                if (name.isEmpty) {
-                                  return "please_fill_this_field".tr();
-                                }
-                                return null;
-                              },
-                            ),
-                          ],
-                        ),
-
-                  /// Область
-                  work == work_mode.work
-                      ? Column(
-                          children: <Widget>[
-                            SizedBox(height: 20),
-                            Align(
-                              widthFactor: 10,
-                              heightFactor: 1.5,
-                              alignment: Alignment.topLeft,
-                              child: Text(
-                                'region'.tr(),
-                                style: TextStyle(fontSize: 16, color: Colors.black),
-                              ),
-                            ),
-                            DropdownSearch<String>(
-                              showSelectedItem: true,
-                              items: regions,
-                              onChanged: (value) {
-                                setState(() {
-                                  selectedRegion = value;
-                                  selectedDistrict = "";
-                                  districts = [];
-                                });
-                                getDistrictsByRegionName(value);
-                              },
-                              dropdownSearchDecoration: InputDecoration(
-                                  border: OutlineInputBorder(
-                                    borderRadius: BorderRadius.circular(10),
-                                    borderSide: BorderSide.none,
-                                  ),
-                                  filled: true,
-                                  fillColor: Colors.grey[200],
-                                  contentPadding: EdgeInsets.symmetric(vertical: 5, horizontal: 12)),
-                              selectedItem: selectedRegion,
-                            )
-                          ],
-                        )
-                      : Container(),
-                  work == work_mode.work ? SizedBox(height: 20) : Container(),
-
-                  /// Район
-                  work == work_mode.work
-                      ? Column(
-                          children: <Widget>[
-                            Align(
-                              widthFactor: 10,
-                              heightFactor: 1.5,
-                              alignment: Alignment.topLeft,
-                              child: Text(
-                                'district'.tr(),
-                                style: TextStyle(fontSize: 16, color: Colors.black),
-                              ),
-                            ),
-                            DropdownSearch<String>(
-                              showSelectedItem: true,
-                              items: districts,
-                              onChanged: (value) {
-                                setState(() {
-                                  selectedDistrict = value;
-                                });
-                              },
-                              dropdownSearchDecoration: InputDecoration(
-                                  border: OutlineInputBorder(
-                                    borderRadius: BorderRadius.circular(10),
-                                    borderSide: BorderSide.none,
-                                  ),
-                                  filled: true,
-                                  fillColor: Colors.grey[200],
-                                  contentPadding: EdgeInsets.symmetric(vertical: 5, horizontal: 12)),
-                              selectedItem: selectedDistrict,
-                            )
-                          ],
-                        )
-                      : Container(),
-
-                  /// Сферы деятельности ishtapp
-                  work == work_mode.work
-                      ? Column(
-                          children: <Widget>[
-                            SizedBox(height: 20),
-                            DropdownButtonFormField<int>(
-                              isExpanded: true,
-                              hint: Text("job_types".tr()),
-                              value: _job_type_id,
-                              onChanged: (int newValue) {
-                                setState(() {
-                                  _job_type_id = newValue;
-                                });
-                              },
-                              focusNode: FocusNode(canRequestFocus: false),
-                              validator: (value) => value == null ? "please_fill_this_field".tr() : null,
-                              decoration: InputDecoration(
-                                enabledBorder: UnderlineInputBorder(
-                                  borderSide: BorderSide(color: Colors.grey),
-                                ),
-                              ),
-                              items: jobTypeList.map<DropdownMenuItem<int>>((dynamic value) {
-                                var jj = new JobType(id: value['id'], name: value['name']);
-                                return DropdownMenuItem<int>(
-                                  value: jj.id,
-                                  child: Text(value['name']),
-                                );
-                              }).toList(),
-                            ),
-                            SizedBox(height: 20),
-                            DropdownButtonFormField<int>(
-                              isExpanded: true,
-                              hint: Text("vacancy_types".tr()),
-                              value: _vacancy_type_id,
-                              onChanged: (int newValue) {
-                                setState(() {
-                                  _vacancy_type_id = newValue;
-                                });
-                              },
-                              focusNode: FocusNode(canRequestFocus: false),
-                              validator: (value) => value == null ? "please_fill_this_field".tr() : null,
-                              decoration: InputDecoration(
-                                enabledBorder: UnderlineInputBorder(
-                                  borderSide: BorderSide(color: Colors.grey),
-                                ),
-                              ),
-                              items: vacancyTypeList.map<DropdownMenuItem<int>>((dynamic value) {
-                                var jj = new JobType(id: value['id'], name: value['name']);
-                                return DropdownMenuItem<int>(
-                                  value: jj.id,
-                                  child: Text(value['name']),
-                                );
-                              }).toList(),
-                            ),
-                            SizedBox(height: 20),
-                            DropdownButtonFormField<int>(
-                              isExpanded: true,
-                              hint: Text("businesses".tr()),
-                              value: _busyness_id,
-                              onChanged: (int newValue) {
-                                setState(() {
-                                  _busyness_id = newValue;
-                                });
-                              },
-                              focusNode: FocusNode(canRequestFocus: false),
-                              validator: (value) => value == null ? "please_fill_this_field".tr() : null,
-                              decoration: InputDecoration(
-                                enabledBorder: UnderlineInputBorder(
-                                  borderSide: BorderSide(color: Colors.grey),
-                                ),
-                              ),
-                              items: busynessList.map<DropdownMenuItem<int>>((dynamic value) {
-                                var jj = new JobType(id: value['id'], name: value['name']);
-                                return DropdownMenuItem<int>(
-                                  value: jj.id,
-                                  child: Text(value['name']),
-                                );
-                              }).toList(),
-                            ),
-                            SizedBox(height: 20),
-                            DropdownButtonFormField<int>(
-                              isExpanded: true,
-                              hint: Text("schedules".tr()),
-                              value: _schedule_id,
-                              onChanged: (int newValue) {
-                                setState(() {
-                                  _schedule_id = newValue;
-                                });
-                              },
-                              focusNode: FocusNode(canRequestFocus: false),
-                              validator: (value) => value == null ? "please_fill_this_field".tr() : null,
-                              decoration: InputDecoration(
-                                enabledBorder: UnderlineInputBorder(
-                                  borderSide: BorderSide(color: Colors.grey),
-                                ),
-                              ),
-                              items: scheduleList.map<DropdownMenuItem<int>>((dynamic value) {
-                                var jj = new JobType(id: value['id'], name: value['name']);
-                                return DropdownMenuItem<int>(
-                                  value: jj.id,
-                                  child: Text(value['name']),
-                                );
-                              }).toList(),
-                            ),
-                          ],
-                        )
-                      : Container(),
-
-                  Prefs.getString(Prefs.ROUTE) == 'COMPANY' && widget.vacancy.isProductLabVacancy
-                      ? Column(
-                    children: <Widget>[
-                      Align(
-                          widthFactor: 10,
-                          heightFactor: 1.5,
-                          alignment: Alignment.topLeft,
-                          child: Text(
-                            'Дополнительная информация'.tr(),
-                            style: TextStyle(fontSize: 16, color: Colors.black),
-                          )),
-                      TextFormField(
-                        controller: _vacancy_description_controller,
-                        maxLines: 5,
-                        focusNode: FocusNode(canRequestFocus: false),
-                        decoration: InputDecoration(
-                          border: OutlineInputBorder(
-                              borderRadius: BorderRadius.circular(10), borderSide: BorderSide.none),
-                          floatingLabelBehavior: FloatingLabelBehavior.always,
-                          filled: true,
-                          fillColor: Colors.grey[200],
-                        ),
-                        validator: (name) {
-                          if (name.isEmpty) {
-                            return "please_fill_this_field".tr();
-                          }
-                          return null;
-                        },
-                      ),
-                      SizedBox(height: 20)
-                    ],
-                  )
-                      : SizedBox(),
-
-                  Prefs.getString(Prefs.ROUTE) == 'COMPANY'
-                      ? Column(
-                          children: <Widget>[
-                            FlatButton(
-                              color: kColorPrimaryDark,
-                              onPressed: () => _showDataPicker(context),
-                              child: Text(
-                                'Укажите дату дедлайна',
-                                style: TextStyle(fontSize: 16, color: Colors.white),
-                              ),
-                            ),
-                            SizedBox(height: 20)
-                          ],
-                        )
-                      : Container(),
-
-                  work == work_mode.work ? SizedBox(height: 20) : Container(),
-                  work == work_mode.work
-                      ? CheckboxListTile(
-                          contentPadding: EdgeInsets.zero,
-                          title: Text(
-                            'for_disabilities_people'.tr(),
-                            style: TextStyle(fontSize: 16, color: Colors.black),
+                            ],
                           ),
-                          controlAffinity: ListTileControlAffinity.leading,
-                          value: is_disability_person_vacancy,
-                          onChanged: (value) {
+                        ),
+                        Container(
+                          margin: EdgeInsets.only(bottom: 16),
+                          child: Column(
+                            children: [
+                              Align(
+                                  widthFactor: 10,
+                                  heightFactor: 1.5,
+                                  alignment: Alignment.topLeft,
+                                  child: Text(
+                                    'currency'.tr().toString().toUpperCase() + '*',
+                                    style: TextStyle(fontSize: 12, color: Colors.black, fontWeight: FontWeight.w700),
+                                  )
+                              ),
+                              DropdownButtonFormField<int>(
+                                hint: Text(
+                                  "select".tr(),
+                                  style: TextStyle(
+                                      fontSize: 14
+                                  ),
+                                ),
+                                value: _currency_id,
+                                onChanged: (int newValue) async {
+                                  setState(() {
+                                    _currency_id = newValue;
+                                  });
+                                },
+                                focusNode: FocusNode(canRequestFocus: false),
+                                validator: (value) => value == null ? "please_fill_this_field".tr() : null,
+                                decoration: InputDecoration(
+                                  contentPadding: EdgeInsets.symmetric(vertical: 10, horizontal: 20),
+                                  border: OutlineInputBorder(),
+                                  enabledBorder: OutlineInputBorder(borderSide: BorderSide(color: Colors.grey[200], width: 2.0)),
+                                  errorBorder: OutlineInputBorder(borderSide: BorderSide(color: kColorPrimary, width: 2.0)),
+                                  errorStyle: TextStyle(color: kColorPrimary, fontWeight: FontWeight.w500),
+                                  floatingLabelBehavior: FloatingLabelBehavior.always,
+                                  filled: true,
+                                  fillColor: kColorWhite,
+                                ),
+                                items: currencyList.map<DropdownMenuItem<int>>((dynamic value) {
+                                  var jj = new JobType(id: value['id'], name: value['name']);
+                                  return DropdownMenuItem<int>(
+                                    value: jj.id,
+                                    child: Text(value['name']),
+                                  );
+                                }).toList(),
+                              ),
+                            ],
+                          ),
+                        ),
+                        Container(
+                          margin: EdgeInsets.only(bottom: 16),
+                          child: Column(
+                            children: [
+                              Align(
+                                  widthFactor: 10,
+                                  heightFactor: 1.5,
+                                  alignment: Alignment.topLeft,
+                                  child: Text(
+                                    'period'.tr().toString().toUpperCase() + '*',
+                                    style: TextStyle(fontSize: 12, color: Colors.black, fontWeight: FontWeight.w700),
+                                  )
+                              ),
+                              DropdownButtonFormField<int>(
+                                hint: Text(
+                                  "select".tr(),
+                                  style: TextStyle(
+                                      fontSize: 14
+                                  ),
+                                ),
+                                value: _salaryPeriodId,
+                                onChanged: (int newValue) async {
+                                  setState(() {
+                                    _salaryPeriodId = newValue;
+                                  });
+                                },
+                                focusNode: FocusNode(canRequestFocus: false),
+                                validator: (value) => value == null ? "please_fill_this_field".tr() : null,
+                                decoration: InputDecoration(
+                                  contentPadding: EdgeInsets.symmetric(vertical: 10, horizontal: 20),
+                                  border: OutlineInputBorder(),
+                                  enabledBorder: OutlineInputBorder(borderSide: BorderSide(color: Colors.grey[200], width: 2.0)),
+                                  errorBorder: OutlineInputBorder(borderSide: BorderSide(color: kColorPrimary, width: 2.0)),
+                                  errorStyle: TextStyle(color: kColorPrimary, fontWeight: FontWeight.w500),
+                                  floatingLabelBehavior: FloatingLabelBehavior.always,
+                                  filled: true,
+                                  fillColor: kColorWhite,
+                                ),
+                                items: [
+                                  DropdownMenuItem<int>(
+                                    value: 0,
+                                    child: Text('Ставка за час'),
+                                  ),
+                                  DropdownMenuItem<int>(
+                                    value: 1,
+                                    child: Text('Ставка за смену'),
+                                  ),
+                                  DropdownMenuItem<int>(
+                                    value: 2,
+                                    child: Text('В неделю'),
+                                  ),
+                                  DropdownMenuItem<int>(
+                                    value: 3,
+                                    child: Text('В месяц'),
+                                  )
+                                ],
+                              ),
+                            ],
+                          ),
+                        ),
+                      ],
+                    ),
+                  ),
+
+                  ///Description
+                  Container(
+                    margin: EdgeInsets.only(bottom: 16),
+                    child: Column(
+                      children: <Widget>[
+                        Align(
+                            widthFactor: 10,
+                            heightFactor: 1.5,
+                            alignment: Alignment.topLeft,
+                            child: Text(
+                              'vacancy_description'.tr().toString().toUpperCase() + '*',
+                              style: TextStyle(fontSize: 12, color: Colors.black, fontWeight: FontWeight.w700),
+                            )
+                        ),
+                        TextFormField(
+                          controller: _vacancy_description_controller,
+                          maxLines: 5,
+                          focusNode: FocusNode(canRequestFocus: false),
+                          decoration: InputDecoration(
+                            contentPadding: EdgeInsets.symmetric(vertical: 10, horizontal: 20),
+                            border: OutlineInputBorder(),
+                            disabledBorder: OutlineInputBorder(borderSide: BorderSide(color: Colors.grey[200], width: 2.0)),
+                            enabledBorder: OutlineInputBorder(borderSide: BorderSide(color: Colors.grey[200], width: 2.0)),
+                            errorBorder: OutlineInputBorder(borderSide: BorderSide(color: kColorPrimary, width: 2.0)),
+                            errorStyle: TextStyle(color: kColorPrimary, fontWeight: FontWeight.w500),
+                            floatingLabelBehavior: FloatingLabelBehavior.always,
+                            filled: true,
+                            fillColor: kColorWhite,
+                          ),
+                          validator: (name) {
+                            if (name.isEmpty) {
+                              return "please_fill_this_field".tr();
+                            }
+                            return null;
+                          },
+                        ),
+                      ],
+                    ),
+                  ),
+
+                  /// Адрес
+                  Container(
+                    margin: EdgeInsets.only(bottom: 16),
+                    child: Column(
+                      children: [
+                        Align(
+                            widthFactor: 10,
+                            heightFactor: 1.5,
+                            alignment: Alignment.topLeft,
+                            child: Text(
+                              'address'.tr().toString().toUpperCase(),
+                              style: TextStyle(fontSize: 12, color: Colors.black, fontWeight: FontWeight.w700),
+                            )
+                        ),
+                        TypeAheadFormField(
+                          textFieldConfiguration: TextFieldConfiguration(
+                            controller: _vacancyTypeAheadController,
+                            decoration: InputDecoration(
+                              contentPadding: EdgeInsets.symmetric(vertical: 10, horizontal: 20),
+                              border: OutlineInputBorder(),
+                              enabledBorder: OutlineInputBorder(borderSide: BorderSide(color: Colors.grey[200], width: 2.0)),
+                              errorBorder: OutlineInputBorder(borderSide: BorderSide(color: kColorPrimary, width: 2.0)),
+                              errorStyle: TextStyle(color: kColorPrimary, fontWeight: FontWeight.w500),
+                              floatingLabelBehavior: FloatingLabelBehavior.always,
+                              filled: true,
+                              fillColor: kColorWhite,
+                            ),
+                          ),
+                          suggestionsCallback: (pattern) async {
+                            print(pattern);
+                            if(pattern.length > 3) {
+                              _suggestionsAddress = await _fetchAddressSuggestions(pattern);
+                            }
+                            return _suggestionsAddress;
+                          },
+                          itemBuilder: (context, suggestion) {
+                            return ListTile(
+                              title: Text(suggestion['value']),
+                            );
+                          },
+                          noItemsFoundBuilder: (context) {
+                            return Container(
+                              padding: EdgeInsets.symmetric(vertical: 10, horizontal: 20),
+                              child: Text(
+                                'address_not_found'.tr(),
+                                style: TextStyle(
+                                    fontSize: 14,
+                                    fontWeight: FontWeight.w500,
+                                    color: Colors.black54
+                                ),
+                              ),
+                            );
+                          },
+                          transitionBuilder: (context, suggestionsBox, controller) {
+                            return suggestionsBox;
+                          },
+                          onSuggestionSelected: (suggestion) async {
+                            _vacancyTypeAheadController.text = suggestion['value'];
+
+                            String region = suggestion['data']['region_with_type'];
+                            String district = suggestion['data']['city'];
+                            String street = suggestion['data']['street_with_type'];
+                            String houseNumber = suggestion['data']['house'];
+
+                            if(region != '' && region != null){
+                              selectedRegion = region;
+                              districtList = await Vacancy.getLists('districts', region);
+                              districtList.forEach((district) {
+                                setState(() {
+                                  districts.add(district['name']);
+                                });
+                              });
+                            }
+
+                            if(district != '' && district != null){
+                              selectedDistrict = district;
+                            }
+
+                            if(street != '' && street != null){
+                              _vacancyStreetController.text = street;
+                            }
+
+                            if(houseNumber != '' && houseNumber != null){
+                              _vacancyHouseNumberController.text = houseNumber;
+                            }
+
+                          },
+                          validator: (value) {
+                            if (value.isEmpty) {
+                              return 'Введите адрес';
+                            }
+                            return null;
+                          },
+                          onSaved: (value) => _selectedCity = value,
+                        ),
+                      ],
+                    ),
+                  ),
+
+                  /// Сферы деятельности
+                  Container(
+                    margin: EdgeInsets.only(bottom: 16),
+                    child: Column(
+                      children: [
+                        Align(
+                            widthFactor: 10,
+                            heightFactor: 1.5,
+                            alignment: Alignment.topLeft,
+                            child: Text(
+                              'job_types'.tr().toString().toUpperCase() + '*',
+                              style: TextStyle(fontSize: 12, color: Colors.black, fontWeight: FontWeight.w700),
+                            )
+                        ),
+                        DropdownButtonFormField<int>(
+                          isExpanded: true,
+                          hint: Text("select".tr()),
+                          value: _job_type_id,
+                          onChanged: (int newValue) {
                             setState(() {
-                              is_disability_person_vacancy = value;
+                              _job_type_id = newValue;
                             });
                           },
-                        )
-                      : Container(),
-                  work == work_mode.work ? SizedBox(height: 20) : Container(),
-                  SizedBox(
+                          focusNode: FocusNode(canRequestFocus: false),
+                          validator: (value) => value == null ? "please_fill_this_field".tr() : null,
+                          decoration: InputDecoration(
+                            contentPadding: EdgeInsets.symmetric(vertical: 0, horizontal: 20),
+                            border: OutlineInputBorder(),
+                            enabledBorder: OutlineInputBorder(borderSide: BorderSide(color: Colors.grey[200], width: 2.0)),
+                            errorBorder: OutlineInputBorder(borderSide: BorderSide(color: kColorPrimary, width: 2.0)),
+                            errorStyle: TextStyle(color: kColorPrimary, fontWeight: FontWeight.w500),
+                            floatingLabelBehavior: FloatingLabelBehavior.always,
+                            filled: true,
+                            fillColor: kColorWhite,
+                          ),
+                          items: jobTypeList.map<DropdownMenuItem<int>>((dynamic value) {
+                            var jj = new JobType(id: value['id'], name: value['name']);
+                            return DropdownMenuItem<int>(
+                              value: jj.id,
+                              child: Text(value['name']),
+                            );
+                          }).toList(),
+                        ),
+                      ],
+                    ),
+                  ),
+
+                  /// Vacancy Types
+                  Container(
+                    margin: EdgeInsets.only(bottom: 16),
+                    child: Column(
+                      children: [
+                        Align(
+                            widthFactor: 10,
+                            heightFactor: 1.5,
+                            alignment: Alignment.topLeft,
+                            child: Text(
+                              'vacancy_types'.tr().toString().toUpperCase() + '*',
+                              style: TextStyle(fontSize: 12, color: Colors.black, fontWeight: FontWeight.w700),
+                            )
+                        ),
+                        DropdownButtonFormField<int>(
+                          isExpanded: true,
+                          hint: Text("select".tr()),
+                          value: _vacancy_type_id,
+                          onChanged: (int newValue) {
+                            setState(() {
+                              _vacancy_type_id = newValue;
+                            });
+                          },
+                          focusNode: FocusNode(canRequestFocus: false),
+                          validator: (value) => value == null ? "please_fill_this_field".tr() : null,
+                          decoration: InputDecoration(
+                            contentPadding: EdgeInsets.symmetric(vertical: 0, horizontal: 20),
+                            border: OutlineInputBorder(),
+                            enabledBorder: OutlineInputBorder(borderSide: BorderSide(color: Colors.grey[200], width: 2.0)),
+                            errorBorder: OutlineInputBorder(borderSide: BorderSide(color: kColorPrimary, width: 2.0)),
+                            errorStyle: TextStyle(color: kColorPrimary, fontWeight: FontWeight.w500),
+                            floatingLabelBehavior: FloatingLabelBehavior.always,
+                            filled: true,
+                            fillColor: kColorWhite,
+                          ),
+                          items: vacancyTypeList.map<DropdownMenuItem<int>>((dynamic value) {
+                            var jj = new JobType(id: value['id'], name: value['name']);
+                            return DropdownMenuItem<int>(
+                              value: jj.id,
+                              child: Text(value['name']),
+                            );
+                          }).toList(),
+                        ),
+                      ],
+                    ),
+                  ),
+
+                  /// Business
+                  Container(
+                    margin: EdgeInsets.only(bottom: 16),
+                    child: Column(
+                      children: [
+                        Align(
+                            widthFactor: 10,
+                            heightFactor: 1.5,
+                            alignment: Alignment.topLeft,
+                            child: Text(
+                              'businesses'.tr().toString().toUpperCase() + '*',
+                              style: TextStyle(fontSize: 12, color: Colors.black, fontWeight: FontWeight.w700),
+                            )
+                        ),
+                        DropdownButtonFormField<int>(
+                          isExpanded: true,
+                          hint: Text("select".tr()),
+                          value: _busyness_id,
+                          onChanged: (int newValue) {
+                            setState(() {
+                              _busyness_id = newValue;
+                            });
+                          },
+                          focusNode: FocusNode(canRequestFocus: false),
+                          validator: (value) => value == null ? "please_fill_this_field".tr() : null,
+                          decoration: InputDecoration(
+                            contentPadding: EdgeInsets.symmetric(vertical: 0, horizontal: 20),
+                            border: OutlineInputBorder(),
+                            enabledBorder: OutlineInputBorder(borderSide: BorderSide(color: Colors.grey[200], width: 2.0)),
+                            errorBorder: OutlineInputBorder(borderSide: BorderSide(color: kColorPrimary, width: 2.0)),
+                            errorStyle: TextStyle(color: kColorPrimary, fontWeight: FontWeight.w500),
+                            floatingLabelBehavior: FloatingLabelBehavior.always,
+                            filled: true,
+                            fillColor: kColorWhite,
+                          ),
+                          items: busynessList.map<DropdownMenuItem<int>>((dynamic value) {
+                            var jj = new JobType(id: value['id'], name: value['name']);
+                            return DropdownMenuItem<int>(
+                              value: jj.id,
+                              child: Text(value['name']),
+                            );
+                          }).toList(),
+                        ),
+                      ],
+                    ),
+                  ),
+
+                  /// Schedule
+                  Container(
+                    margin: EdgeInsets.only(bottom: 16),
+                    child: Column(
+                      children: [
+                        Align(
+                            widthFactor: 10,
+                            heightFactor: 1.5,
+                            alignment: Alignment.topLeft,
+                            child: Text(
+                              'schedules'.tr().toString().toUpperCase() + '*',
+                              style: TextStyle(fontSize: 12, color: Colors.black, fontWeight: FontWeight.w700),
+                            )
+                        ),
+                        DropdownButtonFormField<int>(
+                          isExpanded: true,
+                          hint: Text("select".tr()),
+                          value: _schedule_id,
+                          onChanged: (int newValue) {
+                            setState(() {
+                              _schedule_id = newValue;
+                            });
+                          },
+                          focusNode: FocusNode(canRequestFocus: false),
+                          validator: (value) => value == null ? "please_fill_this_field".tr() : null,
+                          decoration: InputDecoration(
+                            contentPadding: EdgeInsets.symmetric(vertical: 0, horizontal: 20),
+                            border: OutlineInputBorder(),
+                            enabledBorder: OutlineInputBorder(borderSide: BorderSide(color: Colors.grey[200], width: 2.0)),
+                            errorBorder: OutlineInputBorder(borderSide: BorderSide(color: kColorPrimary, width: 2.0)),
+                            errorStyle: TextStyle(color: kColorPrimary, fontWeight: FontWeight.w500),
+                            floatingLabelBehavior: FloatingLabelBehavior.always,
+                            filled: true,
+                            fillColor: kColorWhite,
+                          ),
+                          items: scheduleList.map<DropdownMenuItem<int>>((dynamic value) {
+                            var jj = new JobType(id: value['id'], name: value['name']);
+                            return DropdownMenuItem<int>(
+                              value: jj.id,
+                              child: Text(value['name']),
+                            );
+                          }).toList(),
+                        ),
+                      ],
+                    ),
+                  ),
+
+                  /// Experience
+                  Container(
+                    margin: EdgeInsets.only(bottom: 16),
+                    child: Column(
+                      children: [
+                        Align(
+                            widthFactor: 10,
+                            heightFactor: 1.5,
+                            alignment: Alignment.topLeft,
+                            child: Text(
+                              'required_experience'.tr().toString().toUpperCase() + '*',
+                              style: TextStyle(fontSize: 12, color: Colors.black, fontWeight: FontWeight.w700),
+                            )
+                        ),
+                        DropdownButtonFormField<int>(
+                          isExpanded: true,
+                          hint: Text("select".tr()),
+                          value: _experienceId,
+                          onChanged: (int newValue) {
+                            setState(() {
+                              _experienceId = newValue;
+                            });
+                          },
+                          focusNode: FocusNode(canRequestFocus: false),
+                          validator: (value) => value == null ? "please_fill_this_field".tr() : null,
+                          decoration: InputDecoration(
+                            contentPadding: EdgeInsets.symmetric(vertical: 0, horizontal: 20),
+                            border: OutlineInputBorder(),
+                            enabledBorder: OutlineInputBorder(borderSide: BorderSide(color: Colors.grey[200], width: 2.0)),
+                            errorBorder: OutlineInputBorder(borderSide: BorderSide(color: kColorPrimary, width: 2.0)),
+                            errorStyle: TextStyle(color: kColorPrimary, fontWeight: FontWeight.w500),
+                            floatingLabelBehavior: FloatingLabelBehavior.always,
+                            filled: true,
+                            fillColor: kColorWhite,
+                          ),
+                          items: [
+                            DropdownMenuItem<int>(
+                              value: 0,
+                              child: Text('Без опыта'),
+                            ),
+                            DropdownMenuItem<int>(
+                              value: 1,
+                              child: Text('Полгода'),
+                            ),
+                            DropdownMenuItem<int>(
+                              value: 2,
+                              child: Text('Более года'),
+                            )
+                          ],
+                        ),
+                      ],
+                    ),
+                  ),
+
+                  /// Payment Freq
+                  Container(
+                    margin: EdgeInsets.only(bottom: 30),
+                    child: Column(
+                      children: [
+                        Align(
+                            widthFactor: 10,
+                            heightFactor: 1.5,
+                            alignment: Alignment.topLeft,
+                            child: Text(
+                              'payment_frequency'.tr().toString().toUpperCase() + '*',
+                              style: TextStyle(fontSize: 12, color: Colors.black, fontWeight: FontWeight.w700),
+                            )
+                        ),
+                        DropdownButtonFormField<int>(
+                          isExpanded: true,
+                          hint: Text("select".tr()),
+                          value: _payPeriodId,
+                          onChanged: (int newValue) {
+                            setState(() {
+                              _payPeriodId = newValue;
+                            });
+                          },
+                          focusNode: FocusNode(canRequestFocus: false),
+                          validator: (value) => value == null ? "please_fill_this_field".tr() : null,
+                          decoration: InputDecoration(
+                            contentPadding: EdgeInsets.symmetric(vertical: 0, horizontal: 20),
+                            border: OutlineInputBorder(),
+                            enabledBorder: OutlineInputBorder(borderSide: BorderSide(color: Colors.grey[200], width: 2.0)),
+                            errorBorder: OutlineInputBorder(borderSide: BorderSide(color: kColorPrimary, width: 2.0)),
+                            errorStyle: TextStyle(color: kColorPrimary, fontWeight: FontWeight.w500),
+                            floatingLabelBehavior: FloatingLabelBehavior.always,
+                            filled: true,
+                            fillColor: kColorWhite,
+                          ),
+                          items: [
+                            DropdownMenuItem<int>(
+                              value: 0,
+                              child: Text('Ежедневная'),
+                            ),
+                            DropdownMenuItem<int>(
+                              value: 1,
+                              child: Text('Еженедельная'),
+                            ),
+                            DropdownMenuItem<int>(
+                              value: 2,
+                              child: Text('Ежемесячная'),
+                            )
+                          ],
+                        ),
+                      ],
+                    ),
+                  ),
+
+                  Container(
                     width: double.maxFinite,
-                    child: Row(
-                      mainAxisAlignment: MainAxisAlignment.spaceAround,
+                    child: Flex(
+                      direction: Axis.horizontal,
+                      mainAxisAlignment: MainAxisAlignment.spaceBetween,
                       children: [
                         CustomButton(
-                          width: MediaQuery.of(context).size.width * 0.3,
-                          padding: EdgeInsets.all(10),
-                          color: Colors.grey[200],
+                          borderSide: BorderSide(
+                              color: kColorPrimary,
+                              width: 2.0
+                          ),
+                          color: Colors.transparent,
                           textColor: kColorPrimary,
                           onPressed: () {
+                            _vacancy_name_controller = TextEditingController();
+                            _vacancy_salary_controller = TextEditingController();
+                            _vacancy_description_controller = TextEditingController();
+                            _vacancyTypeAheadController = TextEditingController();
+                            _vacancyStreetController = TextEditingController();
+                            _vacancyHouseNumberController = TextEditingController();
+
                             setState(() {
                               _schedule_id = null;
                               _busyness_id = null;
@@ -1575,14 +949,16 @@ class _EditVacancyState extends State<EditVacancy> {
                               _vacancy_type_id = null;
                               _region_id = null;
                               _district_id = null;
+                              _currency_id = null;
+                              _salaryPeriodId = null;
+                              _experienceId = null;
+                              _payPeriodId = null;
                             });
                             Navigator.of(context).pop();
                           },
                           text: 'cancel'.tr(),
                         ),
                         CustomButton(
-                          width: MediaQuery.of(context).size.width * 0.3,
-                          padding: EdgeInsets.all(10),
                           color: kColorPrimary,
                           textColor: Colors.white,
                           onPressed: () {
@@ -1607,46 +983,27 @@ class _EditVacancyState extends State<EditVacancy> {
                                 name: _vacancy_name_controller.text,
                                 salary_from: _vacancy_salary_from_controller.text,
                                 salary_to: _vacancy_salary_to_controller.text,
-                                is_disability_person_vacancy: is_disability_person_vacancy ? 1 : 0,
                                 description: _vacancy_description_controller.text,
+                                address: _vacancyTypeAheadController.text,
+                                region: _region_id != null ? _region_id.toString() : null,
+                                district: _district_id != null ? _district_id.toString() : null,
+                                street: _vacancyStreetController.text,
+                                houseNumber: _vacancyHouseNumberController.text,
                                 type: _vacancy_type_id != null ? _vacancy_type_id.toString() : null,
                                 busyness: _busyness_id != null ? _busyness_id.toString() : null,
                                 schedule: _schedule_id != null ? _schedule_id.toString() : null,
                                 job_type: _job_type_id != null ? _job_type_id.toString() : null,
-                                region: _region_id != null ? _region_id.toString() : null,
-                                district: _district_id != null ? _district_id.toString() : null,
                                 currency: _currency_id != null ? _currency_id.toString() : null,
-                                opportunity: opportunity,
-                                opportunityType: opportunityType,
-                                opportunityDuration: opportunityDuration,
-                                internshipLanguage: selectedInternshipType,
-                                typeOfRecommendedLetter: selectedTypeOfRecommendedLetter,
-                                ageFrom: _ageFromController.text,
-                                ageTo: _ageToController.text,
-                                isProductLabVacancy: work_mode.training == work,
-                                deadline: deadline,
+                                period: _salaryPeriodId != null ? _salaryPeriodId.toString() : null,
+                                experience: _experienceId != null ? _experienceId.toString() : null,
+                                payPeriod: _payPeriodId != null ? _payPeriodId.toString() : null,
                               );
-                              SkillCategory skillCategory = new SkillCategory();
                               Vacancy.saveCompanyVacancy(vacancy: company_vacancy).then((value) {
-                                if (work == work_mode.training) {
-                                  skillCategory.saveVacancySkills(tags, selectedCategoryIdFromFirstChip, value, true);
-                                  skillCategory
-                                      .saveVacancySkills(tags2, selectedCategoryIdSecondChip, value, false)
-                                      .then((value) {
-                                    StoreProvider.of<AppState>(context).dispatch(getCompanyVacancies());
-                                    setState(() {
-                                      loading = false;
-                                    });
-                                    Navigator.of(context).pop();
-                                    Navigator.of(context).pop();
-                                  });
-                                } else {
-                                  StoreProvider.of<AppState>(context).dispatch(getCompanyVacancies());
-                                  setState(() {
-                                    loading = false;
-                                  });
-                                  Navigator.of(context).pop();
-                                }
+                                StoreProvider.of<AppState>(context).dispatch(getCompanyVacancies());
+                                setState(() {
+                                  loading = false;
+                                });
+                                Navigator.of(context).pop();
                               });
 
                               _vacancy_name_controller = TextEditingController();
@@ -1654,8 +1011,7 @@ class _EditVacancyState extends State<EditVacancy> {
                               _vacancy_salary_from_controller = TextEditingController();
                               _vacancy_salary_to_controller = TextEditingController();
                               _vacancy_description_controller = TextEditingController();
-                              _ageFromController = TextEditingController();
-                              _ageToController = TextEditingController();
+
                               setState(() {
                                 _schedule_id = null;
                                 _busyness_id = null;
@@ -1664,11 +1020,9 @@ class _EditVacancyState extends State<EditVacancy> {
                                 _region_id = null;
                                 _district_id = null;
                                 _currency_id = null;
-                                opportunity = null;
-                                opportunityType = null;
-                                opportunityDuration = null;
-                                selectedInternshipType = null;
-                                selectedTypeOfRecommendedLetter = null;
+                                _salaryPeriodId = null;
+                                _experienceId = null;
+                                _payPeriodId = null;
                               });
                             } else {
                               print('invalid');
@@ -1679,6 +1033,7 @@ class _EditVacancyState extends State<EditVacancy> {
                       ],
                     ),
                   ),
+
                 ],
               ),
             ),
@@ -1686,5 +1041,36 @@ class _EditVacancyState extends State<EditVacancy> {
         ),
       ),
     );
+  }
+
+  Future<List<dynamic>> _fetchAddressSuggestions(String pattern) async {
+    List<dynamic> suggestions = [];
+    String token = "132a62a4c888a776c87241ed9e615638651f14a8";
+
+    if(pattern.length > 3) {
+      final response = await http.post(
+        Uri.parse('https://suggestions.dadata.ru/suggestions/api/4_1/rs/suggest/address'),
+        headers: <String, String>{
+          'Content-Type': 'application/json',
+          'Accept': 'application/json',
+          'Authorization': 'Token ' + token
+        },
+        body: jsonEncode(<String, String>{
+          'query': pattern,
+          'count': '3'
+        }),
+      );
+
+      if (response.statusCode == 200) {
+        Map<dynamic, dynamic> responseData = json.decode(response.body);
+        for(int i = 0; i < responseData['suggestions'].length; i++) {
+          suggestions.add(responseData['suggestions'][i]);
+        }
+      } else {
+        throw Exception('Не удается найти адрес.');
+      }
+
+    }
+    return suggestions;
   }
 }

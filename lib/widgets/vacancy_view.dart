@@ -184,7 +184,6 @@ class _VacancyViewState extends State<VacancyView> {
 
   @override
   Widget build(BuildContext context) {
-    bool isProductLabVacancy = widget.vacancy.isProductLabVacancy == null ? false : widget.vacancy.isProductLabVacancy;
     return Container(
       width: MediaQuery.of(context).size.width * 1,
       height: MediaQuery.of(context).size.height * 1,
@@ -204,7 +203,7 @@ class _VacancyViewState extends State<VacancyView> {
                 padding: const EdgeInsets.all(0),
                 child: Flex(
                   direction: Axis.vertical,
-                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                  mainAxisAlignment: MainAxisAlignment.start,
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
 
@@ -385,7 +384,7 @@ class _VacancyViewState extends State<VacancyView> {
                     ),
 
                     Flexible(
-                      flex: 5,
+                      flex: 7,
                       child: Container(
                         padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 10),
                         child: Flex(
@@ -415,7 +414,7 @@ class _VacancyViewState extends State<VacancyView> {
                                   scrollDirection: Axis.vertical,
                                   child: RichText(
                                     text: TextSpan(
-                                        text: widget.vacancy.description != null ? widget.vacancy.description : "",
+                                        text: widget.vacancy.description != null ? Bidi.stripHtmlIfNeeded(widget.vacancy.description) : "",
                                         style: TextStyle(
                                             fontSize: 16,
                                             fontWeight: FontWeight.normal,
@@ -432,10 +431,10 @@ class _VacancyViewState extends State<VacancyView> {
                       ),
                     ),
 
-                    Flexible(
+                    widget.page != 'user_match' ? Flexible(
                       flex: 2,
-                      child: widget.page != 'user_match' ?
-                      Container(
+                      child: Container(
+                        height: double.infinity,
                         child: SizedBox(
                           width: double.maxFinite,
                           child: Row (
@@ -445,8 +444,6 @@ class _VacancyViewState extends State<VacancyView> {
                               widget.page == 'company_view' ?
                               Center(
                                 child: CustomButton(
-                                  width: MediaQuery.of(context).size.width * 0.5,
-                                  padding: EdgeInsets.all(5),
                                   color: kColorPrimary,
                                   textColor: Colors.white,
                                   onPressed: () => Navigator.of(context).push(MaterialPageRoute(
@@ -460,25 +457,10 @@ class _VacancyViewState extends State<VacancyView> {
                                 ),
                               ) :
                               widget.page == 'submitted' ?
-                              Container(
-                                width: MediaQuery.of(context).size.width * 0.7,
-                                padding: EdgeInsets.all(5),
-                                margin: EdgeInsets.symmetric(vertical: 10),
-                                decoration: BoxDecoration(
-                                    color: kColorDarkBlue, borderRadius: BorderRadius.circular(12)
-                                ),
-                                child: Center(
-                                  child: Text(
-                                      recruited == 0 ?
-                                      "На рассмотрении" : recruited == 1 ?
-                                      "Одобрено" : "Попробуйте в следующий раз",
-                                      textAlign: TextAlign.center,
-                                      style: TextStyle(
-                                        color: Colors.white,
-                                        fontSize: 18,
-                                        fontWeight: FontWeight.bold,
-                                      )),
-                                ),
+                              CustomButton(
+                                onPressed: () {},
+                                color: kColorDarkBlue,
+                                text: recruited == 0 ? "На рассмотрении" : recruited == 1 ? "Одобрено" : "Попробуйте в следующий раз",
                               ) :
                               widget.page == 'inactive' ? Container() :
                               Center(
@@ -514,8 +496,8 @@ class _VacancyViewState extends State<VacancyView> {
                             ],
                           ),
                         ),
-                      ) : Container(),
-                    ),
+                      ),
+                    ) : Container(),
                   ],
                 ),
               ),

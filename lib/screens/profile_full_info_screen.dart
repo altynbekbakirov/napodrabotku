@@ -877,33 +877,6 @@ class _ProfileInfoScreenState extends State<ProfileInfoScreen> {
               ),
             );
           } else {
-            List<Widget> skills = [];
-            List<Widget> skills2 = [];
-
-            for (var item in data.skills) {
-              skills.add(Container(
-                padding: EdgeInsets.only(bottom: 10),
-                alignment: Alignment.centerLeft,
-                child: Container(
-                  padding: EdgeInsets.symmetric(horizontal: 10, vertical: 5),
-                  decoration: BoxDecoration(color: Color(0xffF2F2F5), borderRadius: BorderRadius.circular(8)),
-                  child: Text(item.toString(), style: TextStyle(fontSize: 16, color: Colors.black87)),
-                ),
-                // Text(item.name, textAlign: TextAlign.left),
-              ));
-            }
-            for (var item in data.skills2) {
-              skills2.add(Container(
-                padding: EdgeInsets.only(bottom: 10),
-                alignment: Alignment.centerLeft,
-                child: Container(
-                  padding: EdgeInsets.symmetric(horizontal: 10, vertical: 5),
-                  decoration: BoxDecoration(color: Color(0xffF2F2F5), borderRadius: BorderRadius.circular(8)),
-                  child: Text(item.toString(), style: TextStyle(fontSize: 16, color: Colors.black87)),
-                ),
-                // Text(item.name, textAlign: TextAlign.left),
-              ));
-            }
 
             body = Scaffold(
               appBar: AppBar(
@@ -971,7 +944,7 @@ class _ProfileInfoScreenState extends State<ProfileInfoScreen> {
                                             Text("email".tr(),
                                                 softWrap: true,
                                                 style: TextStyle(fontSize: 16, color: Colors.grey, height: 2)),
-                                            Text(data.email,
+                                            Text(data.email != null ? data.email : '-',
                                                 softWrap: true, style: TextStyle(fontSize: 16, color: kColorDark)),
                                           ],
                                         ),
@@ -1003,35 +976,6 @@ class _ProfileInfoScreenState extends State<ProfileInfoScreen> {
                                                 style: TextStyle(fontSize: 16, color: Colors.grey, height: 2)),
                                             Text(data?.phone_number,
                                                 softWrap: true, style: TextStyle(fontSize: 16, color: kColorDark)),
-                                          ],
-                                        ),
-                                        Divider(),
-                                        Row(
-                                          mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                                          children: [
-                                            Text("Отрасль".tr(),
-                                                softWrap: true,
-                                                style: TextStyle(fontSize: 16, color: Colors.grey, height: 2)),
-                                            Text(data.jobSphere,
-                                                softWrap: true, style: TextStyle(fontSize: 16, color: kColorDark)),
-                                          ],
-                                        ),
-                                        Divider(),
-                                        Flex(
-                                          direction: Axis.horizontal,
-                                          mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                                          children: [
-                                            Flexible(
-                                              child: Text("Возможность".tr(),
-                                                  softWrap: true,
-                                                  style: TextStyle(fontSize: 16, color: Colors.grey, height: 2)),
-                                            ),
-                                            Flexible(
-                                              child: Text(data.opportunity,
-                                                  softWrap: true,
-                                                  textAlign: TextAlign.right,
-                                                  style: TextStyle(fontSize: 16, color: kColorDark)),
-                                            ),
                                           ],
                                         ),
                                         // Divider(),
@@ -1223,51 +1167,6 @@ class _ProfileInfoScreenState extends State<ProfileInfoScreen> {
                                                             child: Text("empty".tr())),
                                                       ),
 
-                                                /// skills
-                                                Container(
-                                                  margin: EdgeInsets.fromLTRB(0, 30, 0, 10),
-                                                  child: Row(
-                                                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                                                    crossAxisAlignment: CrossAxisAlignment.center,
-                                                    children: [
-                                                      Text('Навыки (Я умею)'.tr().toUpperCase(),
-                                                          style: TextStyle(
-                                                              fontSize: 14,
-                                                              fontWeight: FontWeight.w700,
-                                                              color: kColorDarkBlue)),
-                                                    ],
-                                                  ),
-                                                ),
-                                                data.skills.length > 0
-                                                    ? Column(children: skills)
-                                                    : Container(
-                                                        child: Container(
-                                                            margin: EdgeInsets.fromLTRB(0, 15, 0, 15),
-                                                            child: Text("empty".tr())),
-                                                      ),
-
-                                                /// skills 2
-                                                Container(
-                                                  margin: EdgeInsets.fromLTRB(0, 30, 0, 20),
-                                                  child: Row(
-                                                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                                                    crossAxisAlignment: CrossAxisAlignment.center,
-                                                    children: [
-                                                      Text('Навыки (Я хочу развить)'.tr().toUpperCase(),
-                                                          style: TextStyle(
-                                                              fontSize: 14,
-                                                              fontWeight: FontWeight.w700,
-                                                              color: kColorDarkBlue)),
-                                                    ],
-                                                  ),
-                                                ),
-                                                data.skills2.length > 0
-                                                    ? Column(children: skills2)
-                                                    : Container(
-                                                        child: Container(
-                                                            margin: EdgeInsets.fromLTRB(0, 15, 0, 15),
-                                                            child: Text("empty".tr())),
-                                                      ),
                                               ],
                                             )
                                           : Center(
@@ -1289,10 +1188,12 @@ class _ProfileInfoScreenState extends State<ProfileInfoScreen> {
                               crossAxisAlignment: CrossAxisAlignment.center,
                               children: <Widget>[
                                 CustomButton(
-                                  width: MediaQuery.of(context).size.width * 0.4,
-                                  padding: EdgeInsets.all(5),
-                                  color: kColorPrimary,
-                                  textColor: Colors.white,
+                                  borderSide: BorderSide(
+                                      color: kColorPrimary,
+                                      width: 2.0
+                                  ),
+                                  color: Colors.transparent,
+                                  textColor: kColorPrimary,
                                   onPressed: () {
                                     Users user = new Users();
                                     user
@@ -1305,8 +1206,6 @@ class _ProfileInfoScreenState extends State<ProfileInfoScreen> {
                                   text: 'Отклонить'.tr(),
                                 ),
                                 CustomButton(
-                                  width: MediaQuery.of(context).size.width * 0.4,
-                                  padding: EdgeInsets.all(5),
                                   color: kColorPrimary,
                                   textColor: Colors.white,
                                   onPressed: () {

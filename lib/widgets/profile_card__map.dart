@@ -3,7 +3,6 @@ import 'package:ishtapp/datas/RSAA.dart';
 import 'package:ishtapp/datas/user.dart';
 import 'package:ishtapp/datas/vacancy.dart';
 import 'package:ishtapp/screens/tabs/discover_tab.dart';
-import 'package:ishtapp/screens/tabs/tabs_product_lab/discover_tab.dart' as ProductLab;
 import 'package:swipe_stack/swipe_stack.dart';
 import 'package:easy_localization/easy_localization.dart';
 import 'package:flutter_redux/flutter_redux.dart';

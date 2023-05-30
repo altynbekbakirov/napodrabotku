@@ -8,9 +8,6 @@ import 'package:ishtapp/screens/home_screen.dart';
 import 'package:ishtapp/screens/otp_sms_screen.dart';
 import 'package:ishtapp/screens/profile_screen.dart';
 import 'package:ishtapp/screens/school_screen.dart';
-import 'package:ishtapp/screens/screens_product_lab/home_screen.dart';
-import 'package:ishtapp/screens/screens_product_lab/sign_up_screen.dart';
-import 'package:ishtapp/screens/screens_product_lab/start_screen.dart';
 import 'package:ishtapp/screens/sign_in_screen.dart';
 import 'package:ishtapp/screens/sign_up_screen.dart';
 import 'package:ishtapp/screens/start_screen.dart';
@@ -75,15 +72,6 @@ class RouteGenerator {
 
       case Routes.select_mode:
         return CupertinoPageRoute(builder: (_) => SelectMode());
-
-      case Routes.product_lab_start:
-        return CupertinoPageRoute(builder: (_) => ProductLabStart());
-
-      case Routes.product_lab_home:
-        return CupertinoPageRoute(builder: (_) => ProductLabHome());
-
-      case Routes.product_lab_sign_up:
-        return CupertinoPageRoute(builder: (_) => ProductLabSignUp());
 
       case Routes.edit_vacancy:
         return CupertinoPageRoute(builder: (_) => EditVacancy());

@@ -159,6 +159,7 @@ class _SignInScreenState extends State<SignInScreen> {
                       keyboardAction: TextInputAction.next,
                       onInputChanged: (PhoneNumber number) async {
                         phoneNumber = number.phoneNumber;
+                        initialCountry = number.isoCode;
                         await Users.checkPhone(phoneNumber.trim()).then((value) {
                           print(phoneNumber);
                           setState(() {
@@ -169,6 +170,7 @@ class _SignInScreenState extends State<SignInScreen> {
                       onInputValidated: (bool value) {
                         _isPhoneCorrect = value;
                       },
+                      maxLength: initialCountry == 'KG' ? 11 : 13,
                       selectorConfig: const SelectorConfig(selectorType: PhoneInputSelectorType.BOTTOM_SHEET, setSelectorButtonAsPrefixIcon: true, useEmoji: true),
                       ignoreBlank: true,
                       autoValidateMode: AutovalidateMode.always,

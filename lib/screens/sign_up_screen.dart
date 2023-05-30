@@ -505,6 +505,7 @@ class _SignUpScreenState extends State<SignUpScreen> {
                       keyboardAction: TextInputAction.next,
                       onInputChanged: (PhoneNumber number) async {
                         phoneNumber = number.phoneNumber;
+                        initialCountry = number.isoCode;
                         await Users.checkPhone(phoneNumber.trim()).then((value) {
                           print(phoneNumber);
                           setState(() {
@@ -515,6 +516,7 @@ class _SignUpScreenState extends State<SignUpScreen> {
                       onInputValidated: (bool value) {
                         isPhoneCorrect = value;
                       },
+                      maxLength: initialCountry == 'KG' ? 11 : 13,
                       selectorConfig:
                           const SelectorConfig(
                               selectorType: PhoneInputSelectorType.BOTTOM_SHEET,
@@ -952,49 +954,30 @@ class _SignUpScreenState extends State<SignUpScreen> {
                             } else {
 
                               await Users.checkUsername(_emailController.text).then((value) async {
-                                /// Validate form
-                                _openLoadingDialog(context);
 
-                                var uri = Uri.parse(API_IP + API_REGISTER1 + '?lang=' + Prefs.getString(Prefs.LANGUAGE));
-                                var request = new http.MultipartRequest("POST", uri);
+                                int min = 100000;
+                                int max = 999999;
+                                var randomizer = new Random();
+                                var rNum = min + randomizer.nextInt(max - min);
 
-                                request.fields["id"] = user.id.toString();
-                                request.fields["password"] = user.password;
-                                request.fields["name"] = user.name;
-                                request.fields["email"] = user.email;
-                                request.fields["birth_date"] = formatter.format(user.birth_date);
-                                request.fields["active"] = '1';
-                                request.fields["phone_number"] = user.phone_number;
-                                request.fields["type"] = user.is_company ? 'COMPANY' : 'USER';
+                                smscRuMessage = 'Код подтверждения - $rNum';
 
-                                // open a byteStream
-                                if (_imageFile != null) {
-                                  var _image = File(_imageFile.path);
-                                  var stream = new http.ByteStream(DelegatingStream.typed(_image.openRead()));
-                                  // get file length
-                                  var length = await _image.length();
-                                  // multipart that takes file.. here this "image_file" is a key of the API request
-                                  var multipartFile = new http.MultipartFile('avatar', stream, length, filename: basename(_image.path));
-                                  // add file to multipart
-                                  request.files.add(multipartFile);
+                                final response = await http.get(Uri.parse('https://smsc.ru/sys/send.php?login=$smscRuLogin&psw=$smscRuPassword&phones=$phoneNumber&mes=$smscRuMessage'));
+
+                                if (response.statusCode == 200) {
+                                  Navigator.of(context).push(MaterialPageRoute(
+                                      builder: (context) => OtpSmsScreen(
+                                        verificationId: rNum.toString(),
+                                        users: user,
+                                        phone: phoneNumber,
+                                        login: false,
+                                        imageFile: _imageFile,
+                                      )
+                                  ));
+                                } else {
+                                  throw Exception('Не удалось отправить СМС-сообщение с кодом.');
                                 }
 
-                                request.send().then((response) {
-                                  response.stream.transform(utf8.decoder).listen((value) {
-                                    var response = json.decode(value);
-                                    if (response['status'] == 200) {
-                                      Prefs.setString(Prefs.PASSWORD, user.password);
-                                      Prefs.setString(Prefs.TOKEN, response["token"]);
-                                      Prefs.setString(Prefs.EMAIL, response["email"]);
-                                      Prefs.setInt(Prefs.USER_ID, response["id"]);
-                                      Prefs.setString(Prefs.USER_TYPE, user.is_company ? 'COMPANY' : 'USER');
-                                      Prefs.setString(Prefs.PROFILEIMAGE, response["avatar"]);
-                                      _showDialog(context, 'successfull_sign_up'.tr(), false);
-                                    } else {
-                                      _showDialog(context, 'some_error_occurred_plese_try_again'.tr(), true);
-                                    }
-                                  });
-                                });
                               });
                             }
                           }

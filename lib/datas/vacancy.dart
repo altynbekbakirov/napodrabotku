@@ -222,6 +222,7 @@ class Vacancy {
         'salary_to': vacancy.salary_to,
         'is_disability_person_vacancy': vacancy.is_disability_person_vacancy,
         'description': vacancy.description,
+        'address': vacancy.address,
         'region': vacancy.region,
         'district': vacancy.district,
         'street': vacancy.street,

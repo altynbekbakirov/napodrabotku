@@ -58,9 +58,15 @@ class VacanciesTab extends StatelessWidget {
                                   Navigator.of(context).push(
                                       MaterialPageRoute(
                                           builder: (BuildContext context) {
-                                            return VacancyView(
-                                              page: "submitted",
-                                              vacancy: vacancy,
+                                            return Scaffold(
+                                              backgroundColor: kColorPrimary,
+                                              appBar: AppBar(
+                                                title: Text("vacancy_view".tr()),
+                                              ),
+                                              body: VacancyView(
+                                                page: "submitted",
+                                                vacancy: vacancy,
+                                              ),
                                             );
                                           }));
                                   },
