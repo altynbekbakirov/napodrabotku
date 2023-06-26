@@ -9,22 +9,44 @@ import 'package:redux_api_middleware/redux_api_middleware.dart';
 
 import 'package:ishtapp/datas/app_state.dart';
 
+const LIST_USERS_REQUEST = 'LIST_USERS_REQUEST';
+const LIST_USERS_SUCCESS = 'LIST_USERS_SUCCESS';
+const LIST_USERS_FAILURE = 'LIST_USERS_FAILURE';
+
+RSAA getUsersRequest() {
+  return RSAA(
+    method: 'GET',
+    endpoint: API_IP + API_USER_LIST + "?lang=" + Prefs.getString(Prefs.LANGUAGE) + "&route=" + Prefs.getString(Prefs.ROUTE),
+    types: [
+      LIST_USERS_REQUEST,
+      LIST_USERS_SUCCESS,
+      LIST_USERS_FAILURE,
+    ],
+    headers: {
+      'Content-Type': 'application/json',
+      'Authorization': Prefs.getString(Prefs.TOKEN) != null ? Prefs.getString(Prefs.TOKEN) : 'null',
+    },
+  );
+}
+
+ThunkAction<AppState> getUsers() => (Store<AppState> store) => store.dispatch(getUsersRequest());
+
 const LIST_VACANCIES_REQUEST = 'LIST_VACANCIES_REQUEST';
 const LIST_VACANCIES_SUCCESS = 'LIST_VACANCIES_SUCCESS';
 const LIST_VACANCIES_FAILURE = 'LIST_VACANCIES_FAILURE';
 
 RSAA getVacanciesRequest(
     {List job_type_ids,
-    List region_ids,
-    List district_ids,
-    List schedule_ids,
-    List busyness_ids,
-    List vacancy_type_ids,
-    List opportunity_ids,
-    List opportunity_type_ids,
-    List opportunity_duration_ids,
-    List internship_language_ids,
-    String type}) {
+      List region_ids,
+      List district_ids,
+      List schedule_ids,
+      List busyness_ids,
+      List vacancy_type_ids,
+      List opportunity_ids,
+      List opportunity_type_ids,
+      List opportunity_duration_ids,
+      List internship_language_ids,
+      String type}) {
   return RSAA(
     method: 'POST',
     endpoint: API_IP + API_VACANCY_LIST + "?lang=" + Prefs.getString(Prefs.LANGUAGE) + "&route=" + Prefs.getString(Prefs.ROUTE),
@@ -57,21 +79,22 @@ RSAA getVacanciesRequest(
 }
 
 ThunkAction<AppState> getVacancies() =>
-    (Store<AppState> store) => store.dispatch(getVacanciesRequest(
-        job_type_ids: store.state.vacancy.job_type_ids,
-        region_ids: store.state.vacancy.region_ids,
-        district_ids: store.state.vacancy.district_ids,
-        schedule_ids: store.state.vacancy.schedule_ids,
-        busyness_ids: store.state.vacancy.busyness_ids,
-        vacancy_type_ids: store.state.vacancy.vacancy_type_ids,
-        type: store.state.vacancy.type,
-        opportunity_ids: store.state.vacancy.opportunity_ids,
-        opportunity_type_ids: store.state.vacancy.opportunity_type_ids,
-        opportunity_duration_ids: store.state.vacancy.opportunity_duration_ids,
-        internship_language_ids: store.state.vacancy.internship_language_ids,
+        (Store<AppState> store) => store.dispatch(getVacanciesRequest(
+      job_type_ids: store.state.vacancy.job_type_ids,
+      region_ids: store.state.vacancy.region_ids,
+      district_ids: store.state.vacancy.district_ids,
+      schedule_ids: store.state.vacancy.schedule_ids,
+      busyness_ids: store.state.vacancy.busyness_ids,
+      vacancy_type_ids: store.state.vacancy.vacancy_type_ids,
+      type: store.state.vacancy.type,
+      opportunity_ids: store.state.vacancy.opportunity_ids,
+      opportunity_type_ids: store.state.vacancy.opportunity_type_ids,
+      opportunity_duration_ids: store.state.vacancy.opportunity_duration_ids,
+      internship_language_ids: store.state.vacancy.internship_language_ids,
     ));
+
 ThunkAction<AppState> deleteItem() =>
-    (Store<AppState> store) => store.state.vacancy.list.data.removeLast();
+        (Store<AppState> store) => store.state.vacancy.list.data.removeLast();
 
 ThunkAction<AppState> setFilter({
   List job_type_ids,
@@ -85,7 +108,7 @@ ThunkAction<AppState> setFilter({
   List opportunity_duration_ids,
   List internship_language_ids,
 }) =>
-    (Store<AppState> store) {
+        (Store<AppState> store) {
       store.state.vacancy.job_type_ids = job_type_ids;
       store.state.vacancy.schedule_ids = schedule_ids;
       store.state.vacancy.region_ids = region_ids;
@@ -99,8 +122,8 @@ ThunkAction<AppState> setFilter({
     };
 
 ThunkAction<AppState> setTimeFilter({String type}) => (Store<AppState> store) {
-      store.state.vacancy.type = type;
-    };
+  store.state.vacancy.type = type;
+};
 
 const GET_LIKED_VACANCY_REQUEST = 'GET_LIKED_VACANCY_REQUEST';
 const GET_LIKED_VACANCY_SUCCESS = 'GET_LIKED_VACANCY_SUCCESS';
@@ -127,7 +150,7 @@ RSAA getLikedVacancyRequest() {
 }
 
 ThunkAction<AppState> getLikedVacancies() =>
-    (Store<AppState> store) => store.dispatch(getLikedVacancyRequest());
+        (Store<AppState> store) => store.dispatch(getLikedVacancyRequest());
 
 const GET_SUBMITTED_VACANCY_REQUEST = 'GET_SUBMITTED_VACANCY_REQUEST';
 const GET_SUBMITTED_VACANCY_SUCCESS = 'GET_SUBMITTED_VACANCY_SUCCESS';
@@ -152,10 +175,10 @@ RSAA getSubmittedVacancyRequest() {
 }
 
 ThunkAction<AppState> getSubmittedVacancies() =>
-    (Store<AppState> store) => store.dispatch(getSubmittedVacancyRequest());
+        (Store<AppState> store) => store.dispatch(getSubmittedVacancyRequest());
 
 ThunkAction<AppState> deleteItem1() =>
-    (Store<AppState> store) => store.state.vacancy.list.data.removeLast();
+        (Store<AppState> store) => store.state.vacancy.list.data.removeLast();
 
 const GET_LIKED_VACANCY_NUMBER_REQUEST = 'GET_LIKED_VACANCY_NUMBER_REQUEST';
 const GET_LIKED_VACANCY_NUMBER_SUCCESS = 'GET_LIKED_VACANCY_NUMBER_SUCCESS';
@@ -177,7 +200,7 @@ RSAA getNumOfLikedVacancyRequest() {
 }
 
 ThunkAction<AppState> getNumberOfLikedVacancies() =>
-    (Store<AppState> store) => store.dispatch(getNumOfLikedVacancyRequest());
+        (Store<AppState> store) => store.dispatch(getNumOfLikedVacancyRequest());
 
 const GET_SUBMITTED_VACANCY_NUMBER_REQUEST =
     'GET_SUBMITTED_VACANCY_NUMBER_REQUEST';
@@ -202,7 +225,7 @@ RSAA getNumOfSubmittedVacancyRequest() {
 }
 
 ThunkAction<AppState> getNumberOfSubmittedVacancies() =>
-    (Store<AppState> store) =>
+        (Store<AppState> store) =>
         store.dispatch(getNumOfSubmittedVacancyRequest());
 
 const GET_USER_REQUEST = 'GET_USER_REQUEST';
@@ -225,7 +248,7 @@ RSAA getUserRequest() {
 }
 
 ThunkAction<AppState> getUser() =>
-    (Store<AppState> store) => store.dispatch(getUserRequest());
+        (Store<AppState> store) => store.dispatch(getUserRequest());
 
 const GET_USER_CV_REQUEST = 'GET_USER_CV_REQUEST';
 const GET_USER_CV_SUCCESS = 'GET_USER_CV_SUCCESS';
@@ -234,7 +257,7 @@ RSAA getUserCvRequest() {
   return RSAA(
     method: 'GET',
     endpoint:
-        API_IP + API_GET_USER_CV + '?lang=' + Prefs.getString(Prefs.LANGUAGE),
+    API_IP + API_GET_USER_CV + '?lang=' + Prefs.getString(Prefs.LANGUAGE),
     types: [
       GET_USER_CV_REQUEST,
       GET_USER_CV_SUCCESS,
@@ -248,7 +271,7 @@ RSAA getUserCvRequest() {
 }
 
 ThunkAction<AppState> getUserCv() =>
-    (Store<AppState> store) => store.dispatch(getUserCvRequest());
+        (Store<AppState> store) => store.dispatch(getUserCvRequest());
 
 const GET_COMPANY_VACANCIES_REQUEST = 'GET_COMPANY_VACANCIES_REQUEST';
 const GET_COMPANY_VACANCIES_SUCCESS = 'GET_COMPANY_VACANCIES_SUCCESS';
@@ -273,7 +296,7 @@ RSAA getCompanyVacanciesRequest() {
 }
 
 ThunkAction<AppState> getCompanyVacancies() =>
-    (Store<AppState> store) => store.dispatch(getCompanyVacanciesRequest());
+        (Store<AppState> store) => store.dispatch(getCompanyVacanciesRequest());
 
 const GET_COMPANY_INACTIVE_VACANCIES_REQUEST =
     'GET_COMPANY_INACTIVE_VACANCIES_REQUEST';
@@ -301,7 +324,7 @@ RSAA getCompanyInactiveVacanciesRequest() {
 }
 
 ThunkAction<AppState> getCompanyInactiveVacancies() =>
-    (Store<AppState> store) =>
+        (Store<AppState> store) =>
         store.dispatch(getCompanyInactiveVacanciesRequest());
 
 const GET_SUBMITTED_USER_REQUEST = 'GET_SUBMITTED_USER_REQUEST';
@@ -311,7 +334,7 @@ RSAA getSubmittedUsersRequest() {
   return RSAA(
     method: 'POST',
     endpoint:
-        API_IP + API_SUBMITTED_USERS + Prefs.getInt(Prefs.USER_ID).toString(),
+    API_IP + API_SUBMITTED_USERS + Prefs.getInt(Prefs.USER_ID).toString(),
     types: [
       GET_SUBMITTED_USER_REQUEST,
       GET_SUBMITTED_USER_SUCCESS,
@@ -325,7 +348,7 @@ RSAA getSubmittedUsersRequest() {
 }
 
 ThunkAction<AppState> getSubmittedUsers() =>
-    (Store<AppState> store) => store.dispatch(getSubmittedUsersRequest());
+        (Store<AppState> store) => store.dispatch(getSubmittedUsersRequest());
 
 const GET_USER_FULL_INFO_REQUEST = 'GET_USER_FULL_INFO_REQUEST';
 const GET_USER_FULL_INFO_SUCCESS = 'GET_USER_FULL_INFO_SUCCESS';
@@ -347,7 +370,7 @@ RSAA getUserFullInfoRequest(int user_id) {
 }
 
 ThunkAction<AppState> getUserFullInfo(int user_id) =>
-    (Store<AppState> store) => store.dispatch(getUserFullInfoRequest(user_id));
+        (Store<AppState> store) => store.dispatch(getUserFullInfoRequest(user_id));
 
 const GET_ACTIVE_VACANCY_NUMBER_REQUEST = 'GET_ACTIVE_VACANCY_NUMBER_REQUEST';
 const GET_ACTIVE_VACANCY_NUMBER_SUCCESS = 'GET_ACTIVE_VACANCY_NUMBER_SUCCESS';
@@ -369,7 +392,7 @@ RSAA getNumOfActiveVacancyRequest() {
 }
 
 ThunkAction<AppState> getNumberOfActiveVacancies() =>
-    (Store<AppState> store) => store.dispatch(getNumOfActiveVacancyRequest());
+        (Store<AppState> store) => store.dispatch(getNumOfActiveVacancyRequest());
 
 const GET_INACTIVE_VACANCY_NUMBER_REQUEST =
     'GET_INACTIVE_VACANCY_NUMBER_REQUEST';
@@ -394,7 +417,7 @@ RSAA getNumOfInactiveVacancyRequest() {
 }
 
 ThunkAction<AppState> getNumberOfInactiveVacancies() =>
-    (Store<AppState> store) => store.dispatch(getNumOfInactiveVacancyRequest());
+        (Store<AppState> store) => store.dispatch(getNumOfInactiveVacancyRequest());
 
 //CHAT
 const GET_CHAT_LIST_REQUEST = 'GET_CHAT_LIST_REQUEST';
@@ -417,7 +440,7 @@ RSAA getChatListRequest() {
 }
 
 ThunkAction<AppState> getChatList() =>
-    (Store<AppState> store) => store.dispatch(getChatListRequest());
+        (Store<AppState> store) => store.dispatch(getChatListRequest());
 
 const GET_MESSAGE_LIST_REQUEST = 'GET_MESSAGE_LIST_REQUEST';
 const GET_MESSAGE_LIST_SUCCESS = 'GET_MESSAGE_LIST_SUCCESS';
@@ -438,6 +461,28 @@ RSAA getMessageListRequest(int receiver_id, int vacancy_id) {
   );
 }
 
+const GET_UNREAD_MESSAGES_NUMBER_REQUEST = 'GET_UNREAD_MESSAGES_NUMBER_REQUEST';
+const GET_UNREAD_MESSAGES_NUMBER_SUCCESS = 'GET_UNREAD_MESSAGES_NUMBER_SUCCESS';
+const GET_UNREAD_MESSAGES_NUMBER_FAILURE = 'GET_UNREAD_MESSAGES_NUMBER_FAILURE';
+RSAA getNumOfUnreadMessagesRequest() {
+  return RSAA(
+    method: 'GET',
+    endpoint: API_IP + API_UNREAD_MESSAGES,
+    types: [
+      GET_UNREAD_MESSAGES_NUMBER_REQUEST,
+      GET_UNREAD_MESSAGES_NUMBER_SUCCESS,
+      GET_UNREAD_MESSAGES_NUMBER_FAILURE,
+    ],
+    headers: {
+      'Content-Type': 'application/json',
+      'Authorization': Prefs.getString(Prefs.TOKEN),
+    },
+  );
+}
+ThunkAction<AppState> getNumberOfUnreadMessages() =>
+        (Store<AppState> store) =>
+        store.dispatch(getNumOfUnreadMessagesRequest());
+
 ThunkAction<AppState> getMessageList(int receiver_id, int vacancy_id) =>
-    (Store<AppState> store) =>
+        (Store<AppState> store) =>
         store.dispatch(getMessageListRequest(receiver_id, vacancy_id));

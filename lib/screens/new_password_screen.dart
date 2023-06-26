@@ -49,17 +49,21 @@ class _NewPasswordScreenState extends State<NewPasswordScreen> {
                   heightFactor: 1.5,
                   alignment: Alignment.topLeft,
                   child: Text(
-                    'new_password'.tr(),
-                    style: TextStyle(fontSize: 16, color: Colors.black),
+                    'new_password'.tr().toUpperCase(),
+                    style: TextStyle(fontSize: 12, color: Colors.black, fontWeight: FontWeight.w700),
                   )),
               TextFormField(
                 obscureText: _obscureText,
                 controller: _password_controller,
                 decoration: InputDecoration(
-                  border: OutlineInputBorder(borderRadius: BorderRadius.circular(10), borderSide: BorderSide.none),
+                  contentPadding: EdgeInsets.symmetric(vertical: 0, horizontal: 20),
+                  border: OutlineInputBorder(),
+                  enabledBorder: OutlineInputBorder(borderSide: BorderSide(color: Colors.grey[200], width: 2.0)),
+                  errorBorder: OutlineInputBorder(borderSide: BorderSide(color: kColorPrimary, width: 2.0)),
+                  errorStyle: TextStyle(color: kColorPrimary, fontWeight: FontWeight.w500),
                   floatingLabelBehavior: FloatingLabelBehavior.always,
                   filled: true,
-                  fillColor: Colors.grey[200],
+                  fillColor: kColorWhite,
                   suffixIcon: IconButton(
                     icon: Icon(
                       // Based on passwordVisible state choose the icon
@@ -88,17 +92,21 @@ class _NewPasswordScreenState extends State<NewPasswordScreen> {
                   heightFactor: 1.5,
                   alignment: Alignment.topLeft,
                   child: Text(
-                    'new_password_confirm'.tr(),
-                    style: TextStyle(fontSize: 16, color: Colors.black),
+                    'new_password_confirm'.tr().toUpperCase(),
+                    style: TextStyle(fontSize: 12, color: Colors.black, fontWeight: FontWeight.w700),
                   )),
               TextFormField(
                 controller: _password_confirm_controller,
                 obscureText: _obscureText,
                 decoration: InputDecoration(
-                  border: OutlineInputBorder(borderRadius: BorderRadius.circular(10), borderSide: BorderSide.none),
+                  contentPadding: EdgeInsets.symmetric(vertical: 0, horizontal: 20),
+                  border: OutlineInputBorder(),
+                  enabledBorder: OutlineInputBorder(borderSide: BorderSide(color: Colors.grey[200], width: 2.0)),
+                  errorBorder: OutlineInputBorder(borderSide: BorderSide(color: kColorPrimary, width: 2.0)),
+                  errorStyle: TextStyle(color: kColorPrimary, fontWeight: FontWeight.w500),
                   floatingLabelBehavior: FloatingLabelBehavior.always,
                   filled: true,
-                  fillColor: Colors.grey[200],
+                  fillColor: kColorWhite,
                   suffixIcon: IconButton(
                     icon: Icon(
                       // Based on passwordVisible state choose the icon

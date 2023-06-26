@@ -281,8 +281,8 @@ class _ProfileTabState extends State<ProfileTab> {
                                         fontWeight: FontWeight.w700,
                                         color: kColorDark
                                     ),
-                                  )
-                                      : Text(
+                                  ) :
+                                  Text(
                                     StoreProvider.of<AppState>(context).state.vacancy.number_of_active_vacancies != null
                                         ? StoreProvider.of<AppState>(context)
                                         .state

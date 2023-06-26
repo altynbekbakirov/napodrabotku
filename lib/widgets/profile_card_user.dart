@@ -17,10 +17,10 @@ import '../widgets/Dialogs/Dialogs.dart';
 import 'package:flutter_tindercard/flutter_tindercard.dart';
 import 'package:flutter_guid/flutter_guid.dart';
 
-class ProfileCard extends StatefulWidget {
+class ProfileCardUser extends StatefulWidget {
   /// User object
-  final Vacancy vacancy;
-  final VacanciesScreenProps props;
+  final Users user;
+  final UsersScreenProps props;
 
   /// Screen to be checked
   final String page;
@@ -31,10 +31,10 @@ class ProfileCard extends StatefulWidget {
   /// Swiper position
   final SwiperPosition position;
 
-  ProfileCard({
+  ProfileCardUser({
     this.page,
     this.position,
-    @required this.vacancy,
+    @required this.user,
     this.index,
     this.offset,
     this.props,
@@ -42,10 +42,10 @@ class ProfileCard extends StatefulWidget {
   });
 
   @override
-  _ProfileCardState createState() => _ProfileCardState();
+  _ProfileCardUserState createState() => _ProfileCardUserState();
 }
 
-class _ProfileCardState extends State<ProfileCard> {
+class _ProfileCardUserState extends State<ProfileCardUser> {
   int counter = 0;
 
   void removeCards({String type, int vacancy_id, props, context}) {
@@ -131,34 +131,24 @@ class _ProfileCardState extends State<ProfileCard> {
                                         child: RichText(
                                           maxLines: 3,
                                           text: TextSpan(
-                                            text: widget.vacancy.name != null
-                                                ? widget.vacancy.name
-                                                .toString() +
-                                                '\n'
-                                                : "",
-                                            // text: "Testtestteatasdt testtestasdasd\n",
+                                            text: widget.user.name != null ? widget.user.surname != null ? '${widget.user.name} ${widget.user.surname}\n' : '${widget.user.name.toString()}\n' : '',
                                             style: TextStyle(
-                                              fontSize:
-                                              widget.vacancy.name.length >
-                                                  20
-                                                  ? 14
-                                                  : 20,
+                                              fontSize: widget.user.name.length > 20 ? 14 : 20,
                                               fontWeight: FontWeight.w900,
                                               fontFamily: 'Manrope',
                                               color: kColorDark,
                                             ),
                                             children: <TextSpan>[
                                               TextSpan(
-                                                  text: widget.vacancy.region !=
-                                                      null
-                                                      ? widget.vacancy.region
-                                                      : '',
+                                                  text: widget.user.region != null ? widget.user.region : '',
                                                   style: TextStyle(
                                                       fontFamily: 'Manrope',
                                                       fontSize: 12,
                                                       fontWeight:
                                                       FontWeight.w500,
-                                                      color: kColorSecondary)),
+                                                      color: kColorSecondary
+                                                  )
+                                              ),
                                             ],
                                           ),
                                         ),
@@ -173,19 +163,15 @@ class _ProfileCardState extends State<ProfileCard> {
                               child: Container(
                                 child: ClipRRect(
                                   borderRadius: BorderRadius.circular(4),
-                                  child: widget.vacancy.company_logo != null
-                                      ? Image.network(
-                                    SERVER_IP +
-                                        widget.vacancy.company_logo +
-                                        "?token=${Guid.newGuid}",
+                                  child: widget.user.image != null ? Image.network(
+                                    SERVER_IP + widget.user.image + "?token=${Guid.newGuid}",
                                     headers: {
                                       "Authorization":
                                       Prefs.getString(Prefs.TOKEN)
                                     },
                                     width: 60,
                                     height: 60,
-                                  )
-                                      : Image.asset(
+                                  ) : Image.asset(
                                     'assets/images/default-user.jpg',
                                     fit: BoxFit.cover,
                                     width: 60,
@@ -217,44 +203,62 @@ class _ProfileCardState extends State<ProfileCard> {
                                   mainAxisAlignment: MainAxisAlignment.center,
                                   crossAxisAlignment: CrossAxisAlignment.start,
                                   children: [
-                                    widget.vacancy.type != null
-                                        ? Container(
-                                      padding: EdgeInsets.symmetric(
-                                          horizontal: 10, vertical: 5),
+                                    // Интересуемые вакансии
+                                    widget.user.vacancy_type != 'null' ? Container(
+                                      padding: EdgeInsets.symmetric(horizontal: 10, vertical: 5),
                                       decoration: BoxDecoration(
                                           color: kColorGray,
                                           borderRadius:
-                                          BorderRadius.circular(4)),
+                                          BorderRadius.circular(4)
+                                      ),
                                       child: Text(
-                                        widget.vacancy.type != null
-                                            ? widget.vacancy.type
-                                            .toString()
-                                            : "",
+                                        widget.user.vacancy_type != 'null' ? widget.user.vacancy_type.toString() : "",
                                         style: TextStyle(
                                           fontSize: 12,
                                           fontWeight: FontWeight.w700,
                                           color: kColorDark,
                                         ),
                                       ),
-                                    )
-                                        : Container(),
+                                    ) : Container(),
+
+                                    // Вид занятости
+                                    widget.user.vacancy_type != 'null' ?
                                     Container(
-                                      padding: EdgeInsets.symmetric(
-                                          horizontal: 10, vertical: 5),
+                                      padding: EdgeInsets.symmetric(horizontal: 10, vertical: 5),
                                       margin: EdgeInsets.only(top: 5),
                                       decoration: BoxDecoration(
                                           color: kColorGray,
                                           borderRadius:
-                                          BorderRadius.circular(4)),
+                                          BorderRadius.circular(4)
+                                      ),
                                       child: Text(
-                                        widget.vacancy.schedule != null
-                                            ? widget.vacancy.schedule.toString()
-                                            : "",
+                                        widget.user.business != 'null' ? widget.user.business.toString() : "",
                                         style: TextStyle(
                                             fontSize: 12,
                                             fontWeight: FontWeight.bold,
                                             fontFamily: 'Manrope',
-                                            color: kColorDark),
+                                            color: kColorDark
+                                        ),
+                                      ),
+                                    )  : Container(),
+
+                                    // Статус
+                                    Container(
+                                      padding: EdgeInsets.symmetric(horizontal: 10, vertical: 5),
+                                      margin: EdgeInsets.only(top: 5),
+                                      decoration: BoxDecoration(
+                                          color: kColorGray,
+                                          borderRadius:
+                                          BorderRadius.circular(4)
+                                      ),
+                                      child: Text(
+                                        widget.user.status != null ? widget.user.status.toString() : '',
+                                        style: TextStyle(
+                                            fontSize: 12,
+                                            fontWeight: FontWeight.bold,
+                                            fontFamily: 'Manrope',
+                                            color: kColorDark
+                                        ),
                                       ),
                                     ),
                                   ],
@@ -263,47 +267,47 @@ class _ProfileCardState extends State<ProfileCard> {
                             ),
 
                             /// Salary
-                            Flexible(
-                              child: Container(
-                                child: Flex(
-                                  direction: Axis.vertical,
-                                  crossAxisAlignment: CrossAxisAlignment.end,
-                                  mainAxisAlignment: MainAxisAlignment.center,
-                                  children: [
-                                    Container(
-                                      child: Text(
-                                        (widget.vacancy.salary != null
-                                            ? widget.vacancy.salary
-                                            : '') +
-                                            widget.vacancy.currency,
-                                        textAlign: TextAlign.end,
-                                        style: TextStyle(
-                                          fontSize: 20,
-                                          fontWeight: FontWeight.w900,
-                                          fontFamily: 'Manrope',
-                                          color: kColorPrimary,
-                                        ),
-                                      ),
-                                    ),
-                                    Container(
-                                      child: Text(
-                                        widget.vacancy.period != null
-                                            ? widget.vacancy.period
-                                            .toLowerCase()
-                                            : '',
-                                        textAlign: TextAlign.end,
-                                        style: TextStyle(
-                                          fontSize: 14,
-                                          fontWeight: FontWeight.w700,
-                                          fontFamily: 'Manrope',
-                                          color: kColorPrimary,
-                                        ),
-                                      ),
-                                    ),
-                                  ],
-                                ),
-                              ),
-                            ),
+                            // Flexible(
+                            //   child: Container(
+                            //     child: Flex(
+                            //       direction: Axis.vertical,
+                            //       crossAxisAlignment: CrossAxisAlignment.end,
+                            //       mainAxisAlignment: MainAxisAlignment.center,
+                            //       children: [
+                            //         Container(
+                            //           child: Text(
+                            //             (widget.vacancy.salary != null
+                            //                 ? widget.vacancy.salary
+                            //                 : '') +
+                            //                 widget.vacancy.currency,
+                            //             textAlign: TextAlign.end,
+                            //             style: TextStyle(
+                            //               fontSize: 20,
+                            //               fontWeight: FontWeight.w900,
+                            //               fontFamily: 'Manrope',
+                            //               color: kColorPrimary,
+                            //             ),
+                            //           ),
+                            //         ),
+                            //         Container(
+                            //           child: Text(
+                            //             widget.vacancy.period != null
+                            //                 ? widget.vacancy.period
+                            //                 .toLowerCase()
+                            //                 : '',
+                            //             textAlign: TextAlign.end,
+                            //             style: TextStyle(
+                            //               fontSize: 14,
+                            //               fontWeight: FontWeight.w700,
+                            //               fontFamily: 'Manrope',
+                            //               color: kColorPrimary,
+                            //             ),
+                            //           ),
+                            //         ),
+                            //       ],
+                            //     ),
+                            //   ),
+                            // ),
                           ],
                         ),
                       ),
@@ -321,44 +325,23 @@ class _ProfileCardState extends State<ProfileCard> {
                           mainAxisAlignment: MainAxisAlignment.start,
                           crossAxisAlignment: CrossAxisAlignment.start,
                           children: [
-                            Flexible(
-                              flex: 1,
-                              child: Container(
-                                child: Text(
-                                  widget.vacancy.company_name != null
-                                      ? widget.vacancy.company_name
-                                      : "",
-                                  style: TextStyle(
-                                      fontSize: 16,
-                                      fontWeight: FontWeight.bold,
-                                      fontFamily: 'Manrope',
-                                      color: kColorSecondary),
-                                ),
-                              ),
-                            ),
-                            widget.page == 'discover' ||
-                                widget.page == 'match' ||
-                                widget.page == 'company'
-                                ? Flexible(
+                            widget.page == 'discover' || widget.page == 'match' || widget.page == 'company' ? Flexible(
                               child: Container(
                                 margin: EdgeInsets.only(top: 10),
                                 child: RichText(
                                   overflow: TextOverflow.ellipsis,
                                   text: TextSpan(
-                                      text: widget.vacancy.description !=
-                                          null
-                                          ? Bidi.stripHtmlIfNeeded(
-                                          widget.vacancy.description)
-                                          : "",
+                                      text: widget.user.description != null ? Bidi.stripHtmlIfNeeded(widget.user.description) : "",
                                       style: TextStyle(
                                           fontSize: 14,
                                           fontWeight: FontWeight.normal,
                                           fontFamily: 'Manrope',
-                                          color: kColorSecondary)),
+                                          color: kColorSecondary
+                                      ),
+                                  ),
                                 ),
                               ),
-                            )
-                                : Container(),
+                            ) : Container(),
                           ],
                         ),
                       ),
@@ -373,9 +356,7 @@ class _ProfileCardState extends State<ProfileCard> {
                           direction: Axis.horizontal,
                           mainAxisAlignment: MainAxisAlignment.center,
                           children: [
-                            widget.page == 'submit'
-                                ? Container()
-                                : Flexible(
+                            widget.page == 'submit' ? Container() : Flexible(
                               flex: 1,
                               child: Container(
                                 margin:
@@ -405,30 +386,30 @@ class _ProfileCardState extends State<ProfileCard> {
                                         'discover') {
                                       widget.cardController.triggerLeft();
                                     } else if (widget.page == 'match') {
-                                      Vacancy.saveVacancyUser(
-                                          vacancy_id:
-                                          widget.vacancy.id,
-                                          type: "LIKED_THEN_DELETED")
-                                          .then((value) {
-                                        StoreProvider.of<AppState>(
-                                            context)
-                                            .state
-                                            .vacancy
-                                            .liked_list
-                                            .data
-                                            .remove(widget.vacancy);
-                                        StoreProvider.of<AppState>(
-                                            context)
-                                            .dispatch(
-                                            getNumberOfLikedVacancies());
-                                      });
+                                      // Vacancy.saveVacancyUser(
+                                      //     vacancy_id:
+                                      //     widget.vacancy.id,
+                                      //     type: "LIKED_THEN_DELETED")
+                                      //     .then((value) {
+                                      //   StoreProvider.of<AppState>(
+                                      //       context)
+                                      //       .state
+                                      //       .vacancy
+                                      //       .liked_list
+                                      //       .data
+                                      //       .remove(widget.vacancy);
+                                      //   StoreProvider.of<AppState>(
+                                      //       context)
+                                      //       .dispatch(
+                                      //       getNumberOfLikedVacancies());
+                                      // });
                                     } else if (widget.page == 'company' ||
                                         widget.page ==
                                             'company_inactive') {
-                                      Dialogs.showOnDeleteDialog(
-                                          context,
-                                          'delete_are_you_sure'.tr(),
-                                          widget.vacancy);
+                                      // Dialogs.showOnDeleteDialog(
+                                      //     context,
+                                      //     'delete_are_you_sure'.tr(),
+                                      //     widget.vacancy);
                                     }
                                   },
                                   text: widget.page == 'discover'
@@ -452,66 +433,65 @@ class _ProfileCardState extends State<ProfileCard> {
                                           .triggerRight();
                                     } else if (widget.page == 'match') {
                                       Dialogs.openLoadingDialog(context);
-                                      Vacancy.saveVacancyUser(
-                                          vacancy_id:
-                                          widget.vacancy.id,
-                                          type: "SUBMITTED")
-                                          .then((value) {
-                                        if (value == "OK") {
-                                          Users user = new Users();
-                                          Dialogs.showDialogBox(
-                                              context,
-                                              "successfully_submitted"
-                                                  .tr());
-                                          StoreProvider.of<AppState>(
-                                              context)
-                                              .state
-                                              .vacancy
-                                              .liked_list
-                                              .data
-                                              .remove(widget.vacancy);
-                                          StoreProvider.of<AppState>(
-                                              context)
-                                              .dispatch(
-                                              getLikedVacancies());
-                                          StoreProvider.of<AppState>(
-                                              context)
-                                              .dispatch(
-                                              getNumberOfLikedVacancies());
-                                        } else {
-                                          Dialogs.showDialogBox(
-                                              context,
-                                              "some_error_occurred_try_again"
-                                                  .tr());
-                                        }
-                                      });
+                                      // Vacancy.saveVacancyUser(
+                                      //     vacancy_id:
+                                      //     widget.vacancy.id,
+                                      //     type: "SUBMITTED")
+                                      //     .then((value) {
+                                      //   if (value == "OK") {
+                                      //     Users user = new Users();
+                                      //     Dialogs.showDialogBox(
+                                      //         context,
+                                      //         "successfully_submitted"
+                                      //             .tr());
+                                      //     StoreProvider.of<AppState>(
+                                      //         context)
+                                      //         .state
+                                      //         .vacancy
+                                      //         .liked_list
+                                      //         .data
+                                      //         .remove(widget.vacancy);
+                                      //     StoreProvider.of<AppState>(
+                                      //         context)
+                                      //         .dispatch(
+                                      //         getLikedVacancies());
+                                      //     StoreProvider.of<AppState>(
+                                      //         context)
+                                      //         .dispatch(
+                                      //         getNumberOfLikedVacancies());
+                                      //   } else {
+                                      //     Dialogs.showDialogBox(
+                                      //         context,
+                                      //         "some_error_occurred_try_again"
+                                      //             .tr());
+                                      //   }
+                                      // });
                                     } else if (widget.page == 'company') {
-                                      Dialogs.showOnDeactivateDialog(
-                                          context,
-                                          'deactivate_are_you_sure'.tr(),
-                                          false,
-                                          widget.vacancy);
-                                    } else if (widget.page ==
-                                        'company_inactive') {
-                                      Dialogs.showOnDeactivateDialog(
-                                          context,
-                                          'activate_are_you_sure'.tr(),
-                                          true,
-                                          widget.vacancy);
+                                      // Dialogs.showOnDeactivateDialog(
+                                      //     context,
+                                      //     'deactivate_are_you_sure'.tr(),
+                                      //     false,
+                                      //     widget.vacancy);
+                                    } else if (widget.page == 'company_inactive') {
+                                      // Dialogs.showOnDeactivateDialog(
+                                      //     context,
+                                      //     'activate_are_you_sure'.tr(),
+                                      //     true,
+                                      //     widget.vacancy);
                                     } else if (widget.page == 'submit') {
-                                      Navigator.of(context).push(
-                                          MaterialPageRoute(builder:
-                                              (BuildContext context) {
-                                            return ChatScreen(
-                                              user_id: widget.vacancy.company,
-                                              name:
-                                              widget.vacancy.company_name,
-                                              vacancy_id: widget.vacancy.id,
-                                              vacancy: widget.vacancy.name,
-                                              avatar:
-                                              widget.vacancy.company_logo,
-                                            );
-                                          }));
+                                      // Navigator.of(context).push(
+                                      //     MaterialPageRoute(builder:
+                                      //         (BuildContext context) {
+                                      //       return ChatScreen(
+                                      //         user_id: widget.vacancy.company,
+                                      //         name:
+                                      //         widget.vacancy.company_name,
+                                      //         vacancy_id: widget.vacancy.id,
+                                      //         vacancy: widget.vacancy.name,
+                                      //         avatar:
+                                      //         widget.vacancy.company_logo,
+                                      //       );
+                                      //     }));
                                     }
                                   },
                                   text: widget.page == 'discover'

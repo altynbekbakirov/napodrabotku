@@ -92,21 +92,25 @@ class ProfileLikesScreen extends StatelessWidget {
                   ),
                 );
               } else {
-                body = Column(
-                  children: [
-                    Expanded(
-                      child: UsersGrid(
-                          children: data.map((vacancy) {
-                        return GestureDetector(
-                          child: ProfileCard(
-                            vacancy: vacancy,
-                            page: 'match',
-                          ),
-                          onTap: () {},
-                        );
-                      }).toList()),
-                    )
-                  ],
+                body = Container(
+                  padding: EdgeInsets.all(20),
+                  child: Column(
+                    children: [
+                      Expanded(
+                        child: UsersGrid(
+                            children: data.map((vacancy) {
+                              return GestureDetector(
+                                child: ProfileCard(
+                                  vacancy: vacancy,
+                                  page: 'match',
+                                ),
+                                onTap: () {},
+                              );
+                            }).toList()
+                        ),
+                      )
+                    ],
+                  ),
                 );
               }
 

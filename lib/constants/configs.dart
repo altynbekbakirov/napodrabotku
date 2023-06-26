@@ -44,6 +44,7 @@ String API_USER_CV_COURSE_DELETE = 'user/course/delete/';
 
 String API_LOGIN = 'login';
 String API_LOGIN_PHONE = 'login_phone';
+String API_USER_LIST = 'users';
 String API_VACANCY_LIST = 'vacancy';
 String API_QUALIFICATION_LIST = 'qualification';
 String API_LIKED_USER_VACANCY_LIST = 'user_vacancy/LIKED';
@@ -67,6 +68,7 @@ String API_SAVE_JOB_SPHERE = 'user/save/job_sphere';
 
 //chat
 String API_CHAT_LIST = 'chats';
+String API_UNREAD_MESSAGES = 'unread_messages';
 String API_CHAT_DELETE = 'chats/delete';
 String API_MESSAGE_LIST = 'messages';
 String API_SEND_MESSAGE = 'messages';

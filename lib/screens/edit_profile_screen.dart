@@ -441,39 +441,39 @@ class _EditProfileScreenState extends State<EditProfileScreen> {
                     ) : Container(),
                     SizedBox(height: 20),
 
-                    Align(
-                        widthFactor: 10,
-                        heightFactor: 1.5,
-                        alignment: Alignment.topLeft,
-                        child: Text(
-                          'email'.tr().toString().toUpperCase() + '*',
-                          style: TextStyle(fontSize: 12, color: Colors.black, fontWeight: FontWeight.w700),
-                        )
-                    ),
-                    TextFormField(
-                      controller: _email_controller,
-                      decoration: InputDecoration(
-                        enabled: false,
-                        contentPadding: EdgeInsets.symmetric(vertical: 10, horizontal: 20),
-                        border: OutlineInputBorder(),
-                        disabledBorder: OutlineInputBorder(borderSide: BorderSide(color: Colors.grey[200], width: 2.0)),
-                        enabledBorder: OutlineInputBorder(borderSide: BorderSide(color: Colors.grey[200], width: 2.0)),
-                        errorBorder: OutlineInputBorder(borderSide: BorderSide(color: kColorPrimary, width: 2.0)),
-                        errorStyle: TextStyle(color: kColorPrimary, fontWeight: FontWeight.w500),
-                        floatingLabelBehavior: FloatingLabelBehavior.always,
-                        filled: true,
-                        fillColor: kColorWhite,
-                      ),
-                      validator: (name) {
-                        // Basic validation
-//                      if (name.isEmpty) {
-//                        return "please_fill_this_field".tr();
-//                      }
-                        return null;
-                      },
-                      style: TextStyle(color: kColorPrimary.withOpacity(0.6)),
-                    ),
-                    SizedBox(height: 20),
+//                     Align(
+//                         widthFactor: 10,
+//                         heightFactor: 1.5,
+//                         alignment: Alignment.topLeft,
+//                         child: Text(
+//                           'email'.tr().toString().toUpperCase() + '*',
+//                           style: TextStyle(fontSize: 12, color: Colors.black, fontWeight: FontWeight.w700),
+//                         )
+//                     ),
+//                     TextFormField(
+//                       controller: _email_controller,
+//                       decoration: InputDecoration(
+//                         enabled: false,
+//                         contentPadding: EdgeInsets.symmetric(vertical: 10, horizontal: 20),
+//                         border: OutlineInputBorder(),
+//                         disabledBorder: OutlineInputBorder(borderSide: BorderSide(color: Colors.grey[200], width: 2.0)),
+//                         enabledBorder: OutlineInputBorder(borderSide: BorderSide(color: Colors.grey[200], width: 2.0)),
+//                         errorBorder: OutlineInputBorder(borderSide: BorderSide(color: kColorPrimary, width: 2.0)),
+//                         errorStyle: TextStyle(color: kColorPrimary, fontWeight: FontWeight.w500),
+//                         floatingLabelBehavior: FloatingLabelBehavior.always,
+//                         filled: true,
+//                         fillColor: kColorWhite,
+//                       ),
+//                       validator: (name) {
+//                         // Basic validation
+// //                      if (name.isEmpty) {
+// //                        return "please_fill_this_field".tr();
+// //                      }
+//                         return null;
+//                       },
+//                       style: TextStyle(color: kColorPrimary.withOpacity(0.6)),
+//                     ),
+//                     SizedBox(height: 20),
 
                     /// Область
                     Align(
@@ -676,77 +676,6 @@ class _EditProfileScreenState extends State<EditProfileScreen> {
                       ],
                     ) : Container(),
 
-                    /// Выбор Отрасли
-                    selectedJobSphere != null ?
-                    Align(
-                        widthFactor: 10,
-                        heightFactor: 1.5,
-                        alignment: Alignment.topLeft,
-                        child: Text(
-                          'industry'.tr().toString().toUpperCase() + '*',
-                          style: TextStyle(fontSize: 12, color: Colors.black, fontWeight: FontWeight.w700),
-                        )
-                    ) : Container(),
-
-                    selectedJobSphere != null ?
-                    DropdownSearch<String>(
-                        showSelectedItem: true,
-                        items: departments,
-                        onChanged: (value) {
-                          setState(() {
-                            selectedDepartment = value;
-                          });
-                        },
-                        dropdownSearchDecoration: InputDecoration(
-                          contentPadding: EdgeInsets.symmetric(vertical: 0, horizontal: 20),
-                          border: OutlineInputBorder(),
-                          enabledBorder: OutlineInputBorder(borderSide: BorderSide(color: Colors.grey[200], width: 2.0)),
-                          errorBorder: OutlineInputBorder(borderSide: BorderSide(color: kColorPrimary, width: 2.0)),
-                          errorStyle: TextStyle(color: kColorPrimary, fontWeight: FontWeight.w500),
-                          floatingLabelBehavior: FloatingLabelBehavior.always,
-                          filled: true,
-                          fillColor: kColorWhite,
-                        ),
-                        selectedItem: selectedDepartment
-                    ) : Container(),
-                    SizedBox(height: 20),
-
-                    /// Социально-ориентированность
-                    Prefs.getString(Prefs.USER_TYPE) == "COMPANY" ?
-                    Column(
-                      children: <Widget>[
-                        Align(
-                            widthFactor: 10,
-                            heightFactor: 1.5,
-                            alignment: Alignment.topLeft,
-                            child: Text(
-                              'social_orientation'.tr().toString().toUpperCase() + '*',
-                              style: TextStyle(fontSize: 12, color: Colors.black, fontWeight: FontWeight.w700),
-                            )
-                        ),
-                        DropdownSearch<String>(
-                            showSelectedItem: true,
-                            items: socialOrientations,
-                            onChanged: (value) {
-                              setState(() {
-                                selectedSocialOrientation = value;
-                              });
-                            },
-                            dropdownSearchDecoration: InputDecoration(
-                              contentPadding: EdgeInsets.symmetric(vertical: 0, horizontal: 20),
-                              border: OutlineInputBorder(),
-                              enabledBorder: OutlineInputBorder(borderSide: BorderSide(color: Colors.grey[200], width: 2.0)),
-                              errorBorder: OutlineInputBorder(borderSide: BorderSide(color: kColorPrimary, width: 2.0)),
-                              errorStyle: TextStyle(color: kColorPrimary, fontWeight: FontWeight.w500),
-                              floatingLabelBehavior: FloatingLabelBehavior.always,
-                              filled: true,
-                              fillColor: kColorWhite,
-                            ),
-                            selectedItem: selectedSocialOrientation),
-                        SizedBox(height: 20),
-                      ],
-                    ) : Container(),
-
                     Prefs.getString(Prefs.USER_TYPE) == "USER" ?
                     Align(
                         widthFactor: 10,
@@ -799,7 +728,6 @@ class _EditProfileScreenState extends State<EditProfileScreen> {
                     Row(
                       mainAxisAlignment: MainAxisAlignment.start,
                       children: [
-
                         Radio(
                           value: user_gender.Male,
                           groupValue: gender,
@@ -847,8 +775,8 @@ class _EditProfileScreenState extends State<EditProfileScreen> {
                             ),
                             padding: EdgeInsets.all(0),
                             color: Colors.transparent,
-                            text: attachment != null ? basename(attachment.path) : 'upload_new_file'.tr(),
                             textColor: kColorPrimary,
+                            text: attachment != null ? basename(attachment.path) : 'upload_new_file'.tr(),
                             onPressed: () {
                               // _pickAttachment();
                             }

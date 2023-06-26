@@ -276,9 +276,6 @@ class _SignInScreenState extends State<SignInScreen> {
                               if (password.isEmpty) {
                                 return "please_fill_this_field".tr();
                               }
-//                      else if (password.length <5) {
-//                        return "password_must_at_least_5_chars".tr();
-//                      }
                               return null;
                             },
                           ),
@@ -286,20 +283,6 @@ class _SignInScreenState extends State<SignInScreen> {
                       ],
                     ),
                   ) : Container(),
-
-                  // Align(
-                  //   alignment: Alignment.bottomRight,
-                  //   child: GestureDetector(
-                  //     onTap: () {
-                  //       Navigator.pushNamed(context, Routes.forgot_password);
-                  //     },
-                  //     child: Text(
-                  //       'forgot_password'.tr(),
-                  //       style: TextStyle(fontSize: 14, color: kColorDark, fontWeight: FontWeight.w500),
-                  //     ),
-                  //   ),
-                  // ),
-                  // SizedBox(height: 30),
 
                   /// Sign In button
                   SizedBox(
@@ -348,18 +331,6 @@ class _SignInScreenState extends State<SignInScreen> {
                             } else {
                               throw Exception('Не удалось отправить СМС-сообщение с кодом.');
                             }
-
-                            // user.loginPhoneOTP(phoneNumber.trim()).then((
-                            //     value) {
-                            //   if (value == "OK") {
-                            //     Navigator.of(context).popUntil((route) =>
-                            //     route.isFirst);
-                            //     Navigator.of(context).pushNamed(Routes.home);
-                            //   } else {
-                            //     _showDialog(context,
-                            //         "invalid_phone_number_or_password".tr());
-                            //   }
-                            // });
                           }
                         }
                       },

@@ -3,6 +3,7 @@ import 'package:flutter/cupertino.dart';
 import 'package:easy_localization/easy_localization.dart';
 import 'package:ishtapp/datas/vacancy.dart';
 import 'package:ishtapp/datas/Skill.dart';
+import 'package:ishtapp/routes/routes.dart';
 import 'package:ishtapp/utils/constants.dart';
 import 'package:dropdown_search/dropdown_search.dart';
 import 'package:ishtapp/utils/textFormatter/lengthLimitingTextInputFormatter.dart';
@@ -16,6 +17,8 @@ import 'package:flutter_datetime_picker/flutter_datetime_picker.dart';
 import 'package:flutter_typeahead/flutter_typeahead.dart';
 import 'package:http/http.dart' as http;
 import 'dart:convert';
+
+import 'package:ishtapp/widgets/vacancy_view.dart';
 
 enum work_mode { work, training }
 
@@ -154,7 +157,7 @@ class _EditVacancyState extends State<EditVacancy> {
     currencyList = await Vacancy.getLists('currencies', null);
     var v = widget.vacancy.currency;
     currencyList.forEach((item) {
-      if (item['name'] == widget.vacancy.currency) {
+      if (item['code'] == widget.vacancy.currency) {
         setState(() {
           _currency_id = item['id'];
         });
@@ -1003,7 +1006,8 @@ class _EditVacancyState extends State<EditVacancy> {
                                 setState(() {
                                   loading = false;
                                 });
-                                Navigator.of(context).pop();
+                                Navigator.of(context).pushNamedAndRemoveUntil(Routes.home, (Route<dynamic> route) => false);
+                                // Navigator.of(context).pop();
                               });
 
                               _vacancy_name_controller = TextEditingController();

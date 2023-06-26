@@ -8,13 +8,19 @@ import 'package:async/async.dart';
 class ChatState {
   ListChatViewState chat_list;
   ListMessageViewState message_list;
+  int number_of_unread;
 
   factory ChatState.initial() => ChatState(
-        chat_list: ListChatViewState.initial(),
-        message_list: ListMessageViewState.initial(),
-      );
+    chat_list: ListChatViewState.initial(),
+    message_list: ListMessageViewState.initial(),
+    number_of_unread: 0,
+  );
 
-  ChatState({this.chat_list, this.message_list});
+  ChatState({
+    this.chat_list,
+    this.message_list,
+    this.number_of_unread
+  });
 }
 
 class ListChatViewState {
@@ -29,10 +35,10 @@ class ListChatViewState {
   });
 
   factory ListChatViewState.initial() => ListChatViewState(
-        error: null,
-        loading: false,
-        data: [],
-      );
+    error: null,
+    loading: false,
+    data: [],
+  );
 }
 
 class ChatView {
@@ -46,12 +52,12 @@ class ChatView {
 
   ChatView(
       {this.user_id,
-      this.avatar,
-      this.last_message,
-      this.name,
-      this.vacancy_id,
-      this.vacancy,
-      this.num_of_unreads});
+        this.avatar,
+        this.last_message,
+        this.name,
+        this.vacancy_id,
+        this.vacancy,
+        this.num_of_unreads});
 
   factory ChatView.fromJson(Map<String, dynamic> json) => new ChatView(
       user_id: json["id"],
@@ -95,10 +101,10 @@ class ListMessageViewState {
   });
 
   factory ListMessageViewState.initial() => ListMessageViewState(
-        error: null,
-        loading: false,
-        data: [],
-      );
+    error: null,
+    loading: false,
+    data: [],
+  );
 }
 
 enum MessageType { FROM, TO }

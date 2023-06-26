@@ -267,7 +267,7 @@ class _ProfileCardMapState extends State<ProfileCardMap> {
                                           (widget.vacancy.salary != null ? widget.vacancy.salary : '') + widget.vacancy.currency,
                                           textAlign: TextAlign.end,
                                           style: TextStyle(
-                                            fontSize: 24,
+                                            fontSize: 20,
                                             fontWeight: FontWeight.w900,
                                             fontFamily: 'Manrope',
                                             color: kColorPrimary,
@@ -279,7 +279,7 @@ class _ProfileCardMapState extends State<ProfileCardMap> {
                                           widget.vacancy.period != null ? widget.vacancy.period.toLowerCase() : '',
                                           textAlign: TextAlign.end,
                                           style: TextStyle(
-                                            fontSize: 16,
+                                            fontSize: 14,
                                             fontWeight: FontWeight.w700,
                                             fontFamily: 'Manrope',
                                             color: kColorPrimary,
@@ -328,7 +328,7 @@ class _ProfileCardMapState extends State<ProfileCardMap> {
                                 child: RichText(
                                   overflow: TextOverflow.ellipsis,
                                   text: TextSpan(
-                                      text: widget.vacancy.description != null ? widget.vacancy.description : "",
+                                      text: widget.vacancy.description != null ? Bidi.stripHtmlIfNeeded(widget.vacancy.description) : "",
                                       style: TextStyle(
                                           fontSize: 14,
                                           fontWeight: FontWeight.normal,

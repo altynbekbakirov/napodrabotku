@@ -12,6 +12,7 @@ import 'package:ishtapp/widgets/badge.dart';
 import 'package:flutter_redux/flutter_redux.dart';
 import 'package:ishtapp/components/custom_button.dart';
 import 'package:ishtapp/routes/routes.dart';
+import 'dart:async';
 
 class ConversationsTab extends StatefulWidget {
   @override
@@ -23,9 +24,20 @@ class _ConversationsTabState extends State<ConversationsTab> {
     props.getChatList();
   }
 
+
+
+  @override
+  void didChangeDependencies() {
+    final store = StoreProvider.of<AppState>(context);
+    Timer.periodic(Duration(seconds:300), (Timer t) => StoreProvider.of<AppState>(context).dispatch(getChatList()));
+    // TODO: implement didChangeDependencies
+    super.didChangeDependencies();
+  }
+
   @override
   Widget build(BuildContext context) {
-    if (Prefs.getString(Prefs.TOKEN) == "null" || Prefs.getString(Prefs.TOKEN) == null) {
+    if (Prefs.getString(Prefs.TOKEN) == "null" ||
+        Prefs.getString(Prefs.TOKEN) == null) {
       return Center(
         child: Column(
           mainAxisAlignment: MainAxisAlignment.center,
@@ -68,10 +80,6 @@ class _ConversationsTabState extends State<ConversationsTab> {
             body = data.length > 0
                 ? Column(
                     children: [
-                      SizedBox(
-                        height: 20,
-                      ),
-
                       /// Conversations
                       Expanded(
                           child: ListView.separated(
@@ -81,37 +89,49 @@ class _ConversationsTabState extends State<ConversationsTab> {
                         itemBuilder: ((context, index) {
                           /// Get user object
                           return Container(
-                            padding: EdgeInsets.symmetric(vertical: 10, horizontal: 0),
+                            padding: EdgeInsets.symmetric(
+                                vertical: 10, horizontal: 0),
                             child: ListTile(
                               leading: CircleAvatar(
                                 backgroundColor: Colors.white,
-                                backgroundImage: data[index].avatar != null ?
-                                NetworkImage(
-                                    SERVER_IP + data[index].avatar,
-                                    headers: {"Authorization": Prefs.getString(Prefs.TOKEN)}
-                                ) :
-                                AssetImage('assets/images/default-user.jpg'),
+                                backgroundImage: data[index].avatar != null
+                                    ? NetworkImage(
+                                        SERVER_IP + data[index].avatar,
+                                        headers: {
+                                            "Authorization":
+                                                Prefs.getString(Prefs.TOKEN)
+                                          })
+                                    : AssetImage(
+                                        'assets/images/default-user.jpg'),
                               ),
                               title: Text(
-                                  data[index].name + ' (' + data[index].vacancy + ')',
-                                  style: TextStyle(fontSize: 18, color: Colors.black)
+                                  data[index].name +
+                                      ' (' +
+                                      data[index].vacancy +
+                                      ')',
+                                  style: TextStyle(
+                                      fontSize: 16,
+                                      color: Colors.black
+                                  )
                               ),
                               subtitle: Text(data[index].last_message),
-                              trailing: data[index].num_of_unreads > 0 ?
-                              Badge(text: data[index].num_of_unreads.toString()) : null,
+                              trailing: data[index].num_of_unreads > 0
+                                  ? Badge(
+                                      text: data[index].num_of_unreads.toString())
+                                  : null,
                               onTap: () {
+                                StoreProvider.of<AppState>(context).dispatch(getNumberOfUnreadMessages());
+
                                 /// Go to chat screen
-                                Navigator.of(context).push(
-                                    MaterialPageRoute(
-                                        builder: (context) => ChatScreen(
-                                            user_id: data[index].user_id,
-                                            name: data[index].name,
-                                            vacancy_id: data[index].vacancy_id,
-                                            vacancy: data[index].vacancy,
-                                            avatar: data[index].avatar
-                                        )
+                                Navigator.of(context).push(MaterialPageRoute(
+                                    builder: (context) => ChatScreen(
+                                        user_id: data[index].user_id,
+                                        name: data[index].name,
+                                        vacancy_id: data[index].vacancy_id,
+                                        vacancy: data[index].vacancy,
+                                        avatar: data[index].avatar
                                     )
-                                );
+                                ));
                               },
                             ),
                           );
@@ -124,11 +144,13 @@ class _ConversationsTabState extends State<ConversationsTab> {
                         mainAxisAlignment: MainAxisAlignment.center,
                         children: [
                           Padding(
-                            padding: EdgeInsets.all(MediaQuery.of(context).size.width * 0.1),
+                            padding: EdgeInsets.all(
+                                MediaQuery.of(context).size.width * 0.1),
                             child: Text(
                               "empty".tr(),
                               textAlign: TextAlign.center,
-                              style: TextStyle(color: kColorPrimary, fontSize: 20),
+                              style:
+                                  TextStyle(color: kColorPrimary, fontSize: 20),
                             ),
                           )
                         ],
@@ -137,11 +159,13 @@ class _ConversationsTabState extends State<ConversationsTab> {
                         mainAxisAlignment: MainAxisAlignment.center,
                         children: [
                           Padding(
-                            padding: EdgeInsets.all(MediaQuery.of(context).size.width * 0.1),
+                            padding: EdgeInsets.all(
+                                MediaQuery.of(context).size.width * 0.1),
                             child: Text(
                               "chat_function_is_not_available".tr(),
                               textAlign: TextAlign.center,
-                              style: TextStyle(color: kColorPrimary, fontSize: 20),
+                              style:
+                                  TextStyle(color: kColorPrimary, fontSize: 20),
                             ),
                           )
                         ],

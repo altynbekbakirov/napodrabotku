@@ -11,6 +11,24 @@ UserState userReducer(UserState state, FSA action) {
   UserState newState = state;
 
   switch (action.type) {
+    case LIST_USERS_REQUEST:
+      newState.list.error = null;
+      newState.list.loading = true;
+      newState.list.data = null;
+      return newState;
+
+    case LIST_USERS_SUCCESS:
+      newState.list.error = null;
+      newState.list.loading = false;
+      newState.list.data = usersFromJsonStr(action.payload);
+      return newState;
+
+    case LIST_USERS_FAILURE:
+      newState.list.error = action.payload;
+      newState.list.loading = false;
+      newState.list.data = null;
+      return newState;
+
     case GET_USER_REQUEST:
       newState.user.error = null;
       newState.user.loading = true;

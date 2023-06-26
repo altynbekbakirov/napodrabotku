@@ -90,6 +90,7 @@ dependencies:
   translit: ^1.3.0
 
   flutter_intro: ^1.1.0
+  flutter_phosphor_icons: ^0.0.1+3
 
 dev_dependencies:
   flutter_test:

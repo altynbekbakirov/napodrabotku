@@ -40,6 +40,8 @@ class _ChatScreenState extends State<ChatScreen> {
 
   final DateFormat formatter = DateFormat('yyyy-MM-dd H:m');
 
+  ScrollController controller = new ScrollController();
+
   @override
   void initState() {
     super.initState();
@@ -68,12 +70,13 @@ class _ChatScreenState extends State<ChatScreen> {
                 child: Container(
                   padding: EdgeInsets.symmetric(horizontal: 20, vertical: 10),
                   child: ListView.builder(
+                      controller: controller,
                       shrinkWrap: true,
                       itemCount: data == null ? 0 : data.length,
                       itemBuilder: (context, index) {
-                        // SchedulerBinding.instance.addPostFrameCallback((_) {
-                        //   _scrollController.jumpTo(_scrollController.position.maxScrollExtent);
-                        // });
+                        SchedulerBinding.instance.addPostFrameCallback((_) {
+                          controller.jumpTo(controller.position.maxScrollExtent);
+                        });
                         return ChatMessage(
                           isUserSender: data[index].type,
                           body: data[index].body,

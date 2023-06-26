@@ -28,6 +28,8 @@ class Users {
   String gender;
   String region;
   String district;
+  String vacancy_type;
+  String business;
   String job_type;
   String job_sphere;
   String opportunity;
@@ -41,6 +43,8 @@ class Users {
   int userVacancyId;
   String lat;
   String long;
+  String status;
+  String description;
 
   Users({
     this.id,
@@ -61,19 +65,20 @@ class Users {
     this.gender,
     this.region,
     this.district,
+    this.vacancy_type,
+    this.business,
     this.job_type,
-    this.is_product_lab_user,
     this.contact_person_fullname,
     this.contact_person_position,
     this.department,
-    this.opportunity,
     this.job_sphere,
-    this.social_orientation,
     this.address,
     this.recruited,
     this.userVacancyId,
     this.lat,
     this.long,
+    this.status,
+    this.description,
   });
 
   factory Users.fromJson(Map<String, dynamic> json) => new Users(
@@ -91,21 +96,22 @@ class Users {
       is_company: json['type'] == 'COMPANY',
       is_migrant: json['is_migrant'],
       gender: json['gender'],
-      region: json['region'],
-      district: json['district'],
-      job_type: json['job_type'],
-      job_sphere: json['job_sphere'],
-      opportunity: json['opportunity'],
-      department: json['department'],
-      social_orientation: json['social_orientation'],
+      region: json['region'].toString(),
+      district: json['district'].toString(),
+      vacancy_type: json['vacancy_type'].toString(),
+      business: json['business'].toString(),
+      job_type: json['job_type'].toString(),
+      job_sphere: json['job_sphere'].toString(),
+      department: json['department'].toString(),
       contact_person_fullname: json['contact_person_fullname'],
       contact_person_position: json['contact_person_position'],
-      is_product_lab_user: json['is_product_lab_user'] == 1,
       address: json['address'],
       recruited: json['recruited'],
       userVacancyId: json['user_vacancy_id'],
       lat: json['lat'],
       long: json['long'],
+      status: json['status'],
+      description: json['description'],
   );
 
   Future<void> setRecruit(int userId, int userVacancyId, int recruited) async {
@@ -729,81 +735,42 @@ class Users {
       throw error;
     }
   }
-
-  /// Skills
-  static Future<List<dynamic>> getSkills(email, int type) async {
-    final url = API_IP + API_GET_USER_SKILLS + '?email=' + email + '&type=' + type.toString();
-    try {
-      Map<String, String> headers = {"Content-type": "application/json"};
-      final response = await http.get(url, headers: headers);
-      // print(model + ' - ' + utf8.decode(response.bodyBytes));
-      return json.decode(utf8.decode(response.bodyBytes));
-    } catch (error) {
-      throw error;
-    }
-  }
-
-  /// Save job sphere
-  void saveJobSphere(value) async {
-    // string to uri
-    var uri = Uri.parse(API_IP + API_SAVE_JOB_SPHERE);
-
-    // create multipart request
-    var request = new http.MultipartRequest("POST", uri);
-
-    request.fields["id"] = this.id.toString();
-    request.fields["job_sphere"] = value.toString();
-
-    // send request to upload image
-    await request.send().then((response) async {
-      // listen for response
-      response.stream.transform(utf8.decoder).listen((value) {
-        var data = json.decode(value);
-        print(data);
-      });
-    }).catchError((e) {
-      print(e);
-    });
-  }
-
-  /// Save opportunity
-  void saveOpportunity(value) async {
-    // string to uri
-    var uri = Uri.parse(API_IP + API_SAVE_OPPORTUNITY);
-
-    // create multipart request
-    var request = new http.MultipartRequest("POST", uri);
-
-    request.fields["id"] = this.id.toString();
-    request.fields["opportunity"] = value.toString();
-
-    // send request to upload image
-    await request.send().then((response) async {
-      // listen for response
-      response.stream.transform(utf8.decoder).listen((value) {
-        var data = json.decode(value);
-        print(data);
-      });
-    }).catchError((e) {
-      print(e);
-    });
-  }
 }
 
 class UserState {
   UserDetailState user;
   ListUserDetailState submitted_user_list;
+  ListUsersState list;
   UserCvState user_cv;
   UserFullInfoState user_full_info;
 
-  UserState({this.user, this.user_cv, this.submitted_user_list, this.user_full_info});
+  UserState({this.user, this.user_cv, this.submitted_user_list, this.user_full_info, this.list});
 
   factory UserState.initial() => UserState(
         user: UserDetailState.initial(),
         user_cv: UserCvState.initial(),
+        list: ListUsersState.initial(),
         submitted_user_list: ListUserDetailState.initial(),
         user_full_info: UserFullInfoState.initial(),
       );
+}
+
+class ListUsersState {
+  dynamic error;
+  bool loading;
+  List<Users> data;
+
+  ListUsersState({
+    this.error,
+    this.loading,
+    this.data,
+  });
+
+  factory ListUsersState.initial() => ListUsersState(
+    error: null,
+    loading: false,
+    data: [],
+  );
 }
 
 class UserDetailState {

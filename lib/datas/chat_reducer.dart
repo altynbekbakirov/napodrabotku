@@ -27,6 +27,18 @@ ChatState chatReducer(ChatState state, FSA action) {
       newState.chat_list.data = null;
       return newState;
 
+    case GET_UNREAD_MESSAGES_NUMBER_REQUEST:
+      newState.number_of_unread = 0;
+      return newState;
+
+    case GET_UNREAD_MESSAGES_NUMBER_SUCCESS:
+      newState.number_of_unread = int.parse(action.payload);
+      return newState;
+
+    case GET_UNREAD_MESSAGES_NUMBER_FAILURE:
+      newState.number_of_unread = 0;
+      return newState;
+
     case GET_MESSAGE_LIST_REQUEST:
       newState.message_list.error = null;
       newState.message_list.loading = true;
