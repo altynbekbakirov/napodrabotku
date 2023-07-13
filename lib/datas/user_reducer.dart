@@ -101,6 +101,78 @@ UserState userReducer(UserState state, FSA action) {
       newState.user_full_info.data = null;
       return newState;
 
+    case GET_LIKED_USERS_REQUEST:
+      newState.liked_user_list.error = null;
+      newState.liked_user_list.loading = true;
+      newState.liked_user_list.data = null;
+      return newState;
+
+    case GET_LIKED_USERS_SUCCESS:
+      newState.liked_user_list.error = null;
+      newState.liked_user_list.loading = false;
+      newState.liked_user_list.data = usersFromJsonStr(action.payload);
+      return newState;
+
+    case GET_LIKED_USERS_FAILURE:
+      newState.liked_user_list.error = action.payload;
+      newState.liked_user_list.loading = false;
+      newState.liked_user_list.data = null;
+      return newState;
+
+    case GET_ALL_USERS_REQUEST:
+      newState.all_users.error = null;
+      newState.all_users.loading = true;
+      newState.all_users.data = null;
+      return newState;
+
+    case GET_ALL_USERS_SUCCESS:
+      newState.all_users.error = null;
+      newState.all_users.loading = false;
+      newState.all_users.data = usersFromJsonStr(action.payload);
+      return newState;
+
+    case GET_ALL_USERS_FAILURE:
+      newState.all_users.error = action.payload;
+      newState.all_users.loading = false;
+      newState.all_users.data = null;
+      return newState;
+
+    case GET_SUBMITTED_USERS_REQUEST:
+      newState.submitted_users.error = null;
+      newState.submitted_users.loading = true;
+      newState.submitted_users.data = null;
+      return newState;
+
+    case GET_SUBMITTED_USERS_SUCCESS:
+      newState.submitted_users.error = null;
+      newState.submitted_users.loading = false;
+      newState.submitted_users.data = usersFromJsonStr(action.payload);
+      return newState;
+
+    case GET_SUBMITTED_USERS_FAILURE:
+      newState.submitted_users.error = action.payload;
+      newState.submitted_users.loading = false;
+      newState.submitted_users.data = null;
+      return newState;
+
+    case GET_INVITED_USERS_REQUEST:
+      newState.invited_users.error = null;
+      newState.invited_users.loading = true;
+      newState.invited_users.data = null;
+      return newState;
+
+    case GET_INVITED_USERS_SUCCESS:
+      newState.invited_users.error = null;
+      newState.invited_users.loading = false;
+      newState.invited_users.data = usersFromJsonStr(action.payload);
+      return newState;
+
+    case GET_INVITED_USERS_FAILURE:
+      newState.invited_users.error = action.payload;
+      newState.invited_users.loading = false;
+      newState.invited_users.data = null;
+      return newState;
+
     default:
       return newState;
   }

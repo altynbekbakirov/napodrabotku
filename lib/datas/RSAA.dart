@@ -152,6 +152,31 @@ RSAA getLikedVacancyRequest() {
 ThunkAction<AppState> getLikedVacancies() =>
         (Store<AppState> store) => store.dispatch(getLikedVacancyRequest());
 
+const GET_USER_VACANCY_REQUEST = 'GET_USER_VACANCY_REQUEST';
+const GET_USER_VACANCY_SUCCESS = 'GET_USER_VACANCY_SUCCESS';
+const GET_USER_VACANCY_FAILURE = 'GET_USER_VACANCY_FAILURE';
+RSAA getUserVacancyRequest() {
+  return RSAA(
+    method: 'GET',
+    endpoint: API_IP +
+        API_USER_VACANCY_LIST +
+        '?lang=' +
+        Prefs.getString(Prefs.LANGUAGE),
+    types: [
+      GET_USER_VACANCY_REQUEST,
+      GET_USER_VACANCY_SUCCESS,
+      GET_USER_VACANCY_FAILURE,
+    ],
+    headers: {
+      'Content-Type': 'application/json',
+      'Authorization': Prefs.getString(Prefs.TOKEN),
+    },
+  );
+}
+
+ThunkAction<AppState> getUserVacancies() =>
+        (Store<AppState> store) => store.dispatch(getUserVacancyRequest());
+
 const GET_SUBMITTED_VACANCY_REQUEST = 'GET_SUBMITTED_VACANCY_REQUEST';
 const GET_SUBMITTED_VACANCY_SUCCESS = 'GET_SUBMITTED_VACANCY_SUCCESS';
 const GET_SUBMITTED_VACANCY_FAILURE = 'GET_SUBMITTED_VACANCY_FAILURE';
@@ -176,6 +201,31 @@ RSAA getSubmittedVacancyRequest() {
 
 ThunkAction<AppState> getSubmittedVacancies() =>
         (Store<AppState> store) => store.dispatch(getSubmittedVacancyRequest());
+
+const GET_INVITED_VACANCY_REQUEST = 'GET_INVITED_VACANCY_REQUEST';
+const GET_INVITED_VACANCY_SUCCESS = 'GET_INVITED_VACANCY_SUCCESS';
+const GET_INVITED_VACANCY_FAILURE = 'GET_INVITED_VACANCY_FAILURE';
+RSAA getInvitedVacancyRequest() {
+  return RSAA(
+    method: 'GET',
+    endpoint: API_IP +
+        API_INVITED_USER_VACANCY_LIST +
+        '?lang=' +
+        Prefs.getString(Prefs.LANGUAGE),
+    types: [
+      GET_INVITED_VACANCY_REQUEST,
+      GET_INVITED_VACANCY_SUCCESS,
+      GET_INVITED_VACANCY_FAILURE,
+    ],
+    headers: {
+      'Content-Type': 'application/json',
+      'Authorization': Prefs.getString(Prefs.TOKEN),
+    },
+  );
+}
+
+ThunkAction<AppState> getInvitedVacancies() =>
+        (Store<AppState> store) => store.dispatch(getInvitedVacancyRequest());
 
 ThunkAction<AppState> deleteItem1() =>
         (Store<AppState> store) => store.state.vacancy.list.data.removeLast();
@@ -297,6 +347,35 @@ RSAA getCompanyVacanciesRequest() {
 
 ThunkAction<AppState> getCompanyVacancies() =>
         (Store<AppState> store) => store.dispatch(getCompanyVacanciesRequest());
+
+const GET_COMPANY_ACTIVE_VACANCIES_REQUEST =
+    'GET_COMPANY_ACTIVE_VACANCIES_REQUEST';
+const GET_COMPANY_ACTIVE_VACANCIES_SUCCESS =
+    'GET_COMPANY_ACTIVE_VACANCIES_SUCCESS';
+const GET_COMPANY_ACTIVE_VACANCIES_FAILURE =
+    'GET_COMPANY_ACTIVE_VACANCIES_FAILURE';
+RSAA getCompanyActiveVacanciesRequest() {
+  return RSAA(
+    method: 'GET',
+    endpoint: API_IP +
+        API_COMPANY_ACTIVE_VACANCIES +
+        '?lang=' +
+        Prefs.getString(Prefs.LANGUAGE),
+    types: [
+      GET_COMPANY_ACTIVE_VACANCIES_REQUEST,
+      GET_COMPANY_ACTIVE_VACANCIES_SUCCESS,
+      GET_COMPANY_ACTIVE_VACANCIES_FAILURE,
+    ],
+    headers: {
+      'Content-Type': 'application/json',
+      'Authorization': Prefs.getString(Prefs.TOKEN),
+    },
+  );
+}
+
+ThunkAction<AppState> getCompanyActiveVacancies() =>
+        (Store<AppState> store) =>
+        store.dispatch(getCompanyActiveVacanciesRequest());
 
 const GET_COMPANY_INACTIVE_VACANCIES_REQUEST =
     'GET_COMPANY_INACTIVE_VACANCIES_REQUEST';
@@ -486,3 +565,114 @@ ThunkAction<AppState> getNumberOfUnreadMessages() =>
 ThunkAction<AppState> getMessageList(int receiver_id, int vacancy_id) =>
         (Store<AppState> store) =>
         store.dispatch(getMessageListRequest(receiver_id, vacancy_id));
+
+const GET_LIKED_USER_COMPANY_NUMBER_REQUEST = 'GET_LIKED_USER_COMPANY_NUMBER_REQUEST';
+const GET_LIKED_USER_COMPANY_NUMBER_SUCCESS = 'GET_LIKED_USER_COMPANY_NUMBER_SUCCESS';
+const GET_LIKED_USER_COMPANY_NUMBER_FAILURE = 'GET_LIKED_USER_COMPANY_NUMBER_FAILURE';
+RSAA getNumOfLikedUsersRequest() {
+  return RSAA(
+    method: 'GET',
+    endpoint: API_IP + API_USER_COMPANY_NUMBER_LIKED,
+    types: [
+      GET_LIKED_USER_COMPANY_NUMBER_REQUEST,
+      GET_LIKED_USER_COMPANY_NUMBER_SUCCESS,
+      GET_LIKED_USER_COMPANY_NUMBER_FAILURE,
+    ],
+    headers: {
+      'Content-Type': 'application/json',
+      'Authorization': Prefs.getString(Prefs.TOKEN),
+    },
+  );
+}
+
+ThunkAction<AppState> getNumberOfLikedUsers() =>
+        (Store<AppState> store) => store.dispatch(getNumOfLikedUsersRequest());
+
+
+const GET_LIKED_USERS_REQUEST = 'GET_LIKED_USERS_REQUEST';
+const GET_LIKED_USERS_SUCCESS = 'GET_LIKED_USERS_SUCCESS';
+const GET_LIKED_USERS_FAILURE = 'GET_LIKED_USERS_FAILURE';
+RSAA getLikedUsersRequest() {
+  return RSAA(
+    method: 'POST',
+    endpoint: API_IP + API_LIKED_USERS + Prefs.getInt(Prefs.USER_ID).toString(),
+    types: [
+      GET_LIKED_USERS_REQUEST,
+      GET_LIKED_USERS_SUCCESS,
+      GET_LIKED_USERS_FAILURE,
+    ],
+    headers: {
+      'Content-Type': 'application/json',
+      'Authorization': Prefs.getString(Prefs.TOKEN),
+    },
+  );
+}
+
+ThunkAction<AppState> getLikedUsers() =>
+        (Store<AppState> store) => store.dispatch(getLikedUsersRequest());
+
+const GET_ALL_USERS_REQUEST = 'GET_ALL_USERS_REQUEST';
+const GET_ALL_USERS_SUCCESS = 'GET_ALL_USERS_SUCCESS';
+const GET_ALL_USERS_FAILURE = 'GET_ALL_USERS_FAILURE';
+RSAA getAllUsersRequest() {
+  return RSAA(
+    method: 'GET',
+    endpoint: API_IP + API_ALL_USERS + "?lang=" + Prefs.getString(Prefs.LANGUAGE),
+    types: [
+      GET_ALL_USERS_REQUEST,
+      GET_ALL_USERS_SUCCESS,
+      GET_ALL_USERS_FAILURE,
+    ],
+    headers: {
+      'Content-Type': 'application/json',
+      'Authorization': Prefs.getString(Prefs.TOKEN),
+    },
+  );
+}
+
+ThunkAction<AppState> getAllUsers() =>
+        (Store<AppState> store) => store.dispatch(getAllUsersRequest());
+
+const GET_SUBMITTED_USERS_REQUEST = 'GET_SUBMITTED_USERS_REQUEST';
+const GET_SUBMITTED_USERS_SUCCESS = 'GET_SUBMITTED_USERS_SUCCESS';
+const GET_SUBMITTED_USERS_FAILURE = 'GET_SUBMITTED_USERS_FAILURE';
+RSAA getSubmitUsersRequest() {
+  return RSAA(
+    method: 'GET',
+    endpoint: API_IP + API_SUBMIT_USERS + "?lang=" + Prefs.getString(Prefs.LANGUAGE),
+    types: [
+      GET_SUBMITTED_USERS_REQUEST,
+      GET_SUBMITTED_USERS_SUCCESS,
+      GET_SUBMITTED_USERS_FAILURE,
+    ],
+    headers: {
+      'Content-Type': 'application/json',
+      'Authorization': Prefs.getString(Prefs.TOKEN),
+    },
+  );
+}
+
+ThunkAction<AppState> getSubmitUsers() =>
+        (Store<AppState> store) => store.dispatch(getSubmitUsersRequest());
+
+const GET_INVITED_USERS_REQUEST = 'GET_INVITED_USERS_REQUEST';
+const GET_INVITED_USERS_SUCCESS = 'GET_INVITED_USERS_SUCCESS';
+const GET_INVITED_USERS_FAILURE = 'GET_INVITED_USERS_FAILURE';
+RSAA getInviteUsersRequest() {
+  return RSAA(
+    method: 'GET',
+    endpoint: API_IP + API_INVITE_USERS + "?lang=" + Prefs.getString(Prefs.LANGUAGE),
+    types: [
+      GET_INVITED_USERS_REQUEST,
+      GET_INVITED_USERS_SUCCESS,
+      GET_INVITED_USERS_FAILURE,
+    ],
+    headers: {
+      'Content-Type': 'application/json',
+      'Authorization': Prefs.getString(Prefs.TOKEN),
+    },
+  );
+}
+
+ThunkAction<AppState> getInviteUsers() =>
+        (Store<AppState> store) => store.dispatch(getInviteUsersRequest());

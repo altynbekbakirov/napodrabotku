@@ -31,7 +31,7 @@ class _SelectModeState extends State<SelectMode> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: kColorBlue,
+      backgroundColor: kColorPrimary,
       body: WillPopScope(
         child: LayoutBuilder(
           builder: (BuildContext context, BoxConstraints viewportConstraints) {

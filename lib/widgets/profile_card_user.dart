@@ -1,7 +1,9 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_typeahead/flutter_typeahead.dart';
 import 'package:ishtapp/datas/RSAA.dart';
 import 'package:ishtapp/datas/user.dart';
 import 'package:ishtapp/datas/vacancy.dart';
+import 'package:ishtapp/routes/routes.dart';
 import 'package:ishtapp/screens/tabs/discover_tab.dart';
 import 'package:swipe_stack/swipe_stack.dart';
 import 'package:easy_localization/easy_localization.dart';
@@ -25,7 +27,6 @@ class ProfileCardUser extends StatefulWidget {
   /// Screen to be checked
   final String page;
   final int index;
-  int offset;
   final CardController cardController;
 
   /// Swiper position
@@ -36,7 +37,6 @@ class ProfileCardUser extends StatefulWidget {
     this.position,
     @required this.user,
     this.index,
-    this.offset,
     this.props,
     this.cardController,
   });
@@ -47,45 +47,159 @@ class ProfileCardUser extends StatefulWidget {
 
 class _ProfileCardUserState extends State<ProfileCardUser> {
   int counter = 0;
+  bool loading = false;
 
-  void removeCards({String type, int vacancy_id, props, context}) {
-    if (Prefs.getString(Prefs.TOKEN) != null) {
-      if (type == "LIKED") {
-        props.addOneToMatches();
-      }
-      Vacancy.saveVacancyUser(vacancy_id: vacancy_id, type: type).then((value) {
-        StoreProvider.of<AppState>(context)
-            .dispatch(getNumberOfLikedVacancies());
-      });
-      props.listResponse.data.remove(props.listResponse.data[0]);
-    } else {
-      props.listResponse.data.removeLast(props.listResponse.data[0]);
-    }
-    Vacancy.getVacancyByOffset(
-        offset: widget.offset,
-        job_type_ids:
-        StoreProvider.of<AppState>(context).state.vacancy.job_type_ids,
-        region_ids:
-        StoreProvider.of<AppState>(context).state.vacancy.region_ids,
-        schedule_ids:
-        StoreProvider.of<AppState>(context).state.vacancy.schedule_ids,
-        busyness_ids:
-        StoreProvider.of<AppState>(context).state.vacancy.busyness_ids,
-        vacancy_type_ids: StoreProvider.of<AppState>(context)
-            .state
-            .vacancy
-            .vacancy_type_ids,
-        type: StoreProvider.of<AppState>(context).state.vacancy.type)
-        .then((value) {
-      if (value != null) {
-        widget.offset = widget.offset + 1;
-        props.listResponse.data.add(value);
-      }
-    });
+  int vacancyId;
+  List<dynamic> vacancyList = [];
+
+  final _vacancyAddFormKey = GlobalKey<FormState>();
+
+  Future<void> openInviteDialog(context) async {
+
+    print(vacancyList);
+
+    return await showDialog(
+        context: context,
+        builder: (context) {
+          return StatefulBuilder(builder: (context, setState) {
+            return
+            Dialog(
+              insetPadding: EdgeInsets.zero,
+              shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(20.0)),
+              child: Container(
+                constraints: BoxConstraints(maxHeight: MediaQuery.of(context).size.height * 0.9, maxWidth: MediaQuery.of(context).size.width * 0.9),
+                child: Padding(
+                  padding: const EdgeInsets.symmetric(horizontal: 20.0, vertical: 30.0),
+                  child: ListView(
+                    shrinkWrap: true,
+                    children: [
+                      Container(
+                        child: Align(
+                            alignment: Alignment.center,
+                            child: Text(
+                              'choose_vacancy'.tr(),
+                              style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold, color: Colors.black),
+                            )
+                        ),
+                      ),
+
+                      /// Form
+                      Form(
+                        key: _vacancyAddFormKey,
+                        child: Column(
+                          children: <Widget>[
+                            Container(
+                              margin: EdgeInsets.symmetric(vertical: 40),
+                              child: Column(
+
+                                children: [
+                                  DropdownButtonFormField<int>(
+                                    isExpanded: true,
+                                    hint: Text("select".tr()),
+                                    value: vacancyId,
+                                    onChanged: (int newValue) {
+                                      setState(() {
+                                        vacancyId = newValue;
+                                      });
+                                    },
+                                    focusNode: FocusNode(canRequestFocus: false),
+                                    validator: (value) => value == null ? "please_fill_this_field".tr() : null,
+                                    decoration: InputDecoration(
+                                      contentPadding: EdgeInsets.symmetric(vertical: 0, horizontal: 20),
+                                      border: OutlineInputBorder(),
+                                      enabledBorder: OutlineInputBorder(borderSide: BorderSide(color: Colors.grey[200], width: 2.0)),
+                                      errorBorder: OutlineInputBorder(borderSide: BorderSide(color: kColorPrimary, width: 2.0)),
+                                      errorStyle: TextStyle(color: kColorPrimary, fontWeight: FontWeight.w500),
+                                      floatingLabelBehavior: FloatingLabelBehavior.always,
+                                      filled: true,
+                                      fillColor: kColorWhite,
+                                    ),
+                                    items: vacancyList.map<DropdownMenuItem<int>>((dynamic value) {
+                                      var jj = new JobType(id: value.id, name: value.name);
+                                      if(value.status == 'active'){
+                                        return DropdownMenuItem<int>(
+                                          value: jj.id,
+                                          child: Text(jj.name),
+                                        );
+                                      }
+                                      return null;
+                                    }).toList(),
+                                  ),
+                                ],
+                              ),
+                            ),
+
+                            Container(
+                              width: double.maxFinite,
+                              child: Flex(
+                                direction: Axis.horizontal,
+                                mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                                children: [
+
+                                  CustomButton(
+                                    borderSide: BorderSide(
+                                        color: kColorPrimary,
+                                        width: 2.0
+                                    ),
+                                    color: Colors.transparent,
+                                    textColor: kColorPrimary,
+                                    onPressed: () {
+                                      setState(() {
+                                        vacancyId = null;
+                                      });
+                                      Navigator.of(context).pop();
+                                    },
+                                    text: 'cancel'.tr(),
+                                  ),
+                                  CustomButton(
+                                    color: kColorPrimary,
+                                    textColor: Colors.white,
+                                    onPressed: () {
+                                      if (_vacancyAddFormKey.currentState.validate()) {
+
+                                        Vacancy.saveVacancyUserInvite(vacancy_id: vacancyId, type: "INVITED", user_id: widget.user.id).then((value) {
+                                          if (value == "OK") {
+                                            // Dialogs.showDialogBox(context,"successfully_submitted".tr());
+                                            StoreProvider.of<AppState>(context).state.user.list.data.remove(widget.user);
+                                            StoreProvider.of<AppState>(context).dispatch(getUsers());
+                                            Navigator.of(context).pop();
+                                          } else {
+                                            Dialogs.showDialogBox(context,"some_error_occurred_try_again".tr());
+                                          }
+                                        });
+
+                                        setState(() {
+                                          vacancyId = null;
+                                        });
+                                      } else {
+                                        print('invalid');
+                                      }
+                                    },
+                                    text: 'send'.tr(),
+                                  ),
+                                ],
+                              ),
+                            ),
+                          ],
+                        ),
+                      ),
+                    ],
+                  ),
+                ),
+              ),
+            );
+          });
+        });
+  }
+
+  @override
+  void initState() {
+    super.initState();
   }
 
   @override
   Widget build(BuildContext context) {
+
     return Container(
       child: Padding(
         padding: const EdgeInsets.all(0),
@@ -93,7 +207,7 @@ class _ProfileCardUserState extends State<ProfileCardUser> {
           children: [
             Card(
               clipBehavior: Clip.antiAlias,
-              elevation: 4.0,
+              elevation: 0,
               color: Colors.white,
               margin: EdgeInsets.all(0),
               shape: defaultCardBorder(),
@@ -185,22 +299,22 @@ class _ProfileCardUserState extends State<ProfileCardUser> {
                       ),
                     ),
 
-                    Flexible(
-                      flex: 2,
+                    Expanded(
+                      flex: 3,
                       child: Container(
-                        padding: const EdgeInsets.symmetric(
-                            horizontal: 20, vertical: 10),
+                        padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 15),
                         child: Flex(
                           direction: Axis.horizontal,
                           mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                          crossAxisAlignment: CrossAxisAlignment.center,
+                          crossAxisAlignment: CrossAxisAlignment.start,
                           children: [
                             /// Labels
                             Flexible(
+                              flex: 4,
                               child: Container(
                                 child: Flex(
                                   direction: Axis.vertical,
-                                  mainAxisAlignment: MainAxisAlignment.center,
+                                  mainAxisAlignment: MainAxisAlignment.start,
                                   crossAxisAlignment: CrossAxisAlignment.start,
                                   children: [
                                     // Интересуемые вакансии
@@ -208,11 +322,10 @@ class _ProfileCardUserState extends State<ProfileCardUser> {
                                       padding: EdgeInsets.symmetric(horizontal: 10, vertical: 5),
                                       decoration: BoxDecoration(
                                           color: kColorGray,
-                                          borderRadius:
-                                          BorderRadius.circular(4)
+                                          borderRadius: BorderRadius.circular(4)
                                       ),
                                       child: Text(
-                                        widget.user.vacancy_type != 'null' ? widget.user.vacancy_type.toString() : "",
+                                        widget.user.vacancy_type != 'null' ? widget.user.vacancy_type.toString() : '',
                                         style: TextStyle(
                                           fontSize: 12,
                                           fontWeight: FontWeight.w700,
@@ -222,17 +335,16 @@ class _ProfileCardUserState extends State<ProfileCardUser> {
                                     ) : Container(),
 
                                     // Вид занятости
-                                    widget.user.vacancy_type != 'null' ?
+                                    widget.user.business != 'null' ?
                                     Container(
                                       padding: EdgeInsets.symmetric(horizontal: 10, vertical: 5),
                                       margin: EdgeInsets.only(top: 5),
                                       decoration: BoxDecoration(
                                           color: kColorGray,
-                                          borderRadius:
-                                          BorderRadius.circular(4)
+                                          borderRadius: BorderRadius.circular(4)
                                       ),
                                       child: Text(
-                                        widget.user.business != 'null' ? widget.user.business.toString() : "",
+                                        widget.user.business != 'null' ? widget.user.business.toString() : '',
                                         style: TextStyle(
                                             fontSize: 12,
                                             fontWeight: FontWeight.bold,
@@ -247,12 +359,12 @@ class _ProfileCardUserState extends State<ProfileCardUser> {
                                       padding: EdgeInsets.symmetric(horizontal: 10, vertical: 5),
                                       margin: EdgeInsets.only(top: 5),
                                       decoration: BoxDecoration(
-                                          color: kColorGray,
-                                          borderRadius:
-                                          BorderRadius.circular(4)
+                                          color: widget.user.status == 1 ? kColorBlue :
+                                                widget.user.status == 2  ? kColorGreen : kColorGray,
+                                          borderRadius: BorderRadius.circular(4)
                                       ),
                                       child: Text(
-                                        widget.user.status != null ? widget.user.status.toString() : '',
+                                        widget.user.statusText != null ? widget.user.statusText : '',
                                         style: TextStyle(
                                             fontSize: 12,
                                             fontWeight: FontWeight.bold,
@@ -267,47 +379,46 @@ class _ProfileCardUserState extends State<ProfileCardUser> {
                             ),
 
                             /// Salary
-                            // Flexible(
-                            //   child: Container(
-                            //     child: Flex(
-                            //       direction: Axis.vertical,
-                            //       crossAxisAlignment: CrossAxisAlignment.end,
-                            //       mainAxisAlignment: MainAxisAlignment.center,
-                            //       children: [
-                            //         Container(
-                            //           child: Text(
-                            //             (widget.vacancy.salary != null
-                            //                 ? widget.vacancy.salary
-                            //                 : '') +
-                            //                 widget.vacancy.currency,
-                            //             textAlign: TextAlign.end,
-                            //             style: TextStyle(
-                            //               fontSize: 20,
-                            //               fontWeight: FontWeight.w900,
-                            //               fontFamily: 'Manrope',
-                            //               color: kColorPrimary,
-                            //             ),
-                            //           ),
-                            //         ),
-                            //         Container(
-                            //           child: Text(
-                            //             widget.vacancy.period != null
-                            //                 ? widget.vacancy.period
-                            //                 .toLowerCase()
-                            //                 : '',
-                            //             textAlign: TextAlign.end,
-                            //             style: TextStyle(
-                            //               fontSize: 14,
-                            //               fontWeight: FontWeight.w700,
-                            //               fontFamily: 'Manrope',
-                            //               color: kColorPrimary,
-                            //             ),
-                            //           ),
-                            //         ),
-                            //       ],
-                            //     ),
-                            //   ),
-                            // ),
+                            Flexible(
+                              flex: 2,
+                              child: Container(
+                                child: Flex(
+                                  direction: Axis.vertical,
+                                  crossAxisAlignment: CrossAxisAlignment.end,
+                                  mainAxisAlignment: MainAxisAlignment.start,
+                                  children: [
+                                    Container(
+                                      child: Text(
+                                        (widget.user.salary != null ? widget.user.salary : '') +
+                                            ' ${widget.user.currency}',
+                                        textAlign: TextAlign.end,
+                                        style: TextStyle(
+                                          fontSize: 20,
+                                          fontWeight: FontWeight.w900,
+                                          fontFamily: 'Manrope',
+                                          color: kColorPrimary,
+                                        ),
+                                      ),
+                                    ),
+                                    Container(
+                                      child: Text(
+                                        widget.user.period != null
+                                            ? widget.user.period
+                                            .toLowerCase()
+                                            : '',
+                                        textAlign: TextAlign.end,
+                                        style: TextStyle(
+                                          fontSize: 14,
+                                          fontWeight: FontWeight.w700,
+                                          fontFamily: 'Manrope',
+                                          color: kColorPrimary,
+                                        ),
+                                      ),
+                                    ),
+                                  ],
+                                ),
+                              ),
+                            ),
                           ],
                         ),
                       ),
@@ -315,21 +426,19 @@ class _ProfileCardUserState extends State<ProfileCardUser> {
 
                     /// Company Name & Description
                     Expanded(
-                      flex: 2,
                       child: Container(
                         width: double.maxFinite,
-                        padding: const EdgeInsets.symmetric(
-                            horizontal: 20, vertical: 10),
+                        padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 0),
                         child: Flex(
                           direction: Axis.vertical,
                           mainAxisAlignment: MainAxisAlignment.start,
                           crossAxisAlignment: CrossAxisAlignment.start,
                           children: [
-                            widget.page == 'discover' || widget.page == 'match' || widget.page == 'company' ? Flexible(
+                            widget.page == 'company_home' || widget.page == 'company_responses' ? Flexible(
                               child: Container(
-                                margin: EdgeInsets.only(top: 10),
                                 child: RichText(
                                   overflow: TextOverflow.ellipsis,
+                                  maxLines: 3,
                                   text: TextSpan(
                                       text: widget.user.description != null ? Bidi.stripHtmlIfNeeded(widget.user.description) : "",
                                       style: TextStyle(
@@ -350,8 +459,7 @@ class _ProfileCardUserState extends State<ProfileCardUser> {
                     Expanded(
                       flex: 2,
                       child: Container(
-                        padding: const EdgeInsets.symmetric(
-                            horizontal: 15, vertical: 10),
+                        padding: const EdgeInsets.symmetric(horizontal: 15, vertical: 10),
                         child: Flex(
                           direction: Axis.horizontal,
                           mainAxisAlignment: MainAxisAlignment.center,
@@ -359,62 +467,29 @@ class _ProfileCardUserState extends State<ProfileCardUser> {
                             widget.page == 'submit' ? Container() : Flexible(
                               flex: 1,
                               child: Container(
-                                margin:
-                                EdgeInsets.symmetric(horizontal: 5),
+                                margin: EdgeInsets.symmetric(horizontal: 5),
                                 child: CustomButton(
                                   borderSide: BorderSide(
-                                      color: kColorPrimary, width: 2.0),
+                                      color: kColorPrimary, width: 2.0
+                                  ),
                                   padding: EdgeInsets.all(0),
                                   color: Colors.transparent,
                                   textColor: kColorPrimary,
                                   onPressed: () async {
-                                    if (Prefs.getString(Prefs.TOKEN) ==
-                                        null) {
-                                      if (Prefs.getInt(Prefs.OFFSET) >
-                                          0 &&
-                                          Prefs.getInt(Prefs.OFFSET) !=
-                                              null) {
-                                        widget.offset =
-                                            Prefs.getInt(Prefs.OFFSET);
-                                      }
-                                      widget.cardController.triggerLeft();
-
-                                      StoreProvider.of<AppState>(context)
-                                          .dispatch(
-                                          getNumberOfActiveVacancies());
-                                    } else if (widget.page ==
-                                        'discover') {
-                                      widget.cardController.triggerLeft();
-                                    } else if (widget.page == 'match') {
-                                      // Vacancy.saveVacancyUser(
-                                      //     vacancy_id:
-                                      //     widget.vacancy.id,
-                                      //     type: "LIKED_THEN_DELETED")
-                                      //     .then((value) {
-                                      //   StoreProvider.of<AppState>(
-                                      //       context)
-                                      //       .state
-                                      //       .vacancy
-                                      //       .liked_list
-                                      //       .data
-                                      //       .remove(widget.vacancy);
-                                      //   StoreProvider.of<AppState>(
-                                      //       context)
-                                      //       .dispatch(
-                                      //       getNumberOfLikedVacancies());
-                                      // });
-                                    } else if (widget.page == 'company' ||
-                                        widget.page ==
-                                            'company_inactive') {
-                                      // Dialogs.showOnDeleteDialog(
-                                      //     context,
-                                      //     'delete_are_you_sure'.tr(),
-                                      //     widget.vacancy);
+                                    if (Prefs.getString(Prefs.TOKEN) == null) {
+                                    } else if (widget.page == 'company_home') {
+                                      removeCard(
+                                          props: widget.props,
+                                          type: "LIKED",
+                                          userId: widget.user.id,
+                                          user: widget.user,
+                                          context: context
+                                      );
                                     }
                                   },
-                                  text: widget.page == 'discover'
-                                      ? 'skip'.tr()
-                                      : 'delete'.tr(),
+                                  text: widget.page == 'company_home'
+                                      ? 'select_user'.tr()
+                                      : 'skip'.tr(),
                                 ),
                               ),
                             ),
@@ -428,86 +503,21 @@ class _ProfileCardUserState extends State<ProfileCardUser> {
                                   color: kColorPrimary,
                                   textColor: Colors.white,
                                   onPressed: () async {
-                                    if (widget.page == 'discover') {
-                                      widget.cardController
-                                          .triggerRight();
-                                    } else if (widget.page == 'match') {
-                                      Dialogs.openLoadingDialog(context);
-                                      // Vacancy.saveVacancyUser(
-                                      //     vacancy_id:
-                                      //     widget.vacancy.id,
-                                      //     type: "SUBMITTED")
-                                      //     .then((value) {
-                                      //   if (value == "OK") {
-                                      //     Users user = new Users();
-                                      //     Dialogs.showDialogBox(
-                                      //         context,
-                                      //         "successfully_submitted"
-                                      //             .tr());
-                                      //     StoreProvider.of<AppState>(
-                                      //         context)
-                                      //         .state
-                                      //         .vacancy
-                                      //         .liked_list
-                                      //         .data
-                                      //         .remove(widget.vacancy);
-                                      //     StoreProvider.of<AppState>(
-                                      //         context)
-                                      //         .dispatch(
-                                      //         getLikedVacancies());
-                                      //     StoreProvider.of<AppState>(
-                                      //         context)
-                                      //         .dispatch(
-                                      //         getNumberOfLikedVacancies());
-                                      //   } else {
-                                      //     Dialogs.showDialogBox(
-                                      //         context,
-                                      //         "some_error_occurred_try_again"
-                                      //             .tr());
-                                      //   }
-                                      // });
-                                    } else if (widget.page == 'company') {
-                                      // Dialogs.showOnDeactivateDialog(
-                                      //     context,
-                                      //     'deactivate_are_you_sure'.tr(),
-                                      //     false,
-                                      //     widget.vacancy);
-                                    } else if (widget.page == 'company_inactive') {
-                                      // Dialogs.showOnDeactivateDialog(
-                                      //     context,
-                                      //     'activate_are_you_sure'.tr(),
-                                      //     true,
-                                      //     widget.vacancy);
-                                    } else if (widget.page == 'submit') {
-                                      // Navigator.of(context).push(
-                                      //     MaterialPageRoute(builder:
-                                      //         (BuildContext context) {
-                                      //       return ChatScreen(
-                                      //         user_id: widget.vacancy.company,
-                                      //         name:
-                                      //         widget.vacancy.company_name,
-                                      //         vacancy_id: widget.vacancy.id,
-                                      //         vacancy: widget.vacancy.name,
-                                      //         avatar:
-                                      //         widget.vacancy.company_logo,
-                                      //       );
-                                      //     }));
-                                    }
+                                    // if (widget.page == 'company_home') {
+                                    //
+                                    // }
+                                    StoreProvider.of<AppState>(context).dispatch(getCompanyActiveVacancies());
+                                    setState(() {
+                                      vacancyList = StoreProvider.of<AppState>(context).state.vacancy.active_list.data;
+                                    });
+                                    openInviteDialog(context);
                                   },
-                                  text: widget.page == 'discover'
-                                      ? 'like'.tr()
-                                      : (widget.page == 'company'
-                                      ? 'deactivate'.tr()
-                                      : widget.page ==
-                                      'company_inactive'
-                                      ? 'activate'.tr()
-                                      : widget.page == 'submit'
-                                      ? 'write_to'.tr()
-                                      : 'submit'.tr()),
+                                  text: widget.page == 'company_home'
+                                      ? 'invite'.tr()
+                                      : 'submit'.tr(),
                                 ),
                               ),
-                            )
-                                : Container(),
+                            ) : Container(),
                           ],
                         ),
                       ),
@@ -520,5 +530,20 @@ class _ProfileCardUserState extends State<ProfileCardUser> {
         ),
       ),
     );
+  }
+
+  void removeCard({String type, int userId, props, context, Users user}) {
+
+    if (Prefs.getString(Prefs.TOKEN) != null) {
+      if (type == "LIKED") {
+        // props.addOneToMatches();
+      }
+      Users.saveUserCompany(userId: userId, type: type).then((value) {
+        props.listResponse.data.remove(user);
+        StoreProvider.of<AppState>(context).dispatch(getUsers());
+        // Navigator.of(context).pop();
+      });
+    } else {
+    }
   }
 }

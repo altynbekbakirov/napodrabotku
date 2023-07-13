@@ -175,7 +175,7 @@ class ProfileVisitsScreen extends StatelessWidget {
 
 class VacanciesScreenProps1 {
   final Function getSubmittedVacancies;
-  final ListSubmittedVacancyState listResponse1;
+  final ListVacancysState listResponse1;
 
   VacanciesScreenProps1({
     this.getSubmittedVacancies,

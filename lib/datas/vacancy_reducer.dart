@@ -47,6 +47,24 @@ VacancyState vacancyReducer(VacancyState state, FSA action) {
       newState.liked_list.data = null;
       return newState;
 
+    case GET_USER_VACANCY_REQUEST:
+      newState.all_list.error = null;
+      newState.all_list.loading = true;
+      newState.all_list.data = null;
+      return newState;
+
+    case GET_USER_VACANCY_SUCCESS:
+      newState.all_list.error = null;
+      newState.all_list.loading = false;
+      newState.all_list.data = vacanciesFromJsonStr(action.payload);
+      return newState;
+
+    case GET_USER_VACANCY_FAILURE:
+      newState.all_list.error = action.payload;
+      newState.all_list.loading = false;
+      newState.all_list.data = null;
+      return newState;
+
     case GET_SUBMITTED_VACANCY_REQUEST:
       newState.submitted_list.error = null;
       newState.submitted_list.loading = true;
@@ -63,6 +81,24 @@ VacancyState vacancyReducer(VacancyState state, FSA action) {
       newState.submitted_list.error = action.payload;
       newState.submitted_list.loading = false;
       newState.submitted_list.data = null;
+      return newState;
+
+    case GET_INVITED_VACANCY_REQUEST:
+      newState.invited_list.error = null;
+      newState.invited_list.loading = true;
+      newState.invited_list.data = null;
+      return newState;
+
+    case GET_INVITED_VACANCY_SUCCESS:
+      newState.invited_list.error = null;
+      newState.invited_list.loading = false;
+      newState.invited_list.data = vacanciesFromJsonStr(action.payload);
+      return newState;
+
+    case GET_INVITED_VACANCY_FAILURE:
+      newState.invited_list.error = action.payload;
+      newState.invited_list.loading = false;
+      newState.invited_list.data = null;
       return newState;
 
     case GET_COMPANY_VACANCIES_REQUEST:
@@ -83,7 +119,25 @@ VacancyState vacancyReducer(VacancyState state, FSA action) {
       newState.list.data = null;
       return newState;
 
-    case GET_COMPANY_INACTIVE_VACANCIES_REQUEST:
+    case GET_COMPANY_ACTIVE_VACANCIES_REQUEST:
+      newState.active_list.error = null;
+      newState.active_list.loading = true;
+      newState.active_list.data = null;
+      return newState;
+
+    case GET_COMPANY_ACTIVE_VACANCIES_SUCCESS:
+      newState.active_list.error = null;
+      newState.active_list.loading = false;
+      newState.active_list.data = vacanciesFromJsonStr(action.payload);
+      return newState;
+
+    case GET_COMPANY_ACTIVE_VACANCIES_FAILURE:
+      newState.active_list.error = action.payload;
+      newState.active_list.loading = false;
+      newState.active_list.data = null;
+      return newState;
+
+    case GET_COMPANY_ACTIVE_VACANCIES_REQUEST:
       newState.inactive_list.error = null;
       newState.inactive_list.loading = true;
       newState.inactive_list.data = null;

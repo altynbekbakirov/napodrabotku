@@ -42,6 +42,7 @@ class Vacancy {
   bool isProductLabVacancy;
   String vacancyLink;
   String deadline;
+  String status;
 
   Vacancy({
     this.id,
@@ -80,6 +81,7 @@ class Vacancy {
     this.isProductLabVacancy,
     this.vacancyLink,
     this.deadline,
+    this.status,
   });
 
   static void deactivateVacancyWithOverDeadline() async {
@@ -210,7 +212,8 @@ class Vacancy {
         typeOfRecommendedLetter: json['recommendation_letter_type'],
         isProductLabVacancy: json['is_product_lab_vacancy'] == 1,
         vacancyLink: json['vacancy_link'],
-        deadline: json['deadline']
+        deadline: json['deadline'],
+        status: json['status']
       );
 
   static Map<String, dynamic> vacancyToJsonMap(Vacancy vacancy) => {
@@ -247,6 +250,7 @@ class Vacancy {
         'is_product_lab_vacancy': vacancy.isProductLabVacancy,
         'vacancy_link': vacancy.vacancyLink,
         'deadline': vacancy.deadline,
+        'status': vacancy.status,
   };
 
   static List<Vacancy> getListOfVacancies() {
@@ -387,6 +391,31 @@ class Vacancy {
     }
   }
 
+  static Future<String> saveVacancyUserInvite({
+    int vacancy_id,
+    int user_id,
+    String type,
+  }) async {
+    final url = API_IP + API_VACANCY_USER_SAVE;
+    try {
+      Map<String, String> headers = {
+        "Content-type": "application/json",
+        "Authorization": Prefs.getString(Prefs.TOKEN)
+      };
+      final response = await http.post(url,
+          headers: headers,
+          body: json.encode({'vacancy_id': vacancy_id, 'type': type, 'user_id': user_id}));
+      if(response.statusCode == 200) {
+        return "OK";
+      } else {
+        return "ERROR";
+      }
+    } catch (error) {
+      return "ERROR";
+      throw error;
+    }
+  }
+
   static Future<String> saveCompanyVacancy({Vacancy vacancy}) async {
     final url = API_IP + API_VACANCY_SAVE + '?lang=' + Prefs.getString(Prefs.LANGUAGE);
     try {
@@ -476,16 +505,22 @@ class VacancyState {
   List opportunity_duration_ids;
   List internship_language_ids;
   ListVacancysState list;
+  ListVacancysState active_list;
   ListVacancysState inactive_list;
   LikedVacancyListState liked_list;
-  ListSubmittedVacancyState submitted_list;
+  ListVacancysState all_list;
+  ListVacancysState submitted_list;
+  ListVacancysState invited_list;
   UserState user;
 
   factory VacancyState.initial() => VacancyState(
       list: ListVacancysState.initial(),
+      active_list: ListVacancysState.initial(),
       inactive_list: ListVacancysState.initial(),
       liked_list: LikedVacancyListState.initial(),
-      submitted_list: ListSubmittedVacancyState.initial(),
+      all_list: ListVacancysState.initial(),
+      submitted_list: ListVacancysState.initial(),
+      invited_list: ListVacancysState.initial(),
       job_type_ids: [],
       region_ids: [],
       schedule_ids: [],
@@ -510,10 +545,13 @@ class VacancyState {
       this.list,
       this.liked_list,
       this.type,
+      this.all_list,
       this.submitted_list,
+      this.invited_list,
       this.user,
       this.number_of_submiteds,
       this.number_of_likeds,
+      this.active_list,
       this.inactive_list,
       });
 }
@@ -536,6 +574,24 @@ class ListVacancysState {
       );
 }
 
+class ListAllVacancyState {
+  dynamic error;
+  bool loading;
+  List<Vacancy> data;
+
+  ListAllVacancyState({
+    this.error,
+    this.loading,
+    this.data,
+  });
+
+  factory ListAllVacancyState.initial() => ListAllVacancyState(
+        error: null,
+        loading: false,
+        data: [],
+      );
+}
+
 class ListSubmittedVacancyState {
   dynamic error;
   bool loading;
@@ -548,6 +604,24 @@ class ListSubmittedVacancyState {
   });
 
   factory ListSubmittedVacancyState.initial() => ListSubmittedVacancyState(
+        error: null,
+        loading: false,
+        data: [],
+      );
+}
+
+class ListInvitedVacancyState {
+  dynamic error;
+  bool loading;
+  List<Vacancy> data;
+
+  ListInvitedVacancyState({
+    this.error,
+    this.loading,
+    this.data,
+  });
+
+  factory ListInvitedVacancyState.initial() => ListInvitedVacancyState(
         error: null,
         loading: false,
         data: [],

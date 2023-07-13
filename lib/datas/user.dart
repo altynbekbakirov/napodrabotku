@@ -43,7 +43,11 @@ class Users {
   int userVacancyId;
   String lat;
   String long;
-  String status;
+  int status;
+  String statusText;
+  String salary;
+  String currency;
+  String period;
   String description;
 
   Users({
@@ -78,6 +82,10 @@ class Users {
     this.lat,
     this.long,
     this.status,
+    this.statusText,
+    this.salary,
+    this.currency,
+    this.period,
     this.description,
   });
 
@@ -111,6 +119,10 @@ class Users {
       lat: json['lat'],
       long: json['long'],
       status: json['status'],
+      statusText: json['status_text'],
+      salary: json['salary'],
+      currency: json['currency'],
+      period: json['period'],
       description: json['description'],
   );
 
@@ -348,6 +360,7 @@ class Users {
         Prefs.setString(Prefs.USER_TYPE, responseData["user_type"]);
         Prefs.setString(Prefs.USER_LAT, responseData["lat"]);
         Prefs.setString(Prefs.USER_LONG, responseData["long"]);
+        Prefs.setInt(Prefs.USER_STATUS, responseData["active"]);
         return "OK";
       } else {
         return "FAILED";
@@ -382,6 +395,7 @@ class Users {
         Prefs.setString(Prefs.USER_TYPE, responseData["user_type"]);
         Prefs.setString(Prefs.USER_LAT, responseData["lat"]);
         Prefs.setString(Prefs.USER_LONG, responseData["long"]);
+        Prefs.setInt(Prefs.USER_STATUS, responseData["active"]);
         return "OK";
       } else {
         return "FAILED";
@@ -417,6 +431,7 @@ class Users {
         Prefs.setString(Prefs.USER_TYPE, responseData["user_type"]);
         Prefs.setString(Prefs.USER_LAT, responseData["lat"]);
         Prefs.setString(Prefs.USER_LONG, responseData["long"]);
+        Prefs.setInt(Prefs.USER_STATUS, responseData["active"]);
         return "OK";
       } else {
         return "FAILED";
@@ -577,6 +592,26 @@ class Users {
     }
   }
 
+  static Future<void> resetDislikedVacancies() async {
+    final url = API_IP + API_RESET_DISLIKED_VACANCIES;
+    try {
+      Map<String, String> headers = {
+        "Content-type": "application/json",
+        "Authorization": Prefs.getString(Prefs.TOKEN)
+      };
+      final response = await http.post(
+        url,
+        headers: headers,
+      );
+      var body = json.decode(response.body);
+      // Prefs.setString(Prefs.TOKEN, body['token']);
+
+      return "OK";
+    } catch (error) {
+      throw error;
+    }
+  }
+
   static Future<String> getCompanyLogo({int vacancy_id}) async {
     final url = API_IP + API_GET_COMPANY_AVATAR;
     try {
@@ -631,36 +666,6 @@ class Users {
       throw error;
     }
   }
-
-  /*Future<void> resetPassword(User user, String new_password) async {
-    final url = API_IP + 'api/resetpassword/';
-    try {
-      Map<String, String> headers = {
-        "Content-type": "application/json",
-        "token": Prefs.getString(Prefs.TOKEN)
-      };
-      final response = await http.post(
-        url,
-        headers: headers,
-        body: json.encode({
-          "email": user.email,
-          "old_password": user.password,
-          "new_password": new_password,
-        }),
-      );
-      final responseData = json.decode(response.body);
-      if (responseData['status'] == 999) {
-        throw HttpException(responseData['status'].toString());
-      } else if (responseData['status'] == 888) {
-        throw HttpException(responseData['status'].toString());
-      } else if (responseData['token'] != null) {
-        Prefs.setString(Prefs.TOKEN, responseData['token']);
-        Prefs.setInt(Prefs.USER_ID, responseData['id']);
-      }
-    } catch (error) {
-      throw error;
-    }
-  }*/
 
   void logout() async {
     var userId = 0;
@@ -735,23 +740,118 @@ class Users {
       throw error;
     }
   }
+
+  static Future<String> saveUserCompany({
+    int userId,
+    String type,
+  }) async {
+    final url = API_IP + API_USER_COMPANY_SAVE;
+    try {
+      Map<String, String> headers = {
+        "Content-type": "application/json",
+        "Authorization": Prefs.getString(Prefs.TOKEN)
+      };
+      final response = await http.post(url,
+          headers: headers,
+          body: json.encode({'user_id': userId, 'type': type})
+      );
+      if(response.statusCode == 200) {
+        return "OK";
+      } else {
+        return "ERROR";
+      }
+    } catch (error) {
+      return "ERROR";
+      throw error;
+    }
+  }
+
+  static Future<String> deleteUserCompany({
+    int userId,
+    String type,
+  }) async {
+    final url = API_IP + API_USER_COMPANY_DELETE;
+    try {
+      Map<String, String> headers = {
+        "Content-type": "application/json",
+        "Authorization": Prefs.getString(Prefs.TOKEN)
+      };
+      final response = await http.post(url,
+          headers: headers,
+          body: json.encode({'user_id': userId, 'type': type})
+      );
+      if(response.statusCode == 200) {
+        return "OK";
+      } else {
+        return "ERROR";
+      }
+    } catch (error) {
+      return "ERROR";
+      throw error;
+    }
+  }
+
+  static changeStatus({int status}) async {
+    var uri = Uri.parse(API_IP + API_CHANGE_STATUS);
+
+    try {
+      Map<String, String> headers = {
+        "Content-type": "application/json",
+        "Authorization": Prefs.getString(Prefs.TOKEN)
+      };
+      final response = await http.post(
+        uri,
+        headers: headers,
+        body: json.encode({
+          'status': status
+        }),
+      );
+      final responseData = json.decode(response.body);
+      print(responseData);
+
+      if (responseData['status'] == 400) {
+        throw HttpException(responseData['status'].toString());
+      }
+    } catch (error) {
+      throw error;
+    }
+  }
 }
 
 class UserState {
   UserDetailState user;
   ListUserDetailState submitted_user_list;
+  LikedUserState liked_user_list;
   ListUsersState list;
   UserCvState user_cv;
   UserFullInfoState user_full_info;
 
-  UserState({this.user, this.user_cv, this.submitted_user_list, this.user_full_info, this.list});
+  ListUsersState submitted_users;
+  ListUsersState invited_users;
+  ListUsersState all_users;
+
+  UserState({
+    this.user,
+    this.user_cv,
+    this.submitted_user_list,
+    this.liked_user_list,
+    this.user_full_info,
+    this.list,
+    this.submitted_users,
+    this.invited_users,
+    this.all_users,
+  });
 
   factory UserState.initial() => UserState(
         user: UserDetailState.initial(),
         user_cv: UserCvState.initial(),
         list: ListUsersState.initial(),
         submitted_user_list: ListUserDetailState.initial(),
+        liked_user_list: LikedUserState.initial(),
         user_full_info: UserFullInfoState.initial(),
+        submitted_users: ListUsersState.initial(),
+        invited_users: ListUsersState.initial(),
+        all_users: ListUsersState.initial(),
       );
 }
 
@@ -803,6 +903,24 @@ class ListUserDetailState {
   });
 
   factory ListUserDetailState.initial() => ListUserDetailState(
+        error: null,
+        loading: false,
+        data: [],
+      );
+}
+
+class LikedUserState {
+  dynamic error;
+  bool loading;
+  List<Users> data;
+
+  LikedUserState({
+    this.error,
+    this.loading,
+    this.data,
+  });
+
+  factory LikedUserState.initial() => LikedUserState(
         error: null,
         loading: false,
         data: [],

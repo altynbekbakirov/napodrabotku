@@ -48,42 +48,6 @@ class ProfileCard extends StatefulWidget {
 class _ProfileCardState extends State<ProfileCard> {
   int counter = 0;
 
-  void removeCards({String type, int vacancy_id, props, context}) {
-    if (Prefs.getString(Prefs.TOKEN) != null) {
-      if (type == "LIKED") {
-        props.addOneToMatches();
-      }
-      Vacancy.saveVacancyUser(vacancy_id: vacancy_id, type: type).then((value) {
-        StoreProvider.of<AppState>(context)
-            .dispatch(getNumberOfLikedVacancies());
-      });
-      props.listResponse.data.remove(props.listResponse.data[0]);
-    } else {
-      props.listResponse.data.removeLast(props.listResponse.data[0]);
-    }
-    Vacancy.getVacancyByOffset(
-        offset: widget.offset,
-        job_type_ids:
-        StoreProvider.of<AppState>(context).state.vacancy.job_type_ids,
-        region_ids:
-        StoreProvider.of<AppState>(context).state.vacancy.region_ids,
-        schedule_ids:
-        StoreProvider.of<AppState>(context).state.vacancy.schedule_ids,
-        busyness_ids:
-        StoreProvider.of<AppState>(context).state.vacancy.busyness_ids,
-        vacancy_type_ids: StoreProvider.of<AppState>(context)
-            .state
-            .vacancy
-            .vacancy_type_ids,
-        type: StoreProvider.of<AppState>(context).state.vacancy.type)
-        .then((value) {
-      if (value != null) {
-        widget.offset = widget.offset + 1;
-        props.listResponse.data.add(value);
-      }
-    });
-  }
-
   @override
   Widget build(BuildContext context) {
     return Container(
@@ -448,70 +412,40 @@ class _ProfileCardState extends State<ProfileCard> {
                                   textColor: Colors.white,
                                   onPressed: () async {
                                     if (widget.page == 'discover') {
-                                      widget.cardController
-                                          .triggerRight();
+                                      widget.cardController.triggerRight();
                                     } else if (widget.page == 'match') {
                                       Dialogs.openLoadingDialog(context);
                                       Vacancy.saveVacancyUser(
-                                          vacancy_id:
-                                          widget.vacancy.id,
+                                          vacancy_id: widget.vacancy.id,
                                           type: "SUBMITTED")
                                           .then((value) {
                                         if (value == "OK") {
                                           Users user = new Users();
-                                          Dialogs.showDialogBox(
-                                              context,
-                                              "successfully_submitted"
-                                                  .tr());
-                                          StoreProvider.of<AppState>(
-                                              context)
-                                              .state
-                                              .vacancy
-                                              .liked_list
-                                              .data
-                                              .remove(widget.vacancy);
-                                          StoreProvider.of<AppState>(
-                                              context)
-                                              .dispatch(
-                                              getLikedVacancies());
-                                          StoreProvider.of<AppState>(
-                                              context)
-                                              .dispatch(
-                                              getNumberOfLikedVacancies());
+                                          Dialogs.showDialogBox(context,"successfully_submitted".tr());
+                                          StoreProvider.of<AppState>(context).state.vacancy.liked_list.data.remove(widget.vacancy);
+                                          StoreProvider.of<AppState>(context).dispatch(getLikedVacancies());
+                                          StoreProvider.of<AppState>(context).dispatch(getNumberOfLikedVacancies());
                                         } else {
-                                          Dialogs.showDialogBox(
-                                              context,
-                                              "some_error_occurred_try_again"
-                                                  .tr());
+                                          Dialogs.showDialogBox(context,"some_error_occurred_try_again".tr());
                                         }
                                       });
                                     } else if (widget.page == 'company') {
-                                      Dialogs.showOnDeactivateDialog(
-                                          context,
-                                          'deactivate_are_you_sure'.tr(),
-                                          false,
-                                          widget.vacancy);
-                                    } else if (widget.page ==
-                                        'company_inactive') {
-                                      Dialogs.showOnDeactivateDialog(
-                                          context,
-                                          'activate_are_you_sure'.tr(),
-                                          true,
-                                          widget.vacancy);
+                                      Dialogs.showOnDeactivateDialog(context, 'deactivate_are_you_sure'.tr(), false, widget.vacancy);
+                                    } else if (widget.page == 'company_inactive') {
+                                      Dialogs.showOnDeactivateDialog(context, 'activate_are_you_sure'.tr(), true, widget.vacancy);
                                     } else if (widget.page == 'submit') {
                                       Navigator.of(context).push(
                                           MaterialPageRoute(builder:
                                               (BuildContext context) {
                                             return ChatScreen(
                                               user_id: widget.vacancy.company,
-                                              name:
-                                              widget.vacancy.company_name,
+                                              name: widget.vacancy.company_name,
                                               vacancy_id: widget.vacancy.id,
                                               vacancy: widget.vacancy.name,
-                                              avatar:
-                                              widget.vacancy.company_logo,
+                                              avatar: widget.vacancy.company_logo,
                                             );
-                                          }));
+                                          })
+                                      );
                                     }
                                   },
                                   text: widget.page == 'discover'

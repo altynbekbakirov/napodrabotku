@@ -18,7 +18,7 @@ class ProfileLikesScreen extends StatelessWidget {
   }
 
   void handleInitialBuildOfCompanyVacancy(CompanyVacanciesScreenProps props) {
-    props.getCompanyVacancies();
+    props.getCompanyActiveVacancies();
   }
 
   @override
@@ -26,8 +26,7 @@ class ProfileLikesScreen extends StatelessWidget {
     return Prefs.getString(Prefs.USER_TYPE) == 'COMPANY'
         ? StoreConnector<AppState, CompanyVacanciesScreenProps>(
             converter: (store) => mapStateToVacancyProps(store),
-            onInitialBuild: (props) =>
-                this.handleInitialBuildOfCompanyVacancy(props),
+            onInitialBuild: (props) => this.handleInitialBuildOfCompanyVacancy(props),
             builder: (context, props) {
               List<Vacancy> data = props.listResponse.data;
               bool loading = props.listResponse.loading;
@@ -144,18 +143,18 @@ VacanciesScreenProps1 mapStateToProps(Store<AppState> store) {
 }
 
 class CompanyVacanciesScreenProps {
-  final Function getCompanyVacancies;
+  final Function getCompanyActiveVacancies;
   final ListVacancysState listResponse;
 
   CompanyVacanciesScreenProps({
-    this.getCompanyVacancies,
+    this.getCompanyActiveVacancies,
     this.listResponse,
   });
 }
 
 CompanyVacanciesScreenProps mapStateToVacancyProps(Store<AppState> store) {
   return CompanyVacanciesScreenProps(
-    listResponse: store.state.vacancy.list,
-    getCompanyVacancies: () => store.dispatch(getCompanyVacancies()),
+    listResponse: store.state.vacancy.active_list,
+    getCompanyActiveVacancies: () => store.dispatch(getCompanyActiveVacancies()),
   );
 }

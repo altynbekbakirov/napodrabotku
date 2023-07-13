@@ -13,6 +13,7 @@ class Prefs {
   static const String USER_TYPE = 'user_type';
   static const String USER_LAT = 'lat';
   static const String USER_LONG = 'long';
+  static const String USER_STATUS = 'status';
   static const String OFFSET = 'offset';
   static const String ROUTE = 'route';
   static const String MESSAGEDATE = 'message_date';

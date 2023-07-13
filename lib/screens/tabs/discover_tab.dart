@@ -519,45 +519,173 @@ class _DiscoverTabState extends State<DiscoverTab> with SingleTickerProviderStat
               } else {
                 body = Column(
                   children: [
-                    Expanded(
-                      child: data != null && data.length > 0 ?
-                      Container(
-                        padding: EdgeInsets.symmetric(horizontal: 20),
-                        child: UsersGrid(
-                            children: data.map((user) {
-                              return GestureDetector(
-                                child: ProfileCardUser(user: user, page: 'company', offset: offset),
-                                onTap: () {
-                                  // Navigator.of(context).push(MaterialPageRoute(builder: (BuildContext context) {
-                                  //   return Scaffold(
-                                  //     backgroundColor: kColorPrimary,
-                                  //     appBar: AppBar(
-                                  //       title: Text("vacancy_view".tr()),
-                                  //     ),
-                                  //     body: UserView(
-                                  //       page: "user_view",
-                                  //       user: user
-                                  //     ),
-                                  //   );
-                                  // }));
-                                },
-                              );
-                            }
-                            ).toList()),
-                      ) :
-                      Container(
-                              padding: EdgeInsets.fromLTRB(40, 0, 40, 0),
-                              child: Center(
-                                child: Text(
-                                  'company_vacancies_empty'.tr(),
-                                  textAlign: TextAlign.center,
-                                  style: TextStyle(
-                                    color: Colors.white,
-                                    fontSize: 20,
+                    Flexible(
+                      flex: 1,
+                      child: Container(
+                        padding: EdgeInsets.symmetric(horizontal: 15),
+                        // color: kColorGray,
+                        child: Flex(
+                          direction: Axis.horizontal,
+                          mainAxisAlignment: MainAxisAlignment.spaceAround,
+                          children: [
+                            Flexible(
+                              flex: 1,
+                              child: Container(
+                                margin: EdgeInsets.symmetric(horizontal: 5),
+                                child: GestureDetector(
+                                  child: RawMaterialButton(
+                                      onPressed: () async {
+                                        Prefs.getString(Prefs.USER_TYPE) == 'COMPANY' ? await openFilterDialog(context) : await openFilterDialog(context);
+                                      },
+                                      elevation: 0,
+                                      fillColor: Colors.transparent,
+                                      shape: RoundedRectangleBorder(
+                                          borderRadius: BorderRadius.circular(4),
+                                          side: BorderSide(
+                                              color: Colors.white,
+                                              width: 2.0
+                                          )
+                                      ),
+                                      child: Padding(
+                                        padding: EdgeInsets.all(8),
+                                        child: Row(
+                                          mainAxisAlignment: MainAxisAlignment.center,
+                                          children: <Widget>[
+                                            Icon(
+                                              Boxicons.bx_filter,
+                                              color: Colors.white,
+                                              size: 24,
+                                            )
+                                          ],
+                                        ),
+                                      )
                                   ),
+                                  onTap: () async {
+                                    // Prefs.getString(Prefs.USER_TYPE) == 'COMPANY' ? await openVacancyForm(context) : await openFilterDialog(context);
+                                  },
                                 ),
                               ),
                             ),
+                            Flexible(
+                              flex: 2,
+                              child: Container(
+                                margin: EdgeInsets.symmetric(horizontal: 5),
+                                child: CustomButton(
+                                  borderSide: BorderSide(
+                                      color: kColorWhite,
+                                      width: 2.0
+                                  ),
+                                  color: StoreProvider.of<AppState>(context).state.vacancy.type == 'day' ? Colors.white : Colors.transparent,
+                                  textColor: StoreProvider.of<AppState>(context).state.vacancy.type == 'day' ? kColorPrimary : Colors.white,
+                                  textSize: 14,
+                                  padding: EdgeInsets.all(0),
+                                  height: 40.0,
+                                  onPressed: () {
+                                    Prefs.setInt(Prefs.OFFSET, 0);
+                                    StoreProvider.of<AppState>(context).dispatch(setTimeFilter(
+                                        type: StoreProvider.of<AppState>(context).state.vacancy.type == 'day' ? 'all' : 'day'));
+                                    StoreProvider.of<AppState>(context).dispatch(getVacancies());
+                                  },
+                                  text: StoreProvider.of<AppState>(context).state.vacancy.type == 'day' ? 'all'.tr() : 'day'.tr(),
+                                ),
+                              ),
+                            ),
+                            Flexible(
+                              flex: 2,
+                              child: Container(
+                                margin: EdgeInsets.symmetric(horizontal: 5),
+                                child: CustomButton(
+                                  borderSide: BorderSide(
+                                      color: kColorWhite,
+                                      width: 2.0
+                                  ),
+                                  color: StoreProvider.of<AppState>(context).state.vacancy.type == 'week' ? Colors.white : Colors.transparent,
+                                  textColor: StoreProvider.of<AppState>(context).state.vacancy.type == 'week' ? kColorPrimary : Colors.white,
+                                  textSize: 14,
+                                  padding: EdgeInsets.all(0),
+                                  height: 40.0,
+                                  onPressed: () {
+                                    Prefs.setInt(Prefs.OFFSET, 0);
+                                    StoreProvider.of<AppState>(context).dispatch(setTimeFilter(
+                                        type: StoreProvider.of<AppState>(context).state.vacancy.type == 'week' ? 'all' : 'week')
+                                    );
+                                    StoreProvider.of<AppState>(context).dispatch(getVacancies());
+                                  },
+                                  text: StoreProvider.of<AppState>(context).state.vacancy.type == 'week' ? 'all'.tr() : 'week'.tr(),
+                                ),
+                              ),
+                            ),
+                            Flexible(
+                              flex: 2,
+                              child: Container(
+                                margin: EdgeInsets.symmetric(horizontal: 5),
+                                child: CustomButton(
+                                  borderSide: BorderSide(
+                                      color: kColorWhite,
+                                      width: 2.0
+                                  ),
+                                  color: StoreProvider.of<AppState>(context).state.vacancy.type == 'month' ? Colors.white : Colors.transparent,
+                                  textColor: StoreProvider.of<AppState>(context).state.vacancy.type == 'month' ? kColorPrimary : Colors.white,
+                                  textSize: 14,
+                                  padding: EdgeInsets.all(0),
+                                  height: 40.0,
+                                  onPressed: () {
+                                    Prefs.setInt(Prefs.OFFSET, 0);
+                                    StoreProvider.of<AppState>(context).dispatch(setTimeFilter(
+                                        type: StoreProvider.of<AppState>(context).state.vacancy.type == 'month' ? 'all' : 'month'));
+                                    StoreProvider.of<AppState>(context).dispatch(getVacancies());
+                                    setState(() {
+                                      button == 3 ? button = 0 : button = 3;
+                                    });
+                                  },
+                                  text: StoreProvider.of<AppState>(context).state.vacancy.type == 'month' ? 'all'.tr() : 'month'.tr(),
+                                ),
+                              ),
+                            ),
+                          ],
+                        ),
+                      ),
+                    ),
+                    Flexible(
+                      flex: 15,
+                      child: data != null && data.length > 0 ?
+                      Container(
+                        padding: EdgeInsets.symmetric(horizontal: 20, vertical: 20),
+                        child: UsersGrid(
+                            children: data.map((user) {
+                              return GestureDetector(
+                                child: ProfileCardUser(user: user, page: 'company_home', props: props,),
+                                onTap: () {
+                                  Navigator.of(context).push(MaterialPageRoute(builder: (BuildContext context) {
+                                    return Scaffold(
+                                      backgroundColor: kColorPrimary,
+                                      appBar: AppBar(
+                                        title: Text('vacancy_view'.tr()),
+                                      ),
+                                      body: UserView(
+                                        page: 'company_home',
+                                        user: user
+                                      ),
+                                    );
+                                  }));
+                                },
+                              );
+                            }).toList()
+                        ),
+                      ) :
+                      Container(
+                        padding: EdgeInsets.fromLTRB(40, 0, 40, 0),
+                        child: Center(
+                          child: Text(
+                            'company_vacancies_empty'.tr(),
+                            textAlign: TextAlign.center,
+                            style: TextStyle(
+                              color: Colors.white,
+                              fontSize: 20,
+                            ),
+                          ),
+                        ),
+                      ),
                     ),
                   ],
                 );
@@ -720,7 +848,8 @@ class _DiscoverTabState extends State<DiscoverTab> with SingleTickerProviderStat
                       props: props,
                       type: "DISLIKED",
                       vacancyId: StoreProvider.of<AppState>(context).state.vacancy.list.data[_index].id,
-                      context: context);
+                      context: context
+                  );
                 }
 
                 if (orientation.index == CardSwipeOrientation.RIGHT.index) {
@@ -729,19 +858,51 @@ class _DiscoverTabState extends State<DiscoverTab> with SingleTickerProviderStat
                       props: props,
                       type: "LIKED",
                       vacancyId: StoreProvider.of<AppState>(context).state.vacancy.list.data[_index].id,
-                      context: context);
+                      context: context
+                  );
                 }
               },
             ),
           )  :
           Container(
-            padding: EdgeInsets.symmetric(horizontal: 20),
+            padding: EdgeInsets.symmetric(horizontal: 30),
             child: Center(
-              child: Text(
-                "vacancies_empty".tr(),
-                textAlign: TextAlign.center,
-                style: TextStyle(color: Colors.white, fontSize: 20),
-              ),
+              child: Column(
+                mainAxisAlignment: MainAxisAlignment.center,
+                children: [
+                  Container(
+                    margin: EdgeInsets.only(bottom: 10),
+                    child: Text(
+                      "vacancies_empty".tr(),
+                      textAlign: TextAlign.center,
+                      style: TextStyle(
+                          color: Colors.white,
+                          fontSize: 16
+                      ),
+                    ),
+                  ),
+                  GestureDetector(
+                    onTap: () {
+                      Users.resetDislikedVacancies().then((value) {
+                        StoreProvider.of<AppState>(context).dispatch(getVacancies());
+                      });
+                    },
+                    child: Text(
+                      "show_again".tr(),
+                      textAlign: TextAlign.center,
+                      style: TextStyle(
+                          color: Colors.white,
+                          fontSize: 16,
+                          fontWeight: FontWeight.w500,
+                          decoration: TextDecoration.underline,
+                          decorationColor: kColorWhite,
+                          decorationStyle: TextDecorationStyle.solid,
+                          decorationThickness: 3
+                      ),
+                    ),
+                  ),
+                ],
+              )
             ),
           );
         }
@@ -1110,11 +1271,13 @@ UsersScreenProps mapStateToUsersProps(Store<AppState> store) {
 
 class CompanyVacanciesScreenProps {
   final Function getCompanyVacancies;
+  final Function getCompanyActiveVacancies;
   final Function getNumOfActiveVacancies;
   final ListVacancysState listResponse;
 
   CompanyVacanciesScreenProps({
     this.getCompanyVacancies,
+    this.getCompanyActiveVacancies,
     this.getNumOfActiveVacancies,
     this.listResponse,
   });
@@ -1124,6 +1287,7 @@ CompanyVacanciesScreenProps mapStateToVacancyProps(Store<AppState> store) {
   return CompanyVacanciesScreenProps(
     listResponse: store.state.vacancy.list,
     getCompanyVacancies: () => store.dispatch(getCompanyVacancies()),
+    getCompanyActiveVacancies: () => store.dispatch(getCompanyActiveVacancies()),
     getNumOfActiveVacancies: () => store.dispatch(getNumberOfActiveVacancies()),
   );
 }

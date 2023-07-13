@@ -1,8 +1,10 @@
+import 'package:dropdown_search/dropdown_search.dart';
 import 'package:flutter/material.dart';
 import 'package:easy_localization/easy_localization.dart';
 import 'package:flutter_boxicons/flutter_boxicons.dart';
 import 'package:ishtapp/components/custom_button.dart';
 import 'package:ishtapp/routes/routes.dart';
+import 'package:ishtapp/screens/company_vacancies_screen.dart';
 import 'package:ishtapp/screens/profile_likes_screen.dart';
 import 'package:ishtapp/screens/profile_visits_screen.dart';
 import 'package:ishtapp/screens/edit_profile_screen.dart';
@@ -13,6 +15,7 @@ import 'package:redux/redux.dart';
 import 'package:ishtapp/datas/RSAA.dart';
 import 'package:ishtapp/datas/app_state.dart';
 import 'package:ishtapp/datas/user.dart';
+import 'package:ishtapp/datas/vacancy.dart';
 import 'package:flutter_redux/flutter_redux.dart';
 import 'package:flutter_guid/flutter_guid.dart';
 
@@ -24,6 +27,22 @@ class ProfileTab extends StatefulWidget {
 class _ProfileTabState extends State<ProfileTab> {
   Users user;
   int counter = 0;
+
+  List<dynamic> statuses = [
+    {
+      'id': 1,
+      'name': 'Активно ищу работу',
+    },
+    {
+      'id': 2,
+      'name': 'Могу выйти завтра',
+    },
+    {
+      'id': 3,
+      'name': 'Рассматриваю предложения',
+    },
+  ];
+  int selectedStatus;
 
   void handleInitialBuild(ProfileScreenProps props) {
     if (Prefs.getString(Prefs.TOKEN) == "null" || Prefs.getString(Prefs.TOKEN) == null) {
@@ -100,13 +119,22 @@ class _ProfileTabState extends State<ProfileTab> {
   }
 
   @override
+  void initState() {
+    selectedStatus = Prefs.getInt(Prefs.USER_STATUS);
+    super.initState();
+  }
+
+  @override
   Widget build(BuildContext context) {
+
     return StoreConnector<AppState, ProfileScreenProps>(
       converter: (store) => mapStateToProps(store),
       onInitialBuild: (props) => this.handleInitialBuild(props),
       builder: (context, props) {
         bool loading = props.user.loading;
+
         Widget body;
+
         if (loading) {
           body = Center(
             child: CircularProgressIndicator(
@@ -114,6 +142,7 @@ class _ProfileTabState extends State<ProfileTab> {
             ),
           );
         } else {
+
           body = SingleChildScrollView(
             padding: const EdgeInsets.all(20),
             child: Column(
@@ -163,6 +192,42 @@ class _ProfileTabState extends State<ProfileTab> {
                         ),
                       ),
 
+                      Prefs.getString(Prefs.USER_TYPE) == "USER" ?
+                      Container(
+                        margin: EdgeInsets.only(top: 15),
+                        child: DropdownButtonFormField<int>(
+                          isExpanded: true,
+                          hint: Text("select".tr()),
+                          value: selectedStatus,
+                          onChanged: (int newValue) async {
+                            setState(() {
+                              selectedStatus = newValue;
+                              Prefs.setInt(Prefs.USER_STATUS, newValue);
+                            });
+
+                            await Users.changeStatus(status: newValue);
+                          },
+                          focusNode: FocusNode(canRequestFocus: false),
+                          validator: (value) => value == null ? "please_fill_this_field".tr() : null,
+                          decoration: InputDecoration(
+                            contentPadding: EdgeInsets.symmetric(vertical: 0, horizontal: 20),
+                            border: OutlineInputBorder(),
+                            enabledBorder: OutlineInputBorder(borderSide: BorderSide(color: Colors.grey[200], width: 2.0)),
+                            errorBorder: OutlineInputBorder(borderSide: BorderSide(color: kColorPrimary, width: 2.0)),
+                            errorStyle: TextStyle(color: kColorPrimary, fontWeight: FontWeight.w500),
+                            floatingLabelBehavior: FloatingLabelBehavior.always,
+                            filled: true,
+                            fillColor: kColorWhite,
+                          ),
+                          items: statuses.map<DropdownMenuItem<int>>((dynamic value) {
+                            return DropdownMenuItem<int>(
+                              value: value['id'],
+                              child: Text(value['name']),
+                            );
+                          }).toList(),
+                        ),
+                      ) : Container(),
+
                       /// Buttons
                       Container(
                         margin: EdgeInsets.only(top: 30),
@@ -170,9 +235,8 @@ class _ProfileTabState extends State<ProfileTab> {
                           direction: Axis.horizontal,
                           mainAxisAlignment: MainAxisAlignment.center,
                           children: [
-                            Prefs.getString(Prefs.TOKEN) != null
-                                ? Prefs.getString(Prefs.USER_TYPE) == "USER"
-                                ? Flexible(
+                            Prefs.getString(Prefs.TOKEN) != null ? Prefs.getString(Prefs.USER_TYPE) == "USER" ?
+                            Flexible(
                               child: Container(
                                 margin: EdgeInsets.only(right: 10),
                                 child: CustomButton(
@@ -185,11 +249,9 @@ class _ProfileTabState extends State<ProfileTab> {
                                   text: 'profile'.tr(),
                                 ),
                               ),
-                            )
-                                : Container()
-                                : Container(),
-                            Prefs.getString(Prefs.TOKEN) != null
-                                ? Flexible(
+                            ) : Container() : Container(),
+                            Prefs.getString(Prefs.TOKEN) != null ?
+                            Flexible(
                               child: Container(
                                 margin: EdgeInsets.only(left: 10),
                                 child: CustomButton(
@@ -210,8 +272,7 @@ class _ProfileTabState extends State<ProfileTab> {
                                   text: 'settings'.tr(),
                                 ),
                               ),
-                            )
-                                : Container(),
+                            ) : Container(),
                           ],
                         ),
                       ),
@@ -222,11 +283,75 @@ class _ProfileTabState extends State<ProfileTab> {
                 /// Profile Statistics Card
                 Prefs.getString(Prefs.TOKEN) != null ?
                 Container(
-                  margin: EdgeInsets.only(top: 30),
+                  margin: EdgeInsets.only(top: 15),
                   child: Column(
                     children: [
+                      Prefs.getString(Prefs.USER_TYPE) == 'COMPANY' ?
                       GestureDetector(
                         child: Container(
+                          margin: EdgeInsets.only(top: 15),
+                          child: Flex(
+                            direction: Axis.horizontal,
+                            mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                            children: [
+                              Flexible(
+                                child: Container(
+                                  child: SingleChildScrollView(
+                                    scrollDirection: Axis.horizontal,
+                                    clipBehavior: Clip.none,
+                                    child: Flex(
+                                      direction: Axis.horizontal,
+                                      mainAxisAlignment: MainAxisAlignment.start,
+                                      children: [
+                                        Container(
+                                          width: 40,
+                                          height: 40,
+                                          child: Icon(
+                                            Boxicons.bx_file_blank,
+                                            size: 25,
+                                            color: kColorPrimary,
+                                          ),
+                                          decoration:
+                                          BoxDecoration(
+                                              color: kColorGray,
+                                              borderRadius: BorderRadius.circular(4)
+                                          ),
+                                        ),
+                                        Container(
+                                          margin: EdgeInsets.only(left: 10),
+                                          child: Text(
+                                              'all_vacancies'.tr(),
+                                              style: TextStyle(
+                                                  fontSize: 16,
+                                                  fontWeight: FontWeight.w700,
+                                                  color: kColorDark
+                                              )
+                                          ),
+                                        )
+                                      ],
+                                    ),
+                                  ),
+                                ),
+                              ),
+                              Flexible(
+                                child: Container(
+                                  child: Text(
+                                    StoreProvider.of<AppState>(context).state.vacancy.list.data.length > 0 ? StoreProvider.of<AppState>(context).state.vacancy.list.data.length.toString() : '0',
+                                    style: TextStyle(color: Colors.grey[400]),
+                                  ),
+                                ),
+                              ),
+                            ],
+                          ),
+                        ),
+                        onTap: () {
+                          /// Go to profile likes screen
+                          Navigator.push(context, MaterialPageRoute(builder: (context) => CompanyVacanciesScreen()));
+                        },
+                      ) : Container(),
+                      GestureDetector(
+                        child: Container(
+                          margin: EdgeInsets.only(top: 15),
                           child: Flex(
                             direction: Axis.horizontal,
                             mainAxisAlignment: MainAxisAlignment.spaceBetween,
@@ -283,13 +408,7 @@ class _ProfileTabState extends State<ProfileTab> {
                                     ),
                                   ) :
                                   Text(
-                                    StoreProvider.of<AppState>(context).state.vacancy.number_of_active_vacancies != null
-                                        ? StoreProvider.of<AppState>(context)
-                                        .state
-                                        .vacancy
-                                        .number_of_active_vacancies
-                                        .toString()
-                                        : '0',
+                                    StoreProvider.of<AppState>(context).state.vacancy.active_list.data != null && StoreProvider.of<AppState>(context).state.vacancy.active_list.data.length > 0 ? StoreProvider.of<AppState>(context).state.vacancy.active_list.data.length.toString() : '0',
                                     style: TextStyle(color: Colors.grey[400]),
                                   ),
                                 ),
@@ -492,9 +611,7 @@ class _ProfileTabState extends State<ProfileTab> {
               onPressed: () {
                 Navigator.of(ctx).pop();
                 if (!error){
-                  Prefs.getString(Prefs.ROUTE) == "PRODUCT_LAB"
-                      ?  Navigator.pushReplacementNamed(context, Routes.product_lab_home)
-                      : Navigator.pushReplacementNamed(context, Routes.home);
+                  Navigator.pushReplacementNamed(context, Routes.home);
                 }
               },
             )
@@ -509,6 +626,7 @@ class ProfileScreenProps {
   final Function getUser;
   final Function getUserCv;
   final Function getSubmittedNumber;
+  final Function getCompanyVacancies;
   final UserDetailState user;
   final UserCvState user_cv;
   final int submitted_number;
@@ -520,6 +638,7 @@ class ProfileScreenProps {
     this.user_cv,
     this.getSubmittedNumber,
     this.submitted_number,
+    this.getCompanyVacancies,
   });
 }
 
@@ -527,8 +646,10 @@ ProfileScreenProps mapStateToProps(Store<AppState> store) {
   return ProfileScreenProps(
       user: store.state.vacancy.user.user,
       submitted_number: store.state.vacancy.number_of_submiteds,
-      getUser: () => store.dispatch(getUser()),
       user_cv: store.state.vacancy.user.user_cv,
+      getUser: () => store.dispatch(getUser()),
       getUserCv: () => store.dispatch(getUserCv()),
-      getSubmittedNumber: () => store.dispatch(getNumberOfSubmittedVacancies()));
+      getSubmittedNumber: () => store.dispatch(getNumberOfSubmittedVacancies()),
+      getCompanyVacancies: () => store.dispatch(getCompanyVacancies()),
+  );
 }

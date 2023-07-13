@@ -11,7 +11,7 @@ class ChooseLanguageScreen extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: kColorBlue,
+      backgroundColor: kColorPrimary,
       body: LayoutBuilder(
         builder: (BuildContext context, BoxConstraints viewportConstraints) {
           return SingleChildScrollView(
@@ -67,7 +67,7 @@ class ChooseLanguageScreen extends StatelessWidget {
                               height: 50.0,
                               padding: EdgeInsets.all(10),
                               color: Colors.white,
-                              textColor: kColorBlue,
+                              textColor: kColorPrimary,
                               onPressed: () {
                                 Prefs.setString(Prefs.LANGUAGE, 'ky');
                                 EasyLocalization.of(context).locale =
@@ -85,7 +85,7 @@ class ChooseLanguageScreen extends StatelessWidget {
                               height: 50.0,
                               padding: EdgeInsets.all(10),
                               color: Colors.white,
-                              textColor: kColorBlue,
+                              textColor: kColorPrimary,
                               onPressed: () {
                                 Prefs.setString(Prefs.LANGUAGE, 'ru');
                                 EasyLocalization.of(context).locale =

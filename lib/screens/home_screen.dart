@@ -94,16 +94,7 @@ class _HomeScreenState extends State<HomeScreen> {
   String selectedDistrict;
   String selectedJobType;
 
-  int _jobTypeId;
-  int _vacancyTypeId;
-  int _busynessId;
-  int _scheduleId;
   int _regionId;
-  int _districtId;
-  int _currencyId;
-  int _salaryPeriodId;
-  int _experienceId;
-  int _payPeriodId;
   bool loading = false;
   work_mode work = work_mode.isWork;
 
@@ -111,13 +102,6 @@ class _HomeScreenState extends State<HomeScreen> {
 
   DateTime currentBackPressTime;
 
-  TextEditingController _vacancy_name_controller = TextEditingController();
-  TextEditingController _vacancy_salary_controller = TextEditingController();
-  TextEditingController _vacancy_salary_from_controller = TextEditingController();
-  TextEditingController _vacancy_salary_to_controller = TextEditingController();
-  TextEditingController _vacancy_description_controller = TextEditingController();
-  TextEditingController _vacancyStreetController = TextEditingController();
-  TextEditingController _vacancyHouseNumberController = TextEditingController();
   PhoneNumber number = PhoneNumber(isoCode: 'KG');
 
   Users user;
@@ -560,848 +544,6 @@ class _HomeScreenState extends State<HomeScreen> {
         });
   }
 
-  Future<void> openVacancyForm(context) async {
-    _jobTypeId = null;
-    _vacancyTypeId = null;
-    _busynessId = null;
-    _scheduleId = null;
-    _regionId = null;
-    _districtId = null;
-    _currencyId = null;
-    _suggestionsAddress = [];
-
-    if(Prefs.getString(Prefs.LANGUAGE) == 'ru'){
-      _currencyId = 3;
-    }
-
-    return await showDialog(
-        context: context,
-        builder: (context) {
-          return StatefulBuilder(builder: (context, setState) {
-            return loading ?
-            Center(
-              child: CircularProgressIndicator(
-                valueColor: new AlwaysStoppedAnimation<Color>(Colors.white),
-              ),
-            ) :
-            Dialog(
-              insetPadding: EdgeInsets.zero,
-              shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(20.0)),
-              child: Container(
-                constraints: BoxConstraints(maxHeight: MediaQuery.of(context).size.height * 0.9, maxWidth: MediaQuery.of(context).size.width * 0.9),
-                child: Padding(
-                  padding: const EdgeInsets.symmetric(horizontal: 20.0, vertical: 30.0),
-                  child: ListView(
-                    shrinkWrap: true,
-                    children: [
-                      Container(
-                        margin: EdgeInsets.only(bottom: 20),
-                        child: Align(
-                            alignment: Alignment.center,
-                            child: Text(
-                              'add'.tr(),
-                              style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold, color: Colors.black),
-                            )
-                        ),
-                      ),
-                      Container(
-                        margin: EdgeInsets.only(bottom: 20),
-                        child: Align(
-                            alignment: Alignment.topLeft,
-                            child: Text(
-                              'fill_all_fields'.tr(),
-                              style: TextStyle(fontSize: 14, color: kColorPrimary),
-                            )
-                        ),
-                      ),
-
-                      /// Form
-                      Form(
-                        key: _vacancyAddFormKey,
-                        child: Column(
-                          children: <Widget>[
-                            /// Название вакансии
-                            Container(
-                              margin: EdgeInsets.only(bottom: 16),
-                              child: Column(
-                                children: [
-                                  Align(
-                                      widthFactor: 10,
-                                      heightFactor: 1.5,
-                                      alignment: Alignment.topLeft,
-                                      child: Text(
-                                        'vacancy_name'.tr().toString().toUpperCase() + '*',
-                                        style: TextStyle(fontSize: 12, color: Colors.black, fontWeight: FontWeight.w700),
-                                      )
-                                  ),
-                                  TextFormField(
-                                    controller: _vacancy_name_controller,
-                                    keyboardType: TextInputType.name,
-                                    textInputAction: TextInputAction.next,
-                                    focusNode: FocusNode(canRequestFocus: false),
-                                    decoration: InputDecoration(
-                                      contentPadding: EdgeInsets.symmetric(vertical: 10, horizontal: 20),
-                                      border: OutlineInputBorder(),
-                                      enabledBorder: OutlineInputBorder(borderSide: BorderSide(color: Colors.grey[200], width: 2.0)),
-                                      errorBorder: OutlineInputBorder(borderSide: BorderSide(color: kColorPrimary, width: 2.0)),
-                                      errorStyle: TextStyle(color: kColorPrimary, fontWeight: FontWeight.w500),
-                                      floatingLabelBehavior: FloatingLabelBehavior.always,
-                                      filled: true,
-                                      fillColor: kColorWhite,
-                                    ),
-                                    validator: (name) {
-                                      if (name.isEmpty) {
-                                        return "please_fill_this_field".tr();
-                                      }
-                                      return null;
-                                    },
-                                  ),
-                                ],
-                              ),
-                            ),
-
-                            /// Salary
-                            Container(
-                              child: Column(
-                                children: [
-                                  Container(
-                                    margin: EdgeInsets.only(bottom: 16),
-                                    child: Column(
-                                      children: [
-                                        Align(
-                                            widthFactor: 10,
-                                            heightFactor: 1.5,
-                                            alignment: Alignment.topLeft,
-                                            child: Text(
-                                              'vacancy_salary'.tr().toString().toUpperCase() + '*',
-                                              style: TextStyle(fontSize: 12, color: Colors.black, fontWeight: FontWeight.w700),
-                                            )
-                                        ),
-                                        Row(
-                                            crossAxisAlignment: CrossAxisAlignment.center,
-                                            children: [
-                                              Expanded(
-                                                // optional flex property if flex is 1 because the default flex is 1
-                                                flex: 1,
-                                                child: TextFormField(
-                                                  controller: _vacancy_salary_from_controller,
-                                                  focusNode: FocusNode(canRequestFocus: false),
-                                                  decoration: InputDecoration(
-                                                    contentPadding: EdgeInsets.symmetric(vertical: 10, horizontal: 20),
-                                                    border: OutlineInputBorder(),
-                                                    enabledBorder: OutlineInputBorder(borderSide: BorderSide(color: Colors.grey[200], width: 2.0)),
-                                                    errorBorder: OutlineInputBorder(borderSide: BorderSide(color: kColorPrimary, width: 2.0)),
-                                                    errorStyle: TextStyle(color: kColorPrimary, fontWeight: FontWeight.w500),
-                                                    floatingLabelBehavior: FloatingLabelBehavior.always,
-                                                    filled: true,
-                                                    fillColor: kColorWhite,
-                                                  ),
-                                                  inputFormatters: [Utf8LengthLimitingTextInputFormatter(20)],
-                                                  validator: (name) {
-                                                    if (name.isEmpty) {
-                                                      return "please_fill_this_field".tr();
-                                                    }
-                                                    return null;
-                                                  },
-                                                ),
-                                              ),
-                                              Container(
-                                                padding: EdgeInsets.fromLTRB(10, 0, 10, 0),
-                                                child: Text('__'),
-                                              ),
-                                              Expanded(
-                                                // optional flex property if flex is 1 because the default flex is 1
-                                                flex: 1,
-                                                child: TextFormField(
-                                                  controller: _vacancy_salary_to_controller,
-                                                  focusNode: FocusNode(canRequestFocus: false),
-                                                  decoration: InputDecoration(
-                                                    contentPadding: EdgeInsets.symmetric(vertical: 10, horizontal: 20),
-                                                    border: OutlineInputBorder(),
-                                                    enabledBorder: OutlineInputBorder(borderSide: BorderSide(color: Colors.grey[200], width: 2.0)),
-                                                    errorBorder: OutlineInputBorder(borderSide: BorderSide(color: kColorPrimary, width: 2.0)),
-                                                    errorStyle: TextStyle(color: kColorPrimary, fontWeight: FontWeight.w500),
-                                                    floatingLabelBehavior: FloatingLabelBehavior.always,
-                                                    filled: true,
-                                                    fillColor: kColorWhite,
-                                                  ),
-                                                  inputFormatters: [Utf8LengthLimitingTextInputFormatter(20)],
-                                                  validator: (name) {
-                                                    if (name.isEmpty) {
-                                                      return "please_fill_this_field".tr();
-                                                    }
-                                                    return null;
-                                                  },
-                                                ),
-                                              ),
-                                            ]
-                                        ),
-                                      ],
-                                    ),
-                                  ),
-                                  Container(
-                                    margin: EdgeInsets.only(bottom: 16),
-                                    child: Column(
-                                      children: [
-                                        Align(
-                                            widthFactor: 10,
-                                            heightFactor: 1.5,
-                                            alignment: Alignment.topLeft,
-                                            child: Text(
-                                              'currency'.tr().toString().toUpperCase() + '*',
-                                              style: TextStyle(fontSize: 12, color: Colors.black, fontWeight: FontWeight.w700),
-                                            )
-                                        ),
-                                        DropdownButtonFormField<int>(
-                                          hint: Text(
-                                            "select".tr(),
-                                            style: TextStyle(
-                                                fontSize: 14
-                                            ),
-                                          ),
-                                          value: _currencyId,
-                                          onChanged: (int newValue) async {
-                                            setState(() {
-                                              _currencyId = newValue;
-                                            });
-                                          },
-                                          focusNode: FocusNode(canRequestFocus: false),
-                                          validator: (value) => value == null ? "please_fill_this_field".tr() : null,
-                                          decoration: InputDecoration(
-                                            contentPadding: EdgeInsets.symmetric(vertical: 10, horizontal: 20),
-                                            border: OutlineInputBorder(),
-                                            enabledBorder: OutlineInputBorder(borderSide: BorderSide(color: Colors.grey[200], width: 2.0)),
-                                            errorBorder: OutlineInputBorder(borderSide: BorderSide(color: kColorPrimary, width: 2.0)),
-                                            errorStyle: TextStyle(color: kColorPrimary, fontWeight: FontWeight.w500),
-                                            floatingLabelBehavior: FloatingLabelBehavior.always,
-                                            filled: true,
-                                            fillColor: kColorWhite,
-                                          ),
-                                          items: currencyList.map<DropdownMenuItem<int>>((dynamic value) {
-                                            var jj = new JobType(id: value['id'], name: value['name']);
-                                            return DropdownMenuItem<int>(
-                                              value: jj.id,
-                                              child: Text(value['name']),
-                                            );
-                                          }).toList(),
-                                        ),
-                                      ],
-                                    ),
-                                  ),
-                                  Container(
-                                    margin: EdgeInsets.only(bottom: 16),
-                                    child: Column(
-                                      children: [
-                                        Align(
-                                            widthFactor: 10,
-                                            heightFactor: 1.5,
-                                            alignment: Alignment.topLeft,
-                                            child: Text(
-                                              'period'.tr().toString().toUpperCase() + '*',
-                                              style: TextStyle(fontSize: 12, color: Colors.black, fontWeight: FontWeight.w700),
-                                            )
-                                        ),
-                                        DropdownButtonFormField<int>(
-                                          hint: Text(
-                                            "select".tr(),
-                                            style: TextStyle(
-                                                fontSize: 14
-                                            ),
-                                          ),
-                                          value: _salaryPeriodId,
-                                          onChanged: (int newValue) async {
-                                            setState(() {
-                                              _salaryPeriodId = newValue;
-                                            });
-                                          },
-                                          focusNode: FocusNode(canRequestFocus: false),
-                                          validator: (value) => value == null ? "please_fill_this_field".tr() : null,
-                                          decoration: InputDecoration(
-                                            contentPadding: EdgeInsets.symmetric(vertical: 10, horizontal: 20),
-                                            border: OutlineInputBorder(),
-                                            enabledBorder: OutlineInputBorder(borderSide: BorderSide(color: Colors.grey[200], width: 2.0)),
-                                            errorBorder: OutlineInputBorder(borderSide: BorderSide(color: kColorPrimary, width: 2.0)),
-                                            errorStyle: TextStyle(color: kColorPrimary, fontWeight: FontWeight.w500),
-                                            floatingLabelBehavior: FloatingLabelBehavior.always,
-                                            filled: true,
-                                            fillColor: kColorWhite,
-                                          ),
-                                          items: [
-                                            DropdownMenuItem<int>(
-                                              value: 0,
-                                              child: Text('Ставка за час'),
-                                            ),
-                                            DropdownMenuItem<int>(
-                                              value: 1,
-                                              child: Text('Ставка за смену'),
-                                            ),
-                                            DropdownMenuItem<int>(
-                                              value: 2,
-                                              child: Text('В неделю'),
-                                            ),
-                                            DropdownMenuItem<int>(
-                                              value: 3,
-                                              child: Text('В месяц'),
-                                            )
-                                          ],
-                                        ),
-                                      ],
-                                    ),
-                                  ),
-                                ],
-                              ),
-                            ),
-
-                            ///Description
-                            Container(
-                              margin: EdgeInsets.only(bottom: 16),
-                              child: Column(
-                                children: <Widget>[
-                                  Align(
-                                      widthFactor: 10,
-                                      heightFactor: 1.5,
-                                      alignment: Alignment.topLeft,
-                                      child: Text(
-                                        'vacancy_description'.tr().toString().toUpperCase() + '*',
-                                        style: TextStyle(fontSize: 12, color: Colors.black, fontWeight: FontWeight.w700),
-                                      )
-                                  ),
-                                  TextFormField(
-                                    controller: _vacancy_description_controller,
-                                    maxLines: 5,
-                                    focusNode: FocusNode(canRequestFocus: false),
-                                    decoration: InputDecoration(
-                                      contentPadding: EdgeInsets.symmetric(vertical: 10, horizontal: 20),
-                                      border: OutlineInputBorder(),
-                                      disabledBorder: OutlineInputBorder(borderSide: BorderSide(color: Colors.grey[200], width: 2.0)),
-                                      enabledBorder: OutlineInputBorder(borderSide: BorderSide(color: Colors.grey[200], width: 2.0)),
-                                      errorBorder: OutlineInputBorder(borderSide: BorderSide(color: kColorPrimary, width: 2.0)),
-                                      errorStyle: TextStyle(color: kColorPrimary, fontWeight: FontWeight.w500),
-                                      floatingLabelBehavior: FloatingLabelBehavior.always,
-                                      filled: true,
-                                      fillColor: kColorWhite,
-                                    ),
-                                    validator: (name) {
-                                      if (name.isEmpty) {
-                                        return "please_fill_this_field".tr();
-                                      }
-                                      return null;
-                                    },
-                                  ),
-                                ],
-                              ),
-                            ),
-
-                            /// Адрес
-                            Container(
-                              margin: EdgeInsets.only(bottom: 16),
-                              child: Column(
-                                children: [
-                                  Align(
-                                      widthFactor: 10,
-                                      heightFactor: 1.5,
-                                      alignment: Alignment.topLeft,
-                                      child: Text(
-                                        'address'.tr().toString().toUpperCase(),
-                                        style: TextStyle(fontSize: 12, color: Colors.black, fontWeight: FontWeight.w700),
-                                      )
-                                  ),
-                                  TypeAheadFormField(
-                                    textFieldConfiguration: TextFieldConfiguration(
-                                      controller: _vacancyTypeAheadController,
-                                      decoration: InputDecoration(
-                                        contentPadding: EdgeInsets.symmetric(vertical: 10, horizontal: 20),
-                                        border: OutlineInputBorder(),
-                                        enabledBorder: OutlineInputBorder(borderSide: BorderSide(color: Colors.grey[200], width: 2.0)),
-                                        errorBorder: OutlineInputBorder(borderSide: BorderSide(color: kColorPrimary, width: 2.0)),
-                                        errorStyle: TextStyle(color: kColorPrimary, fontWeight: FontWeight.w500),
-                                        floatingLabelBehavior: FloatingLabelBehavior.always,
-                                        filled: true,
-                                        fillColor: kColorWhite,
-                                      ),
-                                    ),
-                                    suggestionsCallback: (pattern) async {
-                                      print(pattern);
-                                      if(pattern.length > 3) {
-                                        _suggestionsAddress = await _fetchAddressSuggestions(pattern);
-                                      }
-                                      return _suggestionsAddress;
-                                    },
-                                    itemBuilder: (context, suggestion) {
-                                      return ListTile(
-                                        title: Text(suggestion['value']),
-                                      );
-                                    },
-                                    noItemsFoundBuilder: (context) {
-                                      return Container(
-                                        padding: EdgeInsets.symmetric(vertical: 10, horizontal: 20),
-                                        child: Text(
-                                          'address_not_found'.tr(),
-                                          style: TextStyle(
-                                              fontSize: 14,
-                                              fontWeight: FontWeight.w500,
-                                              color: Colors.black54
-                                          ),
-                                        ),
-                                      );
-                                    },
-                                    transitionBuilder: (context, suggestionsBox, controller) {
-                                      return suggestionsBox;
-                                    },
-                                    onSuggestionSelected: (suggestion) async {
-                                      _vacancyTypeAheadController.text = suggestion['value'];
-
-                                      String region = suggestion['data']['region_with_type'];
-                                      String district = suggestion['data']['city'];
-                                      String street = suggestion['data']['street_with_type'];
-                                      String houseNumber = suggestion['data']['house'];
-
-                                      if(region != '' && region != null){
-                                        selectedRegion = region;
-                                        districtList = await Vacancy.getLists('districts', region);
-                                        districtList.forEach((district) {
-                                          setState(() {
-                                            districts.add(district['name']);
-                                          });
-                                        });
-                                      }
-
-                                      if(district != '' && district != null){
-                                        selectedDistrict = district;
-                                      }
-
-                                      if(street != '' && street != null){
-                                        _vacancyStreetController.text = street;
-                                      }
-
-                                      if(houseNumber != '' && houseNumber != null){
-                                        _vacancyHouseNumberController.text = houseNumber;
-                                      }
-
-                                    },
-                                    validator: (value) {
-                                      if (value.isEmpty) {
-                                        return 'Введите адрес';
-                                      }
-                                      return null;
-                                    },
-                                    onSaved: (value) => _selectedCity = value,
-                                  ),
-                                ],
-                              ),
-                            ),
-
-                            Container(
-                              margin: EdgeInsets.only(bottom: 16),
-                              child: Column(
-                                children: [
-                                  Align(
-                                      widthFactor: 10,
-                                      heightFactor: 1.5,
-                                      alignment: Alignment.topLeft,
-                                      child: Text(
-                                        'job_types'.tr().toString().toUpperCase() + '*',
-                                        style: TextStyle(fontSize: 12, color: Colors.black, fontWeight: FontWeight.w700),
-                                      )
-                                  ),
-                                  DropdownButtonFormField<int>(
-                                    isExpanded: true,
-                                    hint: Text("select".tr()),
-                                    value: _jobTypeId,
-                                    onChanged: (int newValue) {
-                                      setState(() {
-                                        _jobTypeId = newValue;
-                                      });
-                                    },
-                                    focusNode: FocusNode(canRequestFocus: false),
-                                    validator: (value) => value == null ? "please_fill_this_field".tr() : null,
-                                    decoration: InputDecoration(
-                                      contentPadding: EdgeInsets.symmetric(vertical: 0, horizontal: 20),
-                                      border: OutlineInputBorder(),
-                                      enabledBorder: OutlineInputBorder(borderSide: BorderSide(color: Colors.grey[200], width: 2.0)),
-                                      errorBorder: OutlineInputBorder(borderSide: BorderSide(color: kColorPrimary, width: 2.0)),
-                                      errorStyle: TextStyle(color: kColorPrimary, fontWeight: FontWeight.w500),
-                                      floatingLabelBehavior: FloatingLabelBehavior.always,
-                                      filled: true,
-                                      fillColor: kColorWhite,
-                                    ),
-                                    items: jobTypeList.map<DropdownMenuItem<int>>((dynamic value) {
-                                      var jj = new JobType(id: value['id'], name: value['name']);
-                                      return DropdownMenuItem<int>(
-                                        value: jj.id,
-                                        child: Text(value['name']),
-                                      );
-                                    }).toList(),
-                                  ),
-                                ],
-                              ),
-                            ),
-
-                            Container(
-                              margin: EdgeInsets.only(bottom: 16),
-                              child: Column(
-                                children: [
-                                  Align(
-                                      widthFactor: 10,
-                                      heightFactor: 1.5,
-                                      alignment: Alignment.topLeft,
-                                      child: Text(
-                                        'vacancy_types'.tr().toString().toUpperCase() + '*',
-                                        style: TextStyle(fontSize: 12, color: Colors.black, fontWeight: FontWeight.w700),
-                                      )
-                                  ),
-                                  DropdownButtonFormField<int>(
-                                    isExpanded: true,
-                                    hint: Text("select".tr()),
-                                    value: _vacancyTypeId,
-                                    onChanged: (int newValue) {
-                                      setState(() {
-                                        _vacancyTypeId = newValue;
-                                      });
-                                    },
-                                    focusNode: FocusNode(canRequestFocus: false),
-                                    validator: (value) => value == null ? "please_fill_this_field".tr() : null,
-                                    decoration: InputDecoration(
-                                      contentPadding: EdgeInsets.symmetric(vertical: 0, horizontal: 20),
-                                      border: OutlineInputBorder(),
-                                      enabledBorder: OutlineInputBorder(borderSide: BorderSide(color: Colors.grey[200], width: 2.0)),
-                                      errorBorder: OutlineInputBorder(borderSide: BorderSide(color: kColorPrimary, width: 2.0)),
-                                      errorStyle: TextStyle(color: kColorPrimary, fontWeight: FontWeight.w500),
-                                      floatingLabelBehavior: FloatingLabelBehavior.always,
-                                      filled: true,
-                                      fillColor: kColorWhite,
-                                    ),
-                                    items: vacancyTypeList.map<DropdownMenuItem<int>>((dynamic value) {
-                                      var jj = new JobType(id: value['id'], name: value['name']);
-                                      return DropdownMenuItem<int>(
-                                        value: jj.id,
-                                        child: Text(value['name']),
-                                      );
-                                    }).toList(),
-                                  ),
-                                ],
-                              ),
-                            ),
-
-                            Container(
-                              margin: EdgeInsets.only(bottom: 16),
-                              child: Column(
-                                children: [
-                                  Align(
-                                      widthFactor: 10,
-                                      heightFactor: 1.5,
-                                      alignment: Alignment.topLeft,
-                                      child: Text(
-                                        'businesses'.tr().toString().toUpperCase() + '*',
-                                        style: TextStyle(fontSize: 12, color: Colors.black, fontWeight: FontWeight.w700),
-                                      )
-                                  ),
-                                  DropdownButtonFormField<int>(
-                                    isExpanded: true,
-                                    hint: Text("select".tr()),
-                                    value: _busynessId,
-                                    onChanged: (int newValue) {
-                                      setState(() {
-                                        _busynessId = newValue;
-                                      });
-                                    },
-                                    focusNode: FocusNode(canRequestFocus: false),
-                                    validator: (value) => value == null ? "please_fill_this_field".tr() : null,
-                                    decoration: InputDecoration(
-                                      contentPadding: EdgeInsets.symmetric(vertical: 0, horizontal: 20),
-                                      border: OutlineInputBorder(),
-                                      enabledBorder: OutlineInputBorder(borderSide: BorderSide(color: Colors.grey[200], width: 2.0)),
-                                      errorBorder: OutlineInputBorder(borderSide: BorderSide(color: kColorPrimary, width: 2.0)),
-                                      errorStyle: TextStyle(color: kColorPrimary, fontWeight: FontWeight.w500),
-                                      floatingLabelBehavior: FloatingLabelBehavior.always,
-                                      filled: true,
-                                      fillColor: kColorWhite,
-                                    ),
-                                    items: busynessList.map<DropdownMenuItem<int>>((dynamic value) {
-                                      var jj = new JobType(id: value['id'], name: value['name']);
-                                      return DropdownMenuItem<int>(
-                                        value: jj.id,
-                                        child: Text(value['name']),
-                                      );
-                                    }).toList(),
-                                  ),
-                                ],
-                              ),
-                            ),
-
-                            Container(
-                              margin: EdgeInsets.only(bottom: 16),
-                              child: Column(
-                                children: [
-                                  Align(
-                                      widthFactor: 10,
-                                      heightFactor: 1.5,
-                                      alignment: Alignment.topLeft,
-                                      child: Text(
-                                        'schedules'.tr().toString().toUpperCase() + '*',
-                                        style: TextStyle(fontSize: 12, color: Colors.black, fontWeight: FontWeight.w700),
-                                      )
-                                  ),
-                                  DropdownButtonFormField<int>(
-                                    isExpanded: true,
-                                    hint: Text("select".tr()),
-                                    value: _scheduleId,
-                                    onChanged: (int newValue) {
-                                      setState(() {
-                                        _scheduleId = newValue;
-                                      });
-                                    },
-                                    focusNode: FocusNode(canRequestFocus: false),
-                                    validator: (value) => value == null ? "please_fill_this_field".tr() : null,
-                                    decoration: InputDecoration(
-                                      contentPadding: EdgeInsets.symmetric(vertical: 0, horizontal: 20),
-                                      border: OutlineInputBorder(),
-                                      enabledBorder: OutlineInputBorder(borderSide: BorderSide(color: Colors.grey[200], width: 2.0)),
-                                      errorBorder: OutlineInputBorder(borderSide: BorderSide(color: kColorPrimary, width: 2.0)),
-                                      errorStyle: TextStyle(color: kColorPrimary, fontWeight: FontWeight.w500),
-                                      floatingLabelBehavior: FloatingLabelBehavior.always,
-                                      filled: true,
-                                      fillColor: kColorWhite,
-                                    ),
-                                    items: scheduleList.map<DropdownMenuItem<int>>((dynamic value) {
-                                      var jj = new JobType(id: value['id'], name: value['name']);
-                                      return DropdownMenuItem<int>(
-                                        value: jj.id,
-                                        child: Text(value['name']),
-                                      );
-                                    }).toList(),
-                                  ),
-                                ],
-                              ),
-                            ),
-
-                            Container(
-                              margin: EdgeInsets.only(bottom: 16),
-                              child: Column(
-                                children: [
-                                  Align(
-                                      widthFactor: 10,
-                                      heightFactor: 1.5,
-                                      alignment: Alignment.topLeft,
-                                      child: Text(
-                                        'required_experience'.tr().toString().toUpperCase() + '*',
-                                        style: TextStyle(fontSize: 12, color: Colors.black, fontWeight: FontWeight.w700),
-                                      )
-                                  ),
-                                  DropdownButtonFormField<int>(
-                                    isExpanded: true,
-                                    hint: Text("select".tr()),
-                                    value: _experienceId,
-                                    onChanged: (int newValue) {
-                                      setState(() {
-                                        _experienceId = newValue;
-                                      });
-                                    },
-                                    focusNode: FocusNode(canRequestFocus: false),
-                                    validator: (value) => value == null ? "please_fill_this_field".tr() : null,
-                                    decoration: InputDecoration(
-                                      contentPadding: EdgeInsets.symmetric(vertical: 0, horizontal: 20),
-                                      border: OutlineInputBorder(),
-                                      enabledBorder: OutlineInputBorder(borderSide: BorderSide(color: Colors.grey[200], width: 2.0)),
-                                      errorBorder: OutlineInputBorder(borderSide: BorderSide(color: kColorPrimary, width: 2.0)),
-                                      errorStyle: TextStyle(color: kColorPrimary, fontWeight: FontWeight.w500),
-                                      floatingLabelBehavior: FloatingLabelBehavior.always,
-                                      filled: true,
-                                      fillColor: kColorWhite,
-                                    ),
-                                    items: [
-                                      DropdownMenuItem<int>(
-                                        value: 0,
-                                        child: Text('Без опыта'),
-                                      ),
-                                      DropdownMenuItem<int>(
-                                        value: 1,
-                                        child: Text('Полгода'),
-                                      ),
-                                      DropdownMenuItem<int>(
-                                        value: 2,
-                                        child: Text('Более года'),
-                                      )
-                                    ],
-                                  ),
-                                ],
-                              ),
-                            ),
-
-                            Container(
-                              margin: EdgeInsets.only(bottom: 30),
-                              child: Column(
-                                children: [
-                                  Align(
-                                      widthFactor: 10,
-                                      heightFactor: 1.5,
-                                      alignment: Alignment.topLeft,
-                                      child: Text(
-                                        'payment_frequency'.tr().toString().toUpperCase() + '*',
-                                        style: TextStyle(fontSize: 12, color: Colors.black, fontWeight: FontWeight.w700),
-                                      )
-                                  ),
-                                  DropdownButtonFormField<int>(
-                                    isExpanded: true,
-                                    hint: Text("select".tr()),
-                                    value: _payPeriodId,
-                                    onChanged: (int newValue) {
-                                      setState(() {
-                                        _payPeriodId = newValue;
-                                      });
-                                    },
-                                    focusNode: FocusNode(canRequestFocus: false),
-                                    validator: (value) => value == null ? "please_fill_this_field".tr() : null,
-                                    decoration: InputDecoration(
-                                      contentPadding: EdgeInsets.symmetric(vertical: 0, horizontal: 20),
-                                      border: OutlineInputBorder(),
-                                      enabledBorder: OutlineInputBorder(borderSide: BorderSide(color: Colors.grey[200], width: 2.0)),
-                                      errorBorder: OutlineInputBorder(borderSide: BorderSide(color: kColorPrimary, width: 2.0)),
-                                      errorStyle: TextStyle(color: kColorPrimary, fontWeight: FontWeight.w500),
-                                      floatingLabelBehavior: FloatingLabelBehavior.always,
-                                      filled: true,
-                                      fillColor: kColorWhite,
-                                    ),
-                                    items: [
-                                      DropdownMenuItem<int>(
-                                        value: 0,
-                                        child: Text('Ежедневная'),
-                                      ),
-                                      DropdownMenuItem<int>(
-                                        value: 1,
-                                        child: Text('Еженедельная'),
-                                      ),
-                                      DropdownMenuItem<int>(
-                                        value: 2,
-                                        child: Text('Ежемесячная'),
-                                      )
-                                    ],
-                                  ),
-                                ],
-                              ),
-                            ),
-
-                            Container(
-                              width: double.maxFinite,
-                              child: Flex(
-                                direction: Axis.horizontal,
-                                mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                                children: [
-
-                                  CustomButton(
-                                    borderSide: BorderSide(
-                                        color: kColorPrimary,
-                                        width: 2.0
-                                    ),
-                                    color: Colors.transparent,
-                                    textColor: kColorPrimary,
-                                    onPressed: () {
-                                      _vacancy_name_controller = TextEditingController();
-                                      _vacancy_salary_controller = TextEditingController();
-                                      _vacancy_salary_from_controller = TextEditingController();
-                                      _vacancy_salary_to_controller = TextEditingController();
-                                      _vacancy_description_controller = TextEditingController();
-                                      _vacancyTypeAheadController = TextEditingController();
-                                      _vacancyStreetController = TextEditingController();
-                                      _vacancyHouseNumberController = TextEditingController();
-
-                                      setState(() {
-                                        _scheduleId = null;
-                                        _busynessId = null;
-                                        _jobTypeId = null;
-                                        _vacancyTypeId = null;
-                                        _regionId = null;
-                                        _districtId = null;
-                                        _currencyId = null;
-                                        _salaryPeriodId = null;
-                                        _experienceId = null;
-                                        _payPeriodId = null;
-                                      });
-                                      Navigator.of(context).pop();
-                                    },
-                                    text: 'cancel'.tr(),
-                                  ),
-                                  CustomButton(
-                                    color: kColorPrimary,
-                                    textColor: Colors.white,
-                                    onPressed: () {
-                                      if (_vacancyAddFormKey.currentState.validate()) {
-                                        setState(() {
-                                          loading = true;
-                                        });
-
-                                        Vacancy company_vacancy = new Vacancy(
-                                          name: _vacancy_name_controller.text,
-                                          salary: _vacancy_salary_controller.text,
-                                          salary_from: _vacancy_salary_from_controller.text,
-                                          salary_to: _vacancy_salary_to_controller.text,
-                                          currency: _currencyId != null ? _currencyId.toString() : null,
-                                          period: _salaryPeriodId != null ? _salaryPeriodId.toString() : null,
-                                          description: _vacancy_description_controller.text,
-                                          type: _vacancyTypeId != null ? _vacancyTypeId.toString() : null,
-                                          busyness: _busynessId != null ? _busynessId.toString() : null,
-                                          schedule: _scheduleId != null ? _scheduleId.toString() : null,
-                                          job_type: _jobTypeId != null ? _jobTypeId.toString() : null,
-                                          experience: _experienceId != null ? _experienceId.toString() : null,
-                                          payPeriod: _payPeriodId != null ? _payPeriodId.toString() : null,
-                                          region: selectedRegion ?? null,
-                                          district: selectedDistrict ?? null,
-                                          // region: _regionId != null ? _regionId.toString() : null,
-                                          // district: _districtId != null ? _districtId.toString() : null,
-                                          address: _vacancyTypeAheadController.text,
-                                          street: _vacancyStreetController.text,
-                                          houseNumber: _vacancyHouseNumberController.text,
-                                        );
-
-                                        Vacancy.saveCompanyVacancy(vacancy: company_vacancy).then((value) {
-                                          StoreProvider.of<AppState>(context).dispatch(getCompanyVacancies());
-                                          setState(() {
-                                            loading = false;
-                                          });
-                                          Navigator.of(context).pop();
-                                        });
-
-                                        _vacancy_name_controller = TextEditingController();
-                                        _vacancy_salary_controller = TextEditingController();
-                                        _vacancy_salary_from_controller = TextEditingController();
-                                        _vacancy_salary_to_controller = TextEditingController();
-                                        _vacancy_description_controller = TextEditingController();
-                                        _vacancyTypeAheadController = TextEditingController();
-                                        _vacancyStreetController = TextEditingController();
-                                        _vacancyHouseNumberController = TextEditingController();
-                                        setState(() {
-                                          _scheduleId = null;
-                                          _busynessId = null;
-                                          _jobTypeId = null;
-                                          _vacancyTypeId = null;
-                                          _regionId = null;
-                                          _districtId = null;
-                                          _currencyId = null;
-                                          _salaryPeriodId = null;
-                                          _experienceId = null;
-                                          _payPeriodId = null;
-                                        });
-                                      } else {
-                                        print('invalid');
-                                      }
-                                    },
-                                    text: 'add'.tr(),
-                                  ),
-                                ],
-                              ),
-                            ),
-                          ],
-                        ),
-                      ),
-                    ],
-                  ),
-                ),
-              ),
-            );
-          });
-        });
-  }
-
   void _nextTab(int tabIndex, {isProfile = false}) {
     // Update tab index
     setState(() => _tabCurrentIndex = tabIndex);
@@ -1475,37 +617,6 @@ class _HomeScreenState extends State<HomeScreen> {
         ],
       ),
 
-      Prefs.getString(Prefs.ROUTE) == 'COMPANY' ?
-      Row(
-        mainAxisAlignment: MainAxisAlignment.spaceBetween,
-        crossAxisAlignment: CrossAxisAlignment.center,
-        children: [
-          Text(
-            'chat'.tr(),
-            /*style: TextStyle(
-                  fontSize: 22,
-                  color: Colors.black,
-                  fontWeight: FontWeight.w600)*/
-          ),
-          GestureDetector(
-            child: CircleButton(
-              bgColor: Colors.transparent,
-              padding: 12,
-              icon: Icon(
-                Boxicons.bx_user,
-                color: kColorPrimary,
-                size: 35,
-              ),
-            ),
-            onTap: () {
-              _nextTab(4);
-              setState(() {
-                isProfile = true;
-              });
-            },
-          ),
-        ],
-      ) :
       Row(
         mainAxisAlignment: MainAxisAlignment.spaceBetween,
         crossAxisAlignment: CrossAxisAlignment.center,
@@ -1531,33 +642,6 @@ class _HomeScreenState extends State<HomeScreen> {
         ],
       ),
 
-      Prefs.getString(Prefs.ROUTE) == 'COMPANY' ?
-      Row(
-        mainAxisAlignment: MainAxisAlignment.spaceBetween,
-        crossAxisAlignment: CrossAxisAlignment.center,
-        children: [
-          Text(
-            'training'.tr(),
-          ),
-          GestureDetector(
-            child: CircleButton(
-              bgColor: Colors.transparent,
-              padding: 12,
-              icon: Icon(
-                Boxicons.bx_user,
-                color: kColorPrimary,
-                size: 35,
-              ),
-            ),
-            onTap: () {
-              _nextTab(4);
-              setState(() {
-                isProfile = true;
-              });
-            },
-          ),
-        ],
-      ) :
       Row(
         mainAxisAlignment: MainAxisAlignment.spaceBetween,
         crossAxisAlignment: CrossAxisAlignment.center,
@@ -1737,58 +821,6 @@ class _HomeScreenState extends State<HomeScreen> {
         ),
       ),
     );
-
-    return Container(
-      color: Colors.white54,
-      child: Padding(
-        padding: const EdgeInsets.all(32),
-        child: Container(
-          color: Colors.black26,
-          child: Column(
-            children: [
-              const SizedBox(
-                height: 40,
-              ),
-              Text(
-                '${texts[stepWidgetParams.currentStepIndex]}',
-                style: const TextStyle(
-                  color: Colors.white,
-                  fontSize: 16,
-                ),
-              ),
-              Row(
-                children: [
-                  const SizedBox(
-                    width: 16,
-                  ),
-                  ElevatedButton(
-                    onPressed: stepWidgetParams.onNext,
-                    child: const Text(
-                      'Next',
-                    ),
-                  ),
-                  const SizedBox(
-                    width: 16,
-                  ),
-                  ElevatedButton(
-                    onPressed: () {
-                      // setState(() {
-                      //   Prefs.setBool(Prefs.INTRO, true);
-                      // });
-                      intro.dispose();
-                      // stepWidgetParams.onFinish;
-                    },
-                    child: const Text(
-                      'Finish',
-                    ),
-                  ),
-                ],
-              ),
-            ],
-          ),
-        ),
-      ),
-    );
   }
 
   @override
@@ -1836,17 +868,12 @@ class _HomeScreenState extends State<HomeScreen> {
     props.getNumberOfUnreadMessages();
   }
 
-  void handleWillChangeBuild(VacanciesScreenProps props) {
-    props.getNumberOfUnreadMessages();
-  }
-
   @override
   Widget build(BuildContext context) {
     return StoreConnector<AppState, VacanciesScreenProps>(
         distinct: true,
         converter: (store) => mapStateToProps(store),
         onInitialBuild: (props) => this.handleInitialBuild(props),
-        // onDidChange: (props) => Timer.periodic(Duration(seconds:20), (Timer t) =>this.handleWillChangeBuild(props)),
         builder: (context, props) {
 
           return Scaffold(
@@ -1884,7 +911,7 @@ class _HomeScreenState extends State<HomeScreen> {
                     }
                     _nextTab(index);
                     if(Prefs.getString(Prefs.USER_TYPE) == 'COMPANY'){
-                      if (index == 3 || index == 2) {
+                      if (index == 3) {
                         setState(() {
                           isSpecial = true;
                           isProfile = true;
@@ -1934,39 +961,6 @@ class _HomeScreenState extends State<HomeScreen> {
                         )
                     ),
 
-                    Prefs.getString(Prefs.USER_TYPE) == 'COMPANY' ?
-                    BottomNavigationBarItem(
-                        icon: Container(
-                          width: 50,
-                          height: 30,
-                          child: Stack(
-                            children: [
-                              Positioned(
-                                top: 0.0,
-                                left: 0.0,
-                                right: receivedMessageCount > 0 ? null : 0.0,
-                                child: Icon(
-                                  Boxicons.bx_folder,
-                                  key: intro.keys[4],
-                                  color: _tabCurrentIndex == 1 ? kColorPrimary : Colors.grey,
-                                ),
-                              ),
-                              receivedMessageCount > 0 ?
-                              Positioned(
-                                  top: 0.0,
-                                  right: 0.0,
-                                  child: Badge(
-                                    text: receivedMessageCount.toString(),
-                                  )
-                              ) : Container(),
-                            ],
-                          ),
-                        ),
-                        title: Text(
-                          "received".tr(),
-                          style: TextStyle(color: _tabCurrentIndex == 1 ? kColorPrimary : Colors.grey),
-                        )
-                    ) :
                     BottomNavigationBarItem(
                         icon: Icon(
                           Boxicons.bx_heart,
@@ -1979,18 +973,6 @@ class _HomeScreenState extends State<HomeScreen> {
                         )
                     ),
 
-                    Prefs.getString(Prefs.USER_TYPE) == 'COMPANY' ?
-                    BottomNavigationBarItem(
-                        icon: Icon(
-                          Boxicons.bx_comment_detail,
-                          key: intro.keys[5],
-                          color: _tabCurrentIndex == 2 ? kColorPrimary : Colors.grey,
-                        ),
-                        title: Text(
-                          "chat".tr(),
-                          style: TextStyle(color: _tabCurrentIndex == 2 ? kColorPrimary : Colors.grey),
-                        )
-                    ) :
                     BottomNavigationBarItem(
                         icon: Container(
                           key: intro.keys[5],
@@ -1998,49 +980,33 @@ class _HomeScreenState extends State<HomeScreen> {
                           height: 30,
                           child: Stack(children: [
                             Positioned(
-                              top: 0.0,
-                              left: 0.0,
-                              right: StoreProvider.of<AppState>(context).state.vacancy.number_of_submiteds == null ? 0.0 : null,
+                              top: 0,
+                              left: 0,
+                              right: StoreProvider.of<AppState>(context).state.vacancy.number_of_submiteds > 0 ? null : 0,
                               child: Icon(
                                 Boxicons.bx_file,
                                 color: _tabCurrentIndex == 2 ? kColorPrimary : Colors.grey,
                               ),
                             ),
-                            StoreProvider.of<AppState>(context).state.vacancy.number_of_submiteds == null ?
-                            Container() :
+
+                            StoreProvider.of<AppState>(context).state.vacancy.number_of_submiteds > 0 ?
                             Positioned(
-                              top: 0.0,
-                              right: 0.0,
+                              top: 0,
+                              right: 0,
                               child: StoreProvider.of<AppState>(context).state.vacancy.number_of_submiteds > 0 ?
                               Badge(
                                   text: StoreProvider.of<AppState>(context).state.vacancy.number_of_submiteds.toString()
                               ) : Container(),
-                            ),
+                            ) :
+                            Container(),
                           ]),
                         ),
-                        // icon: Icon(
-                        //   Boxicons.bx_file,
-                        //   key: intro.keys[5],
-                        //   color: _tabCurrentIndex == 2 ? kColorPrimary : Colors.grey,
-                        // ),
                         title: Text(
                           "responses".tr(),
                           style: TextStyle(color: _tabCurrentIndex == 2 ? kColorPrimary : Colors.grey),
                         )
                     ),
 
-                    Prefs.getString(Prefs.USER_TYPE) == 'COMPANY' ?
-                    BottomNavigationBarItem(
-                        icon: Icon(
-                          Boxicons.bx_book,
-                          key: intro.keys[6],
-                          color: _tabCurrentIndex == 3 ? kColorPrimary : Colors.grey,
-                        ),
-                        title: Text(
-                          "training".tr(),
-                          style: TextStyle(color: _tabCurrentIndex == 3 ? kColorPrimary : Colors.grey),
-                        )
-                    ) :
                     BottomNavigationBarItem(
                         icon: Container(
                           key: intro.keys[6],
@@ -2057,6 +1023,7 @@ class _HomeScreenState extends State<HomeScreen> {
                                     color: _tabCurrentIndex == 3 ? kColorPrimary : Colors.grey,
                                   ),
                                 ),
+
                                 StoreProvider.of<AppState>(context).state.chat.number_of_unread > 0 ?
                                 Positioned(
                                   top: 0,
@@ -2070,11 +1037,6 @@ class _HomeScreenState extends State<HomeScreen> {
                               ]
                           ),
                         ),
-                        // icon: Icon(
-                        //   Boxicons.bx_comment_detail,
-                        //   key: intro.keys[6],
-                        //   color: _tabCurrentIndex == 3 ? kColorPrimary : Colors.grey,
-                        // ),
                         title: Text(
                           "chat".tr(),
                           style: TextStyle(color: _tabCurrentIndex == 3 ? kColorPrimary : Colors.grey),
@@ -2093,8 +1055,8 @@ class _HomeScreenState extends State<HomeScreen> {
                     children: [
                       DiscoverTab(),
                       MatchesTab(),
+                      VacanciesTab(),
                       ConversationsTab(),
-                      SchoolTab(),
                       ProfileTab(),
                     ],
                   ) :

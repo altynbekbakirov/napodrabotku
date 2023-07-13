@@ -32,9 +32,7 @@ class _SplashScreenState extends State<SplashScreen> {
     if (Prefs.getString('language') == null)
       Navigator.of(context).pushReplacementNamed(Routes.chooseLanguage);
     else if (Prefs.getString(Prefs.TOKEN) != null) {
-      Prefs.getString(Prefs.ROUTE) == "PRODUCT_LAB"
-        ? Navigator.of(context).pushReplacementNamed(Routes.product_lab_home)
-        : Navigator.of(context).pushReplacementNamed(Routes.home);
+      Navigator.of(context).pushReplacementNamed(Routes.home);
     } else {
       Navigator.of(context).pushReplacementNamed(Routes.select_mode);
     }
