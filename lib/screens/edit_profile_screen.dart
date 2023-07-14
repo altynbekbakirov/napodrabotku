@@ -48,7 +48,7 @@ class _EditProfileScreenState extends State<EditProfileScreen> {
   final DateFormat formatter = DateFormat('yyyy-MM-dd');
 
   final _name_controller = TextEditingController();
-  final _surnname_controller = TextEditingController();
+  final _surname_controller = TextEditingController();
   final _email_controller = TextEditingController();
   final _phone_number_controller = TextEditingController();
   final _birth_date_controller = TextEditingController();
@@ -56,6 +56,7 @@ class _EditProfileScreenState extends State<EditProfileScreen> {
   final _address_of_company = TextEditingController();
   final _fullname_of_contact_person = TextEditingController();
   final _position_of_contact_person = TextEditingController();
+  final _description_controller = TextEditingController();
 
   void _showPicker(context) {
     showModalBottomSheet(
@@ -259,10 +260,11 @@ class _EditProfileScreenState extends State<EditProfileScreen> {
         //         // experience_year_controller.text = user_cv.experience_year == null ? '0' : user_cv.experience_year.toString();
       }
       _name_controller.text = user.name;
-      _surnname_controller.text = user.surname;
+      _surname_controller.text = user.surname;
       _email_controller.text = user.email;
       _phone_number_controller.text = user.phone_number;
       _linkedin_controller.text = user.linkedin;
+      _description_controller.text = user.description;
       is_migrant = user.is_migrant == 1;
       gender = user.gender == 1 ? user_gender.Female : user_gender.Male;
       selectedRegion = user.region;
@@ -411,33 +413,61 @@ class _EditProfileScreenState extends State<EditProfileScreen> {
                             heightFactor: 1.5,
                             alignment: Alignment.topLeft,
                             child: Text(
-                              'surname'.tr().toString().toUpperCase() + '*',
+                              'name'.tr().toString().toUpperCase() + '*     ',
                               style: TextStyle(fontSize: 12, color: Colors.black, fontWeight: FontWeight.w700),
                             )
                         ),
+                        TextFormField(
+                          controller: _name_controller,
+                          decoration: InputDecoration(
+                            contentPadding: EdgeInsets.symmetric(vertical: 10, horizontal: 20),
+                            border: OutlineInputBorder(),
+                            enabledBorder: OutlineInputBorder(borderSide: BorderSide(color: Colors.grey[200], width: 2.0)),
+                            errorBorder: OutlineInputBorder(borderSide: BorderSide(color: kColorPrimary, width: 2.0)),
+                            errorStyle: TextStyle(color: kColorPrimary, fontWeight: FontWeight.w500),
+                            floatingLabelBehavior: FloatingLabelBehavior.always,
+                            filled: true,
+                            fillColor: kColorWhite,
+                          ),
+                          validator: (name) {
+                            // Basic validation
+                            if (name.isEmpty) {
+                              return "please_fill_this_field".tr();
+                            }
+                            return null;
+                          },
+                        ),
+                        SizedBox(height: 20),
+                        Align(
+                            widthFactor: 10,
+                            heightFactor: 1.5,
+                            alignment: Alignment.topLeft,
+                            child: Text(
+                              'lastname'.tr().toString().toUpperCase() + '*',
+                              style: TextStyle(fontSize: 12, color: Colors.black, fontWeight: FontWeight.w700),
+                            )
+                        ),
+                        TextFormField(
+                          controller: _surname_controller,
+                          decoration: InputDecoration(
+                            contentPadding: EdgeInsets.symmetric(vertical: 10, horizontal: 20),
+                            border: OutlineInputBorder(),
+                            enabledBorder: OutlineInputBorder(borderSide: BorderSide(color: Colors.grey[200], width: 2.0)),
+                            errorBorder: OutlineInputBorder(borderSide: BorderSide(color: kColorPrimary, width: 2.0)),
+                            errorStyle: TextStyle(color: kColorPrimary, fontWeight: FontWeight.w500),
+                            floatingLabelBehavior: FloatingLabelBehavior.always,
+                            filled: true,
+                            fillColor: kColorWhite,
+                          ),
+                          validator: (name) {
+                            // Basic validation
+                            if (name.isEmpty) {
+                              return "please_fill_this_field".tr();
+                            }
+                            return null;
+                          },
+                        )
                       ],
-                    ) : Container(),
-
-                    Prefs.getString(Prefs.USER_TYPE) == "USER" ?
-                    TextFormField(
-                      controller: _name_controller,
-                      decoration: InputDecoration(
-                        contentPadding: EdgeInsets.symmetric(vertical: 10, horizontal: 20),
-                        border: OutlineInputBorder(),
-                        enabledBorder: OutlineInputBorder(borderSide: BorderSide(color: Colors.grey[200], width: 2.0)),
-                        errorBorder: OutlineInputBorder(borderSide: BorderSide(color: kColorPrimary, width: 2.0)),
-                        errorStyle: TextStyle(color: kColorPrimary, fontWeight: FontWeight.w500),
-                        floatingLabelBehavior: FloatingLabelBehavior.always,
-                        filled: true,
-                        fillColor: kColorWhite,
-                      ),
-                      validator: (name) {
-                        // Basic validation
-                        if (name.isEmpty) {
-                          return "please_fill_this_field".tr();
-                        }
-                        return null;
-                      },
                     ) : Container(),
                     SizedBox(height: 20),
 
@@ -719,6 +749,42 @@ class _EditProfileScreenState extends State<EditProfileScreen> {
                         heightFactor: 1.5,
                         alignment: Alignment.topLeft,
                         child: Text(
+                          'about_myself'.tr().toString().toUpperCase() + '*',
+                          style: TextStyle(fontSize: 12, color: Colors.black, fontWeight: FontWeight.w700),
+                        )
+                    ) : Container(),
+
+                    Prefs.getString(Prefs.USER_TYPE) == "USER" ?
+                    TextFormField(
+                      controller: _description_controller,
+                      maxLines: 5,
+                      focusNode: FocusNode(canRequestFocus: false),
+                      decoration: InputDecoration(
+                        contentPadding: EdgeInsets.symmetric(vertical: 10, horizontal: 20),
+                        border: OutlineInputBorder(),
+                        disabledBorder: OutlineInputBorder(borderSide: BorderSide(color: Colors.grey[200], width: 2.0)),
+                        enabledBorder: OutlineInputBorder(borderSide: BorderSide(color: Colors.grey[200], width: 2.0)),
+                        errorBorder: OutlineInputBorder(borderSide: BorderSide(color: kColorPrimary, width: 2.0)),
+                        errorStyle: TextStyle(color: kColorPrimary, fontWeight: FontWeight.w500),
+                        floatingLabelBehavior: FloatingLabelBehavior.always,
+                        filled: true,
+                        fillColor: kColorWhite,
+                      ),
+                      validator: (name) {
+                        if (name.isEmpty) {
+                          return "please_fill_this_field".tr();
+                        }
+                        return null;
+                      },
+                    ) : Container(),
+                    SizedBox(height: 20),
+
+                    Prefs.getString(Prefs.USER_TYPE) == "USER" ?
+                    Align(
+                        widthFactor: 10,
+                        heightFactor: 1.5,
+                        alignment: Alignment.topLeft,
+                        child: Text(
                           'gender'.tr().toString().toUpperCase() + '  ' + '*',
                           style: TextStyle(fontSize: 12, color: Colors.black, fontWeight: FontWeight.w700),
                         )
@@ -811,7 +877,7 @@ class _EditProfileScreenState extends State<EditProfileScreen> {
                             user.linkedin = _linkedin_controller.text;
 
                             user.name = _name_controller.text;
-                            user.surname = _surnname_controller.text;
+                            user.surname = _surname_controller.text;
                             user.is_migrant = is_migrant ? 1 : 0;
                             user.gender = gender == user_gender.Male ? "male" : "female";
                             user.region = selectedRegion;
@@ -822,6 +888,7 @@ class _EditProfileScreenState extends State<EditProfileScreen> {
                             user.department = selectedDepartment;
                             user.social_orientation = selectedSocialOrientation;
                             user.address = _address_of_company.text;
+                            user.description = _description_controller.text;
 
                             if (_imageFile != null && _imageFile.path != null)
                               user.uploadImage2(File(_imageFile.path)).then((value) {

@@ -11,6 +11,7 @@ import 'package:ishtapp/screens/edit_profile_screen.dart';
 import 'package:ishtapp/utils/constants.dart';
 import 'package:ishtapp/datas/pref_manager.dart';
 import 'package:ishtapp/constants/configs.dart';
+import 'package:multiselect_formfield/multiselect_formfield.dart';
 import 'package:redux/redux.dart';
 import 'package:ishtapp/datas/RSAA.dart';
 import 'package:ishtapp/datas/app_state.dart';
@@ -43,6 +44,23 @@ class _ProfileTabState extends State<ProfileTab> {
     },
   ];
   int selectedStatus;
+  List<dynamic> vacancyTypeList = [];
+  List<dynamic> scheduleList = [];
+  List _vacancyTypes = [];
+  List _schedules = [];
+
+  getLists() async {
+    vacancyTypeList = await Vacancy.getLists('vacancy_type', null);
+    scheduleList = await Vacancy.getLists('schedule', null);
+  }
+
+  getSchedules(id) async {
+    _schedules = await Users.getSchedules(id);
+  }
+
+  getVacancyTypes(id) async {
+    _vacancyTypes = await Users.getVacancyTypes(id);
+  }
 
   void handleInitialBuild(ProfileScreenProps props) {
     if (Prefs.getString(Prefs.TOKEN) == "null" || Prefs.getString(Prefs.TOKEN) == null) {
@@ -121,6 +139,9 @@ class _ProfileTabState extends State<ProfileTab> {
   @override
   void initState() {
     selectedStatus = Prefs.getInt(Prefs.USER_STATUS);
+    getLists();
+    getSchedules(Prefs.getInt(Prefs.USER_ID));
+    getVacancyTypes(Prefs.getInt(Prefs.USER_ID));
     super.initState();
   }
 
@@ -246,7 +267,7 @@ class _ProfileTabState extends State<ProfileTab> {
                                   onPressed: () {
                                     Navigator.of(context).pushNamed(Routes.user_details);
                                   },
-                                  text: 'profile'.tr(),
+                                  text: 'about_me'.tr(),
                                 ),
                               ),
                             ) : Container() : Container(),
@@ -276,6 +297,86 @@ class _ProfileTabState extends State<ProfileTab> {
                           ],
                         ),
                       ),
+
+                      Prefs.getString(Prefs.USER_TYPE) == "USER" ?
+                      Container(
+                        margin: EdgeInsets.only(top: 30, bottom: 15),
+                        child: Column(
+                          children: [
+                            Container(
+                              margin: EdgeInsets.only(bottom: 10),
+                              child: Text(
+                                ('Меня интересуют').tr().toUpperCase(),
+                                textAlign: TextAlign.center,
+                                style: TextStyle(
+                                  fontSize: 14,
+                                  fontWeight: FontWeight.w700,
+                                  color: kColorDarkBlue
+                                ),
+                              ),
+                            ),
+                            MultiSelectFormField(
+                              fillColor: kColorWhite,
+                              title: Text(
+                                'vacancy_types'.tr(),
+                                style: TextStyle(fontSize: 13, fontWeight: FontWeight.bold, color: Colors.black),
+                              ),
+                              validator: (value) {
+                                if (value == null || value.length == 0) {
+                                  return 'select_one_or_more'.tr();
+                                }
+                                return null;
+                              },
+                              dataSource: vacancyTypeList,
+                              textField: 'name',
+                              valueField: 'id',
+                              okButtonLabel: 'ok'.tr(),
+                              cancelButtonLabel: 'cancel'.tr(),
+                              // required: true,
+                              hintWidget: Text('select_one_or_more'.tr()),
+                              initialValue: _vacancyTypes,
+                              onSaved: (value) async {
+                                if (value == null) return;
+                                setState(() {
+                                  _vacancyTypes = value;
+                                });
+
+                                await Users.changeVacancyTypes(vacancyTypes: _vacancyTypes);
+                              },
+                            ),
+                            SizedBox(height: 10),
+                            MultiSelectFormField(
+                              fillColor: kColorWhite,
+                              title: Text(
+                                'schedules'.tr(),
+                                style: TextStyle(fontSize: 13, fontWeight: FontWeight.bold, color: Colors.black),
+                              ),
+                              validator: (value) {
+                                if (value == null || value.length == 0) {
+                                  return 'select_one_or_more'.tr();
+                                }
+                                return null;
+                              },
+                              dataSource: scheduleList,
+                              textField: 'name',
+                              valueField: 'id',
+                              okButtonLabel: 'ok'.tr(),
+                              cancelButtonLabel: 'cancel'.tr(),
+                              // required: true,
+                              hintWidget: Text('select_one_or_more'.tr()),
+                              initialValue: _schedules,
+                              onSaved: (value) async {
+                                if (value == null) return;
+                                setState(() {
+                                  _schedules = value;
+                                });
+
+                                await Users.changeSchedule(schedules: _schedules);
+                              },
+                            ),
+                          ],
+                        ),
+                      ) : Container(),
                     ],
                   ),
                 ),
@@ -463,6 +564,15 @@ class _ProfileTabState extends State<ProfileTab> {
                                   ),
                                 ),
                               ),
+                              Prefs.getString(Prefs.USER_TYPE) == 'COMPANY' ?
+                              Flexible(
+                                child: Container(
+                                  child:  Text(
+                                    StoreProvider.of<AppState>(context).state.vacancy.inactive_list.data != null && StoreProvider.of<AppState>(context).state.vacancy.inactive_list.data.length > 0 ? StoreProvider.of<AppState>(context).state.vacancy.inactive_list.data.length.toString() : '0',
+                                    style: TextStyle(color: Colors.grey[400]),
+                                  ),
+                                ),
+                              ) : Container(),
                             ],
                           ),
                         ),
@@ -627,8 +737,13 @@ class ProfileScreenProps {
   final Function getUserCv;
   final Function getSubmittedNumber;
   final Function getCompanyVacancies;
+  final Function getCompanyActiveVacancies;
+  final Function getCompanyInactiveVacancies;
   final UserDetailState user;
   final UserCvState user_cv;
+  final ListVacancysState list;
+  final ListVacancysState active_list;
+  final ListVacancysState inactive_list;
   final int submitted_number;
 
   ProfileScreenProps({
@@ -638,7 +753,12 @@ class ProfileScreenProps {
     this.user_cv,
     this.getSubmittedNumber,
     this.submitted_number,
+    this.list,
+    this.active_list,
+    this.inactive_list,
     this.getCompanyVacancies,
+    this.getCompanyActiveVacancies,
+    this.getCompanyInactiveVacancies,
   });
 }
 
@@ -647,9 +767,14 @@ ProfileScreenProps mapStateToProps(Store<AppState> store) {
       user: store.state.vacancy.user.user,
       submitted_number: store.state.vacancy.number_of_submiteds,
       user_cv: store.state.vacancy.user.user_cv,
+      list: store.state.vacancy.list,
+      active_list: store.state.vacancy.active_list,
+      inactive_list: store.state.vacancy.inactive_list,
       getUser: () => store.dispatch(getUser()),
       getUserCv: () => store.dispatch(getUserCv()),
       getSubmittedNumber: () => store.dispatch(getNumberOfSubmittedVacancies()),
       getCompanyVacancies: () => store.dispatch(getCompanyVacancies()),
+      getCompanyActiveVacancies: () => store.dispatch(getCompanyActiveVacancies()),
+      getCompanyInactiveVacancies: () => store.dispatch(getCompanyInactiveVacancies()),
   );
 }

@@ -833,32 +833,31 @@ class _HomeScreenState extends State<HomeScreen> {
       widgetBuilder: customThemeWidgetBuilder,
     );
 
-
-    print('intro: $intro');
-
     if (Prefs.getString(Prefs.ROUTE) == 'COMPANY') {
       _deactivateVacancyWithOverDeadline();
     } else {
-
+      // Timer(Duration(microseconds: 500), () {
+      //   intro.start(context);
+      // });
     }
     getLists();
     buildSome(context);
 
-    super.initState();
+    // if (Prefs.getBool(Prefs.INTRO)) {
+    // Timer(Duration(microseconds: 500), () {
+    //   intro.start(context);
+    // });
+    // }
 
-    if (Prefs.getBool(Prefs.INTRO)) {
-      Timer(Duration(microseconds: 0), () {
-        /// start the intro
-        intro.start(context);
-      });
-    }
+    super.initState();
   }
 
   @override
   void didChangeDependencies() {
-    final store = StoreProvider.of<AppState>(context);
-    Timer.periodic(Duration(seconds:300), (Timer t) => StoreProvider.of<AppState>(context).dispatch(getNumberOfUnreadMessages()));
-    // TODO: implement didChangeDependencies
+    Timer.periodic(Duration(seconds:300), (Timer t) {
+      StoreProvider.of<AppState>(context).dispatch(getChatList());
+      StoreProvider.of<AppState>(context).dispatch(getNumberOfUnreadMessages());
+    });
     super.didChangeDependencies();
   }
 
@@ -979,6 +978,7 @@ class _HomeScreenState extends State<HomeScreen> {
                           width: 50,
                           height: 30,
                           child: Stack(children: [
+
                             Positioned(
                               top: 0,
                               left: 0,
@@ -999,6 +999,7 @@ class _HomeScreenState extends State<HomeScreen> {
                               ) : Container(),
                             ) :
                             Container(),
+
                           ]),
                         ),
                         title: Text(

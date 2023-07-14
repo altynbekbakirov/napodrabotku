@@ -18,6 +18,8 @@ class Prefs {
   static const String ROUTE = 'route';
   static const String MESSAGEDATE = 'message_date';
   static const String INTRO = 'intro';
+  static const String SCHEDULES = 'schedules';
+  static const String VACANCY_TYPES = 'vacancy_types';
 
   static SharedPreferences _prefs;
   static Map<String, dynamic> _memoryPrefs = Map<String, dynamic>();

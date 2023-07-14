@@ -283,5 +283,13 @@
     "enter_the_code_received_in_sms": "SMS келген кодду киргизиңиз",
     "you_can_resend_code_after": "Кодду кийин кайра жөнөтө аласыз ",
     "this_code_will_expire_in": "Бул коддун мөөнөтү бүтөт",
-    "phone_number_not_found": "Телефон номери табылган жок"
+    "phone_number_not_found": "Телефон номери табылган жок",
+    "age": "Жашы",
+    "years": "жаш",
+    "experience_years": "Стаж работы",
+    "nationality": "Жарандык",
+    "from": "от",
+    "to": "чейин",
+    "about_me": "Обо мне",
+    "about_myself": "О себе"
 }

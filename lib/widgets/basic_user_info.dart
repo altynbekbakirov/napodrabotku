@@ -46,7 +46,7 @@ class BasicUserCvInfo extends StatelessWidget {
                   style:
                       TextStyle(fontSize: 16, color: Colors.grey, height: 2)),
               Flexible(
-                child: Text(user.name,
+                child: Text(user.surname != null ? '${user.name} ${user.surname}' : user.name,
                     softWrap: true,
                     style: TextStyle(fontSize: 16, color: kColorDark)),
               ),

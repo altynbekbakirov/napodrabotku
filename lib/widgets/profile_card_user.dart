@@ -28,6 +28,7 @@ class ProfileCardUser extends StatefulWidget {
   final String page;
   final int index;
   final CardController cardController;
+  final List<Vacancy> vacancyList;
 
   /// Swiper position
   final SwiperPosition position;
@@ -39,6 +40,7 @@ class ProfileCardUser extends StatefulWidget {
     this.index,
     this.props,
     this.cardController,
+    this.vacancyList,
   });
 
   @override
@@ -50,145 +52,262 @@ class _ProfileCardUserState extends State<ProfileCardUser> {
   bool loading = false;
 
   int vacancyId;
-  List<dynamic> vacancyList = [];
+  List<dynamic> _vacancyList = [];
 
   final _vacancyAddFormKey = GlobalKey<FormState>();
 
   Future<void> openInviteDialog(context) async {
 
-    print(vacancyList);
+    print(widget.vacancyList);
 
-    return await showDialog(
+    _vacancyList = widget.vacancyList.map<DropdownMenuItem<int>>((dynamic value) {
+      var jj = new Vacancy(id: value.id, name: value.name);
+      return DropdownMenuItem<int>(
+        value: jj.id,
+        child: Text(jj.name.toString()),
+      );
+    }).toList();
+
+    print(_vacancyList);
+
+    return showDialog(
         context: context,
         builder: (context) {
-          return StatefulBuilder(builder: (context, setState) {
-            return
-            Dialog(
-              insetPadding: EdgeInsets.zero,
-              shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(20.0)),
-              child: Container(
-                constraints: BoxConstraints(maxHeight: MediaQuery.of(context).size.height * 0.9, maxWidth: MediaQuery.of(context).size.width * 0.9),
-                child: Padding(
-                  padding: const EdgeInsets.symmetric(horizontal: 20.0, vertical: 30.0),
-                  child: ListView(
-                    shrinkWrap: true,
-                    children: [
-                      Container(
-                        child: Align(
-                            alignment: Alignment.center,
-                            child: Text(
-                              'choose_vacancy'.tr(),
-                              style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold, color: Colors.black),
-                            )
-                        ),
+          return Dialog(
+            insetPadding: EdgeInsets.zero,
+            shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(20.0)),
+            child: Container(
+              constraints: BoxConstraints(maxHeight: MediaQuery.of(context).size.height * 0.9, maxWidth: MediaQuery.of(context).size.width * 0.9),
+              child: Padding(
+                padding: const EdgeInsets.symmetric(horizontal: 20.0, vertical: 30.0),
+                child: ListView(
+                  shrinkWrap: true,
+                  children: [
+                    Container(
+                      child: Align(
+                          alignment: Alignment.center,
+                          child: Text(
+                            'choose_vacancy'.tr(),
+                            style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold, color: Colors.black),
+                          )
                       ),
+                    ),
 
-                      /// Form
-                      Form(
-                        key: _vacancyAddFormKey,
-                        child: Column(
-                          children: <Widget>[
-                            Container(
-                              margin: EdgeInsets.symmetric(vertical: 40),
-                              child: Column(
+                    /// Form
+                    Form(
+                      key: _vacancyAddFormKey,
+                      child: Column(
+                        children: <Widget>[
+                          Container(
+                            margin: EdgeInsets.symmetric(vertical: 40),
+                            child: Column(
 
-                                children: [
-                                  DropdownButtonFormField<int>(
-                                    isExpanded: true,
-                                    hint: Text("select".tr()),
-                                    value: vacancyId,
-                                    onChanged: (int newValue) {
-                                      setState(() {
-                                        vacancyId = newValue;
-                                      });
-                                    },
-                                    focusNode: FocusNode(canRequestFocus: false),
-                                    validator: (value) => value == null ? "please_fill_this_field".tr() : null,
-                                    decoration: InputDecoration(
-                                      contentPadding: EdgeInsets.symmetric(vertical: 0, horizontal: 20),
-                                      border: OutlineInputBorder(),
-                                      enabledBorder: OutlineInputBorder(borderSide: BorderSide(color: Colors.grey[200], width: 2.0)),
-                                      errorBorder: OutlineInputBorder(borderSide: BorderSide(color: kColorPrimary, width: 2.0)),
-                                      errorStyle: TextStyle(color: kColorPrimary, fontWeight: FontWeight.w500),
-                                      floatingLabelBehavior: FloatingLabelBehavior.always,
-                                      filled: true,
-                                      fillColor: kColorWhite,
-                                    ),
-                                    items: vacancyList.map<DropdownMenuItem<int>>((dynamic value) {
-                                      var jj = new JobType(id: value.id, name: value.name);
-                                      if(value.status == 'active'){
-                                        return DropdownMenuItem<int>(
-                                          value: jj.id,
-                                          child: Text(jj.name),
-                                        );
-                                      }
-                                      return null;
-                                    }).toList(),
+                              children: [
+                                DropdownButtonFormField<int>(
+                                  isExpanded: true,
+                                  hint: Text("select".tr()),
+                                  value: vacancyId,
+                                  onChanged: (int newValue) {
+                                    setState(() {
+                                      vacancyId = newValue;
+                                    });
+                                  },
+                                  focusNode: FocusNode(canRequestFocus: false),
+                                  validator: (value) => value == null ? "please_fill_this_field".tr() : null,
+                                  decoration: InputDecoration(
+                                    contentPadding: EdgeInsets.symmetric(vertical: 0, horizontal: 20),
+                                    border: OutlineInputBorder(),
+                                    enabledBorder: OutlineInputBorder(borderSide: BorderSide(color: Colors.grey[200], width: 2.0)),
+                                    errorBorder: OutlineInputBorder(borderSide: BorderSide(color: kColorPrimary, width: 2.0)),
+                                    errorStyle: TextStyle(color: kColorPrimary, fontWeight: FontWeight.w500),
+                                    floatingLabelBehavior: FloatingLabelBehavior.always,
+                                    filled: true,
+                                    fillColor: kColorWhite,
                                   ),
-                                ],
-                              ),
+                                  items: _vacancyList,
+                                ),
+                              ],
                             ),
+                          ),
 
-                            Container(
-                              width: double.maxFinite,
-                              child: Flex(
-                                direction: Axis.horizontal,
-                                mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                                children: [
+                          Container(
+                            width: double.maxFinite,
+                            child: Flex(
+                              direction: Axis.horizontal,
+                              mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                              children: [
 
-                                  CustomButton(
-                                    borderSide: BorderSide(
-                                        color: kColorPrimary,
-                                        width: 2.0
-                                    ),
-                                    color: Colors.transparent,
-                                    textColor: kColorPrimary,
-                                    onPressed: () {
+                                CustomButton(
+                                  borderSide: BorderSide(
+                                      color: kColorPrimary,
+                                      width: 2.0
+                                  ),
+                                  color: Colors.transparent,
+                                  textColor: kColorPrimary,
+                                  onPressed: () {
+                                    setState(() {
+                                      vacancyId = null;
+                                    });
+                                    Navigator.of(context).pop();
+                                  },
+                                  text: 'cancel'.tr(),
+                                ),
+                                CustomButton(
+                                  color: kColorPrimary,
+                                  textColor: Colors.white,
+                                  onPressed: () {
+                                    if (_vacancyAddFormKey.currentState.validate()) {
+
+                                      Vacancy.saveVacancyUserInvite(vacancy_id: vacancyId, type: "INVITED", user_id: widget.user.id).then((value) {
+                                        if (value == "OK") {
+                                          // Dialogs.showDialogBox(context,"successfully_submitted".tr());
+                                          StoreProvider.of<AppState>(context).state.user.list.data.remove(widget.user);
+                                          StoreProvider.of<AppState>(context).dispatch(getUsers());
+                                          Navigator.of(context).pop();
+                                        } else {
+                                          Dialogs.showDialogBox(context,"some_error_occurred_try_again".tr());
+                                        }
+                                      });
+
                                       setState(() {
                                         vacancyId = null;
                                       });
-                                      Navigator.of(context).pop();
-                                    },
-                                    text: 'cancel'.tr(),
-                                  ),
-                                  CustomButton(
-                                    color: kColorPrimary,
-                                    textColor: Colors.white,
-                                    onPressed: () {
-                                      if (_vacancyAddFormKey.currentState.validate()) {
-
-                                        Vacancy.saveVacancyUserInvite(vacancy_id: vacancyId, type: "INVITED", user_id: widget.user.id).then((value) {
-                                          if (value == "OK") {
-                                            // Dialogs.showDialogBox(context,"successfully_submitted".tr());
-                                            StoreProvider.of<AppState>(context).state.user.list.data.remove(widget.user);
-                                            StoreProvider.of<AppState>(context).dispatch(getUsers());
-                                            Navigator.of(context).pop();
-                                          } else {
-                                            Dialogs.showDialogBox(context,"some_error_occurred_try_again".tr());
-                                          }
-                                        });
-
-                                        setState(() {
-                                          vacancyId = null;
-                                        });
-                                      } else {
-                                        print('invalid');
-                                      }
-                                    },
-                                    text: 'send'.tr(),
-                                  ),
-                                ],
-                              ),
+                                    } else {
+                                      print('invalid');
+                                    }
+                                  },
+                                  text: 'send'.tr(),
+                                ),
+                              ],
                             ),
-                          ],
-                        ),
+                          ),
+                        ],
                       ),
-                    ],
-                  ),
+                    ),
+                  ],
                 ),
               ),
-            );
-          });
+            ),
+          );
+
+          // return StatefulBuilder(builder: (context, setState) {
+          //   return Dialog(
+          //     insetPadding: EdgeInsets.zero,
+          //     shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(20.0)),
+          //     child: Container(
+          //       constraints: BoxConstraints(maxHeight: MediaQuery.of(context).size.height * 0.9, maxWidth: MediaQuery.of(context).size.width * 0.9),
+          //       child: Padding(
+          //         padding: const EdgeInsets.symmetric(horizontal: 20.0, vertical: 30.0),
+          //         child: ListView(
+          //           shrinkWrap: true,
+          //           children: [
+          //             Container(
+          //               child: Align(
+          //                   alignment: Alignment.center,
+          //                   child: Text(
+          //                     'choose_vacancy'.tr(),
+          //                     style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold, color: Colors.black),
+          //                   )
+          //               ),
+          //             ),
+          //
+          //             /// Form
+          //             Form(
+          //               key: _vacancyAddFormKey,
+          //               child: Column(
+          //                 children: <Widget>[
+          //                   Container(
+          //                     margin: EdgeInsets.symmetric(vertical: 40),
+          //                     child: Column(
+          //
+          //                       children: [
+          //                         _vacancyList.isEmpty ? DropdownButtonFormField<int>(
+          //                           isExpanded: true,
+          //                           hint: Text("select".tr()),
+          //                           value: vacancyId,
+          //                           onChanged: (int newValue) {
+          //                             setState(() {
+          //                               vacancyId = newValue;
+          //                             });
+          //                           },
+          //                           focusNode: FocusNode(canRequestFocus: false),
+          //                           validator: (value) => value == null ? "please_fill_this_field".tr() : null,
+          //                           decoration: InputDecoration(
+          //                             contentPadding: EdgeInsets.symmetric(vertical: 0, horizontal: 20),
+          //                             border: OutlineInputBorder(),
+          //                             enabledBorder: OutlineInputBorder(borderSide: BorderSide(color: Colors.grey[200], width: 2.0)),
+          //                             errorBorder: OutlineInputBorder(borderSide: BorderSide(color: kColorPrimary, width: 2.0)),
+          //                             errorStyle: TextStyle(color: kColorPrimary, fontWeight: FontWeight.w500),
+          //                             floatingLabelBehavior: FloatingLabelBehavior.always,
+          //                             filled: true,
+          //                             fillColor: kColorWhite,
+          //                           ),
+          //                           items: _vacancyList,
+          //                         ) : Container(),
+          //                       ],
+          //                     ),
+          //                   ),
+          //
+          //                   Container(
+          //                     width: double.maxFinite,
+          //                     child: Flex(
+          //                       direction: Axis.horizontal,
+          //                       mainAxisAlignment: MainAxisAlignment.spaceBetween,
+          //                       children: [
+          //
+          //                         CustomButton(
+          //                           borderSide: BorderSide(
+          //                               color: kColorPrimary,
+          //                               width: 2.0
+          //                           ),
+          //                           color: Colors.transparent,
+          //                           textColor: kColorPrimary,
+          //                           onPressed: () {
+          //                             setState(() {
+          //                               vacancyId = null;
+          //                             });
+          //                             Navigator.of(context).pop();
+          //                           },
+          //                           text: 'cancel'.tr(),
+          //                         ),
+          //                         CustomButton(
+          //                           color: kColorPrimary,
+          //                           textColor: Colors.white,
+          //                           onPressed: () {
+          //                             if (_vacancyAddFormKey.currentState.validate()) {
+          //
+          //                               Vacancy.saveVacancyUserInvite(vacancy_id: vacancyId, type: "INVITED", user_id: widget.user.id).then((value) {
+          //                                 if (value == "OK") {
+          //                                   // Dialogs.showDialogBox(context,"successfully_submitted".tr());
+          //                                   StoreProvider.of<AppState>(context).state.user.list.data.remove(widget.user);
+          //                                   StoreProvider.of<AppState>(context).dispatch(getUsers());
+          //                                   Navigator.of(context).pop();
+          //                                 } else {
+          //                                   Dialogs.showDialogBox(context,"some_error_occurred_try_again".tr());
+          //                                 }
+          //                               });
+          //
+          //                               setState(() {
+          //                                 vacancyId = null;
+          //                               });
+          //                             } else {
+          //                               print('invalid');
+          //                             }
+          //                           },
+          //                           text: 'send'.tr(),
+          //                         ),
+          //                       ],
+          //                     ),
+          //                   ),
+          //                 ],
+          //               ),
+          //             ),
+          //           ],
+          //         ),
+          //       ),
+          //     ),
+          //   );
+          // });
         });
   }
 
@@ -254,7 +373,8 @@ class _ProfileCardUserState extends State<ProfileCardUser> {
                                             ),
                                             children: <TextSpan>[
                                               TextSpan(
-                                                  text: widget.user.region != null ? widget.user.region : '',
+                                                  text:
+                                                  widget.user.region != null ? widget.user.age != null ? widget.user.region + ', ' + widget.user.age + ' ' + 'years'.tr() : widget.user.region : '',
                                                   style: TextStyle(
                                                       fontFamily: 'Manrope',
                                                       fontSize: 12,
@@ -496,25 +616,21 @@ class _ProfileCardUserState extends State<ProfileCardUser> {
                             Prefs.getString(Prefs.TOKEN) != null
                                 ? Flexible(
                               child: Container(
-                                margin:
-                                EdgeInsets.symmetric(horizontal: 5),
+                                margin: EdgeInsets.symmetric(horizontal: 5),
                                 child: CustomButton(
                                   padding: EdgeInsets.all(0),
                                   color: kColorPrimary,
                                   textColor: Colors.white,
                                   onPressed: () async {
-                                    // if (widget.page == 'company_home') {
-                                    //
-                                    // }
-                                    StoreProvider.of<AppState>(context).dispatch(getCompanyActiveVacancies());
-                                    setState(() {
-                                      vacancyList = StoreProvider.of<AppState>(context).state.vacancy.active_list.data;
-                                    });
-                                    openInviteDialog(context);
+                                    // StoreProvider.of<AppState>(context).dispatch(getCompanyActiveVacancies());
+                                    // setState(() {
+                                    //   _vacancyList = StoreProvider.of<AppState>(context).state.vacancy.active_list.data;
+                                    // });
+                                    // print(widget.vacancyList);
+
+                                    await openInviteDialog(context);
                                   },
-                                  text: widget.page == 'company_home'
-                                      ? 'invite'.tr()
-                                      : 'submit'.tr(),
+                                  text: widget.page == 'company_home' ? 'invite'.tr() : 'submit'.tr(),
                                 ),
                               ),
                             ) : Container(),

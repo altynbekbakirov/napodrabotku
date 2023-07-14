@@ -28,8 +28,8 @@ class ProfileLikesScreen extends StatelessWidget {
             converter: (store) => mapStateToVacancyProps(store),
             onInitialBuild: (props) => this.handleInitialBuildOfCompanyVacancy(props),
             builder: (context, props) {
-              List<Vacancy> data = props.listResponse.data;
-              bool loading = props.listResponse.loading;
+              List<Vacancy> data = props.active_list.data;
+              bool loading = props.active_list.loading;
 
               Widget body;
               if (loading) {
@@ -42,11 +42,11 @@ class ProfileLikesScreen extends StatelessWidget {
                 body = data == null || data.isEmpty ? Container() : Column(
                   children: [
                     Expanded(
-                      child: StoreProvider.of<AppState>(context).state.vacancy.list.data !=null ?
+                      child: StoreProvider.of<AppState>(context).state.vacancy.active_list.data !=null ?
                       Container(
                         padding: EdgeInsets.all(20),
                         child: UsersGrid(
-                            children: StoreProvider.of<AppState>(context).state.vacancy.list.data.map((vacancy) {
+                            children: StoreProvider.of<AppState>(context).state.vacancy.active_list.data.map((vacancy) {
                               return GestureDetector(
                                 child: ProfileCard(
                                   vacancy: vacancy,
@@ -144,17 +144,17 @@ VacanciesScreenProps1 mapStateToProps(Store<AppState> store) {
 
 class CompanyVacanciesScreenProps {
   final Function getCompanyActiveVacancies;
-  final ListVacancysState listResponse;
+  final ListVacancysState active_list;
 
   CompanyVacanciesScreenProps({
     this.getCompanyActiveVacancies,
-    this.listResponse,
+    this.active_list,
   });
 }
 
 CompanyVacanciesScreenProps mapStateToVacancyProps(Store<AppState> store) {
   return CompanyVacanciesScreenProps(
-    listResponse: store.state.vacancy.active_list,
+    active_list: store.state.vacancy.active_list,
     getCompanyActiveVacancies: () => store.dispatch(getCompanyActiveVacancies()),
   );
 }

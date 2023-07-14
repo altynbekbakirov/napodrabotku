@@ -81,6 +81,10 @@ String API_INVITE_USERS = 'user_company/INVITED';
 String API_USER_VACANCY_LIST = 'user_vacancy/ALL';
 
 String API_CHANGE_STATUS = 'change_status';
+String API_CHANGE_SCHEDULES = 'change_schedules';
+String API_CHANGE_VACANCY_TYPES = 'change_vacancy_types';
+String API_GET_SCHEDULES = 'users/schedules';
+String API_GET_VACANCY_TYPES = 'users/vacancy_types';
 
 
 //chat

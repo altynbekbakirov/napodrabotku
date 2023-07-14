@@ -100,56 +100,50 @@ class ProfileVisitsScreen extends StatelessWidget {
                 body = Column(
                   children: [
                     Expanded(
-                      child: StoreProvider.of<AppState>(context)
-                                  .state
-                                  .vacancy
-                                  .inactive_list
-                                  .data !=
-                              null
-                          ? UsersGrid(
-                              children: StoreProvider.of<AppState>(context)
-                                  .state
-                                  .vacancy
-                                  .inactive_list
-                                  .data
-                                  .map((vacancy) {
-                              return GestureDetector(
-                                child: ProfileCard(
-                                  vacancy: vacancy,
-                                  page: 'company_inactive',
-                                ),
-                                onTap: () {
+                      child: StoreProvider.of<AppState>(context).state.vacancy.inactive_list.data != null ?
+                      Container(
+                        padding: EdgeInsets.all(20),
+                        child: UsersGrid(
+                                children: StoreProvider.of<AppState>(context).state.vacancy.inactive_list.data.map((vacancy) {
+                                return GestureDetector(
+                                  child: ProfileCard(
+                                    vacancy: vacancy,
+                                    page: 'company_inactive',
+                                  ),
+                                  onTap: () {
 
-                                  VacancySkill.getVacancySkills(vacancy.id).then((value) {
-                                    List<VacancySkill> vacancySkills = [];
+                                    VacancySkill.getVacancySkills(vacancy.id).then((value) {
+                                      List<VacancySkill> vacancySkills = [];
 
-                                    for (var i in value) {
-                                      vacancySkills.add(new VacancySkill(
-                                        id: i.id,
-                                        name: i.name,
-                                        vacancyId: i.vacancyId,
-                                        isRequired: i.isRequired,
-                                      ));
-                                    }
+                                      for (var i in value) {
+                                        vacancySkills.add(new VacancySkill(
+                                          id: i.id,
+                                          name: i.name,
+                                          vacancyId: i.vacancyId,
+                                          isRequired: i.isRequired,
+                                        ));
+                                      }
 
-                                    Navigator.of(context).push(MaterialPageRoute(
-                                        builder: (BuildContext context) {
-                                          return Scaffold(
-                                            backgroundColor: kColorPrimary,
-                                            appBar: AppBar(
-                                              title: Text("vacancy_view".tr()),
-                                            ),
-                                            body: VacancyView(
-                                              page: "inactive",
-                                              vacancy: vacancy,
-                                              vacancySkill: vacancySkills,
-                                            ),
-                                          );
-                                        }));
-                                  });
-                                },
-                              );
-                            }).toList())
+                                      Navigator.of(context).push(MaterialPageRoute(
+                                          builder: (BuildContext context) {
+                                            return Scaffold(
+                                              backgroundColor: kColorPrimary,
+                                              appBar: AppBar(
+                                                title: Text("vacancy_view".tr()),
+                                              ),
+                                              body: VacancyView(
+                                                page: "inactive",
+                                                vacancy: vacancy,
+                                                vacancySkill: vacancySkills,
+                                              ),
+                                            );
+                                          })
+                                      );
+                                    });
+                                  },
+                                );
+                              }).toList()),
+                      )
                           : Center(
                               child: Text(
                                 'empty'.tr(),

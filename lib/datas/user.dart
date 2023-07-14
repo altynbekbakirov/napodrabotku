@@ -49,6 +49,7 @@ class Users {
   String currency;
   String period;
   String description;
+  String age;
 
   Users({
     this.id,
@@ -87,6 +88,7 @@ class Users {
     this.currency,
     this.period,
     this.description,
+    this.age,
   });
 
   factory Users.fromJson(Map<String, dynamic> json) => new Users(
@@ -124,6 +126,7 @@ class Users {
       currency: json['currency'],
       period: json['period'],
       description: json['description'],
+      age: json['age'],
   );
 
   Future<void> setRecruit(int userId, int userVacancyId, int recruited) async {
@@ -258,6 +261,7 @@ class Users {
     request.fields["department"] = this.department.toString();
     request.fields["social_orientation"] = this.social_orientation.toString();
     request.fields["address"] = this.address.toString();
+    request.fields["description"] = this.description.toString();
 
     // open a byteStream
     if (_image != null) {
@@ -361,6 +365,8 @@ class Users {
         Prefs.setString(Prefs.USER_LAT, responseData["lat"]);
         Prefs.setString(Prefs.USER_LONG, responseData["long"]);
         Prefs.setInt(Prefs.USER_STATUS, responseData["active"]);
+        // Prefs.setList(Prefs.SCHEDULES, responseData["schedules"]);
+        // Prefs.setList(Prefs.VACANCY_TYPES, responseData["vacancy_types"]);
         return "OK";
       } else {
         return "FAILED";
@@ -396,6 +402,8 @@ class Users {
         Prefs.setString(Prefs.USER_LAT, responseData["lat"]);
         Prefs.setString(Prefs.USER_LONG, responseData["long"]);
         Prefs.setInt(Prefs.USER_STATUS, responseData["active"]);
+        // Prefs.setList(Prefs.SCHEDULES, responseData["schedules"]);
+        // Prefs.setList(Prefs.VACANCY_TYPES, responseData["vacancy_types"]);
         return "OK";
       } else {
         return "FAILED";
@@ -432,6 +440,8 @@ class Users {
         Prefs.setString(Prefs.USER_LAT, responseData["lat"]);
         Prefs.setString(Prefs.USER_LONG, responseData["long"]);
         Prefs.setInt(Prefs.USER_STATUS, responseData["active"]);
+        // Prefs.setList(Prefs.SCHEDULES, responseData["schedules"]);
+        // Prefs.setList(Prefs.VACANCY_TYPES, responseData["vacancy_types"]);
         return "OK";
       } else {
         return "FAILED";
@@ -812,6 +822,80 @@ class Users {
       if (responseData['status'] == 400) {
         throw HttpException(responseData['status'].toString());
       }
+    } catch (error) {
+      throw error;
+    }
+  }
+
+  static changeSchedule({List schedules}) async {
+    var uri = Uri.parse(API_IP + API_CHANGE_SCHEDULES);
+
+    try {
+      Map<String, String> headers = {
+        "Content-type": "application/json",
+        "Authorization": Prefs.getString(Prefs.TOKEN)
+      };
+      final response = await http.post(
+        uri,
+        headers: headers,
+        body: json.encode({
+          'schedules': schedules
+        }),
+      );
+      final responseData = json.decode(response.body);
+      print(responseData);
+
+      if (responseData['status'] == 400) {
+        throw HttpException(responseData['status'].toString());
+      }
+    } catch (error) {
+      throw error;
+    }
+  }
+
+  static changeVacancyTypes({List vacancyTypes}) async {
+    var uri = Uri.parse(API_IP + API_CHANGE_VACANCY_TYPES);
+
+    try {
+      Map<String, String> headers = {
+        "Content-type": "application/json",
+        "Authorization": Prefs.getString(Prefs.TOKEN)
+      };
+      final response = await http.post(
+        uri,
+        headers: headers,
+        body: json.encode({
+          'vacancy_types': vacancyTypes
+        }),
+      );
+      final responseData = json.decode(response.body);
+      print(responseData);
+
+      if (responseData['status'] == 400) {
+        throw HttpException(responseData['status'].toString());
+      }
+    } catch (error) {
+      throw error;
+    }
+  }
+
+  static Future<List<dynamic>> getSchedules(id) async {
+    final url = API_IP + API_GET_SCHEDULES + '/${id.toString()}';
+    try {
+      Map<String, String> headers = {"Content-type": "application/json"};
+      final response = await http.get(url, headers: headers);
+      return json.decode(utf8.decode(response.bodyBytes));
+    } catch (error) {
+      throw error;
+    }
+  }
+
+  static Future<List<dynamic>> getVacancyTypes(id) async {
+    final url = API_IP + API_GET_VACANCY_TYPES + '/${id.toString()}';
+    try {
+      Map<String, String> headers = {"Content-type": "application/json"};
+      final response = await http.get(url, headers: headers);
+      return json.decode(utf8.decode(response.bodyBytes));
     } catch (error) {
       throw error;
     }

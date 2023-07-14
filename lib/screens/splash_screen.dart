@@ -8,6 +8,7 @@ import 'package:easy_localization/easy_localization.dart';
 import 'package:ishtapp/datas/pref_manager.dart';
 import 'package:ishtapp/routes/routes.dart';
 import 'package:ishtapp/utils/app_themes.dart';
+import 'package:ishtapp/utils/constants.dart';
 import 'package:ishtapp/utils/themebloc/theme_bloc.dart';
 
 class SplashScreen extends StatefulWidget {
@@ -19,7 +20,7 @@ class _SplashScreenState extends State<SplashScreen> {
   @override
   void initState() {
     super.initState();
-    Timer(Duration(seconds: 3), () => {_loadScreen()});
+    Timer(Duration(seconds: 7), () => {_loadScreen()});
   }
 
   _loadScreen() async {
@@ -57,7 +58,7 @@ class _SplashScreenState extends State<SplashScreen> {
       body: WillPopScope(
           child: Container(
             width: double.infinity,
-            color: Theme.of(context).splashColor,
+            color: kColorPrimary,
             child: Column(
               children: <Widget>[
                 Expanded(
@@ -79,11 +80,15 @@ class _SplashScreenState extends State<SplashScreen> {
                           // ),
                           Align(
                             child: Container(
-                              width: MediaQuery.of(context).size.width * 0.6,
-                              child: Image.asset(
-                                'assets/images/logo_white.png',
-                                fit: BoxFit.cover,
+                              decoration: const BoxDecoration(
+                                image: DecorationImage(
+                                    image: AssetImage('assets/images/intro.gif'),
+                                    fit: BoxFit.cover
+                                ),
                               ),
+                              width: MediaQuery.of(context).size.width * 1,
+                              height: MediaQuery.of(context).size.height * 1,
+                              child: Container(),
                             ),
                           ),
                         ],
@@ -94,7 +99,8 @@ class _SplashScreenState extends State<SplashScreen> {
               ],
             ),
           ),
-          onWillPop: onWillPop),
+          onWillPop: onWillPop
+      ),
     );
   }
 }

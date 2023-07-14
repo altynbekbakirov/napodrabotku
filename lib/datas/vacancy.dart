@@ -43,6 +43,7 @@ class Vacancy {
   String vacancyLink;
   String deadline;
   String status;
+  String status_color;
 
   Vacancy({
     this.id,

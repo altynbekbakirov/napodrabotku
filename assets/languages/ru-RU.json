@@ -302,5 +302,13 @@
     "invite": "Пригласить",
     "invites": "Приглашения",
     "choose_vacancy": "Выберите вакансию",
-    "all_vacancies": "Все вакансии"
+    "all_vacancies": "Все вакансии",
+    "age": "Возраст",
+    "years": "лет",
+    "experience_years": "Стаж работы",
+    "nationality": "Гражданство",
+    "from": "от",
+    "to": "до",
+    "about_me": "Обо мне",
+    "about_myself": "О себе"
 }

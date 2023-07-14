@@ -14,6 +14,7 @@ import 'package:ishtapp/utils/constants.dart';
 import 'package:ishtapp/utils/textFormatter/lengthLimitingTextInputFormatter.dart';
 import 'package:ishtapp/widgets/profile_card.dart';
 import 'package:ishtapp/widgets/users_grid.dart';
+import 'package:ishtapp/widgets/vacancy_view.dart';
 import 'package:redux/redux.dart';
 
 import 'package:flutter_redux/flutter_redux.dart';
@@ -47,6 +48,8 @@ class _CompanyVacanciesScreenState extends State<CompanyVacanciesScreen> {
   int _salaryPeriodId;
   int _experienceId;
   int _payPeriodId;
+  String _latitude;
+  String _longitude;
 
   List<dynamic> jobTypeList = [];
   List<dynamic> vacancyTypeList = [];
@@ -487,6 +490,8 @@ class _CompanyVacanciesScreenState extends State<CompanyVacanciesScreen> {
                                         districtList.forEach((district) {
                                           setState(() {
                                             districts.add(district['name']);
+                                            _latitude = suggestion['data']['geo_lat'];
+                                            _longitude = suggestion['data']['geo_lon'];
                                           });
                                         });
                                       }
@@ -841,6 +846,8 @@ class _CompanyVacanciesScreenState extends State<CompanyVacanciesScreen> {
                                         _salaryPeriodId = null;
                                         _experienceId = null;
                                         _payPeriodId = null;
+                                        _latitude = null;
+                                        _longitude = null;
                                       });
                                       Navigator.of(context).pop();
                                     },
@@ -876,6 +883,8 @@ class _CompanyVacanciesScreenState extends State<CompanyVacanciesScreen> {
                                           address: _vacancyTypeAheadController.text,
                                           street: _vacancyStreetController.text,
                                           houseNumber: _vacancyHouseNumberController.text,
+                                          latitude: _latitude,
+                                          longitude: _longitude,
                                         );
 
                                         Vacancy.saveCompanyVacancy(vacancy: company_vacancy).then((value) {
@@ -905,6 +914,8 @@ class _CompanyVacanciesScreenState extends State<CompanyVacanciesScreen> {
                                           _salaryPeriodId = null;
                                           _experienceId = null;
                                           _payPeriodId = null;
+                                          _latitude = null;
+                                          _longitude = null;
                                         });
                                       } else {
                                         print('invalid');
@@ -963,7 +974,20 @@ class _CompanyVacanciesScreenState extends State<CompanyVacanciesScreen> {
                             vacancy: vacancy,
                             page: 'company',
                           ),
-                          onTap: () {},
+                          onTap: () {
+                            Navigator.of(context).push(MaterialPageRoute(builder: (BuildContext context) {
+                              return Scaffold(
+                                backgroundColor: kColorPrimary,
+                                appBar: AppBar(
+                                  title: Text("vacancy_view".tr()),
+                                ),
+                                body: VacancyView(
+                                  page: "company_view",
+                                  vacancy: vacancy,
+                                ),
+                              );
+                            }));
+                          },
                         );
                       }).toList()
                   ),

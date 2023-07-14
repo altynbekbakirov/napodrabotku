@@ -140,6 +140,8 @@ class _ChatScreenState extends State<ChatScreen> {
                         : AssetImage('assets/images/default-user.jpg'),
                   ),
                   title: Text(
+                      widget.vacancy.length >= 10 ?
+                      widget.name + ' (' + widget.vacancy.replaceRange(10, widget.vacancy.length, '...') + ')' :
                       widget.name + ' (' + widget.vacancy + ')',
                       style: TextStyle(fontSize: 16)
                   ),

@@ -95,12 +95,7 @@ class _ProfileCardState extends State<ProfileCard> {
                                         child: RichText(
                                           maxLines: 3,
                                           text: TextSpan(
-                                            text: widget.vacancy.name != null
-                                                ? widget.vacancy.name
-                                                .toString() +
-                                                '\n'
-                                                : "",
-                                            // text: "Testtestteatasdt testtestasdasd\n",
+                                            text: (widget.vacancy.name != null ? widget.vacancy.name.length >=60 ?   widget.vacancy.name.replaceRange(60, widget.vacancy.name.length, '...') : widget.vacancy.name  : '') + '\n',
                                             style: TextStyle(
                                               fontSize:
                                               widget.vacancy.name.length >
@@ -164,10 +159,9 @@ class _ProfileCardState extends State<ProfileCard> {
                     ),
 
                     Flexible(
-                      flex: 2,
+                      flex: 3,
                       child: Container(
-                        padding: const EdgeInsets.symmetric(
-                            horizontal: 20, vertical: 10),
+                        padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 10),
                         child: Flex(
                           direction: Axis.horizontal,
                           mainAxisAlignment: MainAxisAlignment.spaceBetween,
@@ -181,8 +175,7 @@ class _ProfileCardState extends State<ProfileCard> {
                                   mainAxisAlignment: MainAxisAlignment.center,
                                   crossAxisAlignment: CrossAxisAlignment.start,
                                   children: [
-                                    widget.vacancy.type != null
-                                        ? Container(
+                                    widget.vacancy.type != null ? Container(
                                       padding: EdgeInsets.symmetric(
                                           horizontal: 10, vertical: 5),
                                       decoration: BoxDecoration(
@@ -200,8 +193,8 @@ class _ProfileCardState extends State<ProfileCard> {
                                           color: kColorDark,
                                         ),
                                       ),
-                                    )
-                                        : Container(),
+                                    ) : Container(),
+
                                     Container(
                                       padding: EdgeInsets.symmetric(
                                           horizontal: 10, vertical: 5),
@@ -221,6 +214,27 @@ class _ProfileCardState extends State<ProfileCard> {
                                             color: kColorDark),
                                       ),
                                     ),
+
+                                    (widget.page == 'company' || widget.page == 'company_inactive')
+                                        && widget.vacancy.status != '' ? Container(
+                                      padding: EdgeInsets.symmetric(
+                                          horizontal: 10, vertical: 5),
+                                      margin: EdgeInsets.only(top: 5),
+                                      decoration: BoxDecoration(
+                                          color: kColorGray,
+                                          borderRadius:
+                                          BorderRadius.circular(4)
+                                      ),
+                                      child: Text(
+                                        widget.vacancy.status != null ? widget.vacancy.status : "",
+                                        style: TextStyle(
+                                            fontSize: 12,
+                                            fontWeight: FontWeight.bold,
+                                            fontFamily: 'Manrope',
+                                            color: kColorDark
+                                        ),
+                                      ),
+                                    ) : Container(),
                                   ],
                                 ),
                               ),
@@ -236,9 +250,7 @@ class _ProfileCardState extends State<ProfileCard> {
                                   children: [
                                     Container(
                                       child: Text(
-                                        (widget.vacancy.salary != null
-                                            ? widget.vacancy.salary
-                                            : '') +
+                                        (widget.vacancy.salary != null ? widget.vacancy.salary  : '') +
                                             widget.vacancy.currency,
                                         textAlign: TextAlign.end,
                                         style: TextStyle(
@@ -275,11 +287,9 @@ class _ProfileCardState extends State<ProfileCard> {
 
                     /// Company Name & Description
                     Expanded(
-                      flex: 2,
                       child: Container(
                         width: double.maxFinite,
-                        padding: const EdgeInsets.symmetric(
-                            horizontal: 20, vertical: 10),
+                        padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 0),
                         child: Flex(
                           direction: Axis.vertical,
                           mainAxisAlignment: MainAxisAlignment.start,
@@ -305,7 +315,7 @@ class _ProfileCardState extends State<ProfileCard> {
                                 widget.page == 'company'
                                 ? Flexible(
                               child: Container(
-                                margin: EdgeInsets.only(top: 10),
+                                margin: EdgeInsets.only(top: 5),
                                 child: RichText(
                                   overflow: TextOverflow.ellipsis,
                                   text: TextSpan(

@@ -24,16 +24,6 @@ class _ConversationsTabState extends State<ConversationsTab> {
     props.getChatList();
   }
 
-
-
-  @override
-  void didChangeDependencies() {
-    final store = StoreProvider.of<AppState>(context);
-    Timer.periodic(Duration(seconds:300), (Timer t) => StoreProvider.of<AppState>(context).dispatch(getChatList()));
-    // TODO: implement didChangeDependencies
-    super.didChangeDependencies();
-  }
-
   @override
   Widget build(BuildContext context) {
     if (Prefs.getString(Prefs.TOKEN) == "null" ||
@@ -105,6 +95,11 @@ class _ConversationsTabState extends State<ConversationsTab> {
                                         'assets/images/default-user.jpg'),
                               ),
                               title: Text(
+                                  data[index].vacancy.length >= 10 ?
+                                  data[index].name +
+                                      ' (' +
+                                      data[index].vacancy.replaceRange(10, data[index].vacancy.length, '...') +
+                                      ')' :
                                   data[index].name +
                                       ' (' +
                                       data[index].vacancy +
@@ -120,6 +115,7 @@ class _ConversationsTabState extends State<ConversationsTab> {
                                       text: data[index].num_of_unreads.toString())
                                   : null,
                               onTap: () {
+                                StoreProvider.of<AppState>(context).dispatch(getChatList());
                                 StoreProvider.of<AppState>(context).dispatch(getNumberOfUnreadMessages());
 
                                 /// Go to chat screen
