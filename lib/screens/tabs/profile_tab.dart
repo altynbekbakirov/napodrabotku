@@ -31,15 +31,15 @@ class _ProfileTabState extends State<ProfileTab> {
 
   List<dynamic> statuses = [
     {
-      'id': 1,
+      'id': 0,
       'name': 'Активно ищу работу',
     },
     {
-      'id': 2,
+      'id': 1,
       'name': 'Могу выйти завтра',
     },
     {
-      'id': 3,
+      'id': 2,
       'name': 'Рассматриваю предложения',
     },
   ];
