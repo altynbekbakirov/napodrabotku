@@ -7,7 +7,6 @@ import 'package:flutter_typeahead/flutter_typeahead.dart';
 import 'package:ishtapp/datas/RSAA.dart';
 import 'package:ishtapp/datas/app_state.dart';
 import 'package:ishtapp/datas/user.dart';
-import 'package:ishtapp/screens/tabs/school_tab.dart';
 import 'package:ishtapp/screens/tabs/vacancies_tab.dart';
 import 'package:multiselect_formfield/multiselect_formfield.dart';
 import 'package:redux/redux.dart';
@@ -22,8 +21,6 @@ import 'package:ishtapp/utils/constants.dart';
 import 'package:ishtapp/datas/vacancy.dart';
 import 'package:ishtapp/widgets/badge.dart';
 import 'package:ishtapp/datas/pref_manager.dart';
-import 'package:ishtapp/utils/textFormatter/lengthLimitingTextInputFormatter.dart';
-import 'package:flutter/services.dart';
 import 'package:intl_phone_number_input/intl_phone_number_input.dart';
 import 'dart:async';
 import 'package:http/http.dart' as http;
@@ -42,7 +39,7 @@ class HomeScreen extends StatefulWidget {
 
 class _HomeScreenState extends State<HomeScreen> {
 
-  Intro intro2 = Intro(
+  Intro introStart = Intro(
     stepCount: 7,
 
     /// use defaultTheme, or you can implement widgetBuilder function yourself
@@ -63,8 +60,8 @@ class _HomeScreenState extends State<HomeScreen> {
     ),
   );
 
-  Intro introStart;
   Intro intro;
+  Intro intro2;
 
   //region Variables
   final _formKey = GlobalKey<FormState>();
@@ -571,7 +568,7 @@ class _HomeScreenState extends State<HomeScreen> {
           Container(
             // color: kColorGray,
             child: GestureDetector(
-              key: intro.keys[1],
+              key: intro.keys[0],
               child: CircleButton(
                 bgColor: Colors.transparent,
                 padding: 10,
@@ -732,9 +729,9 @@ class _HomeScreenState extends State<HomeScreen> {
     }
 
     List<String> texts = [
-      'Настрой поиск под себя',
+      // 'Настрой поиск под себя',
       'Заполни полностью свой профиль',
-      'Выбери нужный период актуальности вакансии и способ отображения предложений',
+      // 'Выбери нужный период актуальности вакансии и способ отображения предложений',
       'Главная страница поиска',
       'Отобранные Вами предложения',
       'Все Ваши отклики',
@@ -753,11 +750,148 @@ class _HomeScreenState extends State<HomeScreen> {
 
     return Container(
       child: GestureDetector(
-        onTap: () {
-          stepCount - 1 == currentStepIndex
-              ? stepWidgetParams.onFinish()
-              : stepWidgetParams.onNext();
-        },
+        onTap: () {},
+        behavior: HitTestBehavior.opaque,
+        child: Stack(
+          children: [
+            Positioned(
+              child: Container(
+                width: position['width'],
+                child: Column(
+                  mainAxisSize: MainAxisSize.min,
+                  crossAxisAlignment: position['crossAxisAlignment'],
+                  children: [
+                    Text(
+                      currentStepIndex > texts.length - 1
+                          ? ''
+                          : texts[currentStepIndex],
+                      softWrap: true,
+                      style: TextStyle(
+                        fontSize: 20,
+                        fontWeight: FontWeight.bold,
+                        color: Colors.white,
+                      ),
+                    ),
+                    SizedBox(
+                      height: 12,
+                    ),
+                    SizedBox(
+                      height: 40,
+                      child: OutlineButton(
+                        padding: EdgeInsets.symmetric(
+                          vertical: 0,
+                          horizontal: 30,
+                        ),
+                        shape: RoundedRectangleBorder(
+                          borderRadius: BorderRadius.all(
+                            Radius.circular(64),
+                          ),
+                        ),
+                        highlightedBorderColor: Colors.white,
+                        borderSide: BorderSide(color: Colors.white),
+                        textColor: Colors.white,
+                        onPressed: () {
+                          if(stepCount - 1 == currentStepIndex){
+                            stepWidgetParams.onFinish();
+                            DiscoverTab().intro.start(context);
+                          } else {
+                            stepWidgetParams.onNext();
+                          }
+                        },
+                        child: Text(
+                          currentStepIndex < stepCount - 1 ? 'Дальше' : 'Завершить',
+                          style: TextStyle(
+                            fontSize: 16,
+                            fontWeight: FontWeight.bold,
+                          ),
+                        ),
+                      ),
+                    ),
+                  ],
+                ),
+              ),
+              left: position['left'],
+              top: position['top'],
+              bottom: position['bottom'],
+              right: position['right'],
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+
+  Widget customThemeWidgetBuilder2(StepWidgetParams stepWidgetParams) {
+
+    Map _smartGetPosition({
+      Size size,
+      Size screenSize,
+      Offset offset,
+    }) {
+      double height = size.height;
+      double width = size.width;
+      double screenWidth = screenSize.width;
+      double screenHeight = screenSize.height;
+      double bottomArea = screenHeight - offset.dy - height;
+      double topArea = screenHeight - height - bottomArea;
+      double rightArea = screenWidth - offset.dx - width;
+      double leftArea = screenWidth - width - rightArea;
+      Map position = Map();
+      position['crossAxisAlignment'] = CrossAxisAlignment.start;
+      if (topArea > bottomArea) {
+        position['bottom'] = bottomArea + height + 16;
+      } else {
+        position['top'] = offset.dy + height + 12;
+      }
+      if (leftArea > rightArea) {
+        position['right'] = rightArea <= 0 ? 16.0 : rightArea;
+        position['crossAxisAlignment'] = CrossAxisAlignment.end;
+        position['width'] = min(leftArea + width - 16, screenWidth * 0.618);
+      } else {
+        position['left'] = offset.dx <= 0 ? 16.0 : offset.dx;
+        position['width'] = min(rightArea + width - 16, screenWidth * 0.618);
+      }
+
+      /// The distance on the right side is very large, it is more beautiful on the right side
+      if (rightArea > 0.8 * topArea && rightArea > 0.8 * bottomArea) {
+        position['left'] = offset.dx + width + 16;
+        position['top'] = offset.dy - 4;
+        position['bottom'] = null;
+        position['right'] = null;
+        position['width'] = min<double>(position['width'], rightArea * 0.8);
+      }
+
+      /// The distance on the left is large, it is more beautiful on the left side
+      if (leftArea > 0.8 * topArea && leftArea > 0.8 * bottomArea) {
+        position['right'] = rightArea + width + 16;
+        position['top'] = offset.dy - 4;
+        position['bottom'] = null;
+        position['left'] = null;
+        position['crossAxisAlignment'] = CrossAxisAlignment.end;
+        position['width'] = min<double>(position['width'], leftArea * 0.8);
+      }
+      return position;
+    }
+
+    List<String> texts = [
+      'Настрой поиск под себя',
+      'Выбери нужный период актуальности вакансии',
+      'Выбери способ отображения предложений',
+    ];
+
+    int currentStepIndex = stepWidgetParams.currentStepIndex;
+    int stepCount = stepWidgetParams.stepCount;
+    Offset offset = stepWidgetParams.offset;
+
+    Map position = _smartGetPosition(
+      screenSize: stepWidgetParams.screenSize,
+      size: stepWidgetParams.size,
+      offset: offset,
+    );
+
+    return Container(
+      child: GestureDetector(
+        onTap: () {},
         behavior: HitTestBehavior.opaque,
         child: Stack(
           children: [
@@ -827,29 +961,35 @@ class _HomeScreenState extends State<HomeScreen> {
   void initState() {
 
     intro = Intro(
-      maskColor: Color.fromRGBO(0, 0, 0, 0.80),
-      borderRadius: BorderRadius.all(Radius.circular(64.0)),
-      stepCount: 7,
+      padding: EdgeInsets.zero,
+      stepCount: 5,
       widgetBuilder: customThemeWidgetBuilder,
     );
 
-    if (Prefs.getString(Prefs.ROUTE) == 'COMPANY') {
+    intro2 = Intro(
+      padding: EdgeInsets.zero,
+      stepCount: 3,
+      widgetBuilder: customThemeWidgetBuilder2,
+    );
+
+    if (Prefs.getString(Prefs.USER_TYPE) == 'COMPANY') {
       _deactivateVacancyWithOverDeadline();
-    } else {
-      // Timer(Duration(microseconds: 500), () {
-      //   intro.start(context);
-      // });
     }
     getLists();
     buildSome(context);
 
-    // if (Prefs.getBool(Prefs.INTRO)) {
-    // Timer(Duration(microseconds: 500), () {
-    //   intro.start(context);
-    // });
-    // }
-
     super.initState();
+
+    print(Prefs.getBool(Prefs.INTRO));
+
+    if (Prefs.getString(Prefs.USER_TYPE) == 'USER') {
+      // if (Prefs.getBool(Prefs.INTRO)) {
+        Future.delayed(Duration.zero, () {
+          intro.start(context);
+        });
+      // }
+    }
+
   }
 
   @override
@@ -940,7 +1080,7 @@ class _HomeScreenState extends State<HomeScreen> {
                     BottomNavigationBarItem(
                       icon: Icon(
                         Boxicons.bx_search_alt,
-                        key: intro.keys[3],
+                        key: intro.keys[1],
                         color: _tabCurrentIndex == 0 ? kColorPrimary : Colors.grey,
                       ),
                       title: Text(
@@ -951,7 +1091,7 @@ class _HomeScreenState extends State<HomeScreen> {
                     BottomNavigationBarItem(
                         icon: Icon(
                           Boxicons.bx_search,
-                          key: intro.keys[3],
+                          key: intro.keys[1],
                           color: _tabCurrentIndex == 0 ? kColorPrimary : null,
                         ),
                         title: Text(
@@ -963,7 +1103,7 @@ class _HomeScreenState extends State<HomeScreen> {
                     BottomNavigationBarItem(
                         icon: Icon(
                           Boxicons.bx_heart,
-                          key: intro.keys[4],
+                          key: intro.keys[2],
                           color: _tabCurrentIndex == 1 ? kColorPrimary : Colors.grey,
                         ),
                         title: Text(
@@ -974,7 +1114,7 @@ class _HomeScreenState extends State<HomeScreen> {
 
                     BottomNavigationBarItem(
                         icon: Container(
-                          key: intro.keys[5],
+                          key: intro.keys[3],
                           width: 50,
                           height: 30,
                           child: Stack(children: [
@@ -1010,7 +1150,7 @@ class _HomeScreenState extends State<HomeScreen> {
 
                     BottomNavigationBarItem(
                         icon: Container(
-                          key: intro.keys[6],
+                          key: intro.keys[4],
                           width: 50,
                           height: 30,
                           child: Stack(
@@ -1054,7 +1194,7 @@ class _HomeScreenState extends State<HomeScreen> {
                     controller: _pageController,
                     physics: NeverScrollableScrollPhysics(),
                     children: [
-                      DiscoverTab(),
+                      DiscoverTab(intro: intro2,),
                       MatchesTab(),
                       VacanciesTab(),
                       ConversationsTab(),
@@ -1065,7 +1205,7 @@ class _HomeScreenState extends State<HomeScreen> {
                     controller: _pageController,
                     physics: NeverScrollableScrollPhysics(),
                     children: [
-                      DiscoverTab(),
+                      DiscoverTab(intro: intro2),
                       MatchesTab(),
                       VacanciesTab(),
                       ConversationsTab(),

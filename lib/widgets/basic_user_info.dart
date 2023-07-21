@@ -67,19 +67,19 @@ class BasicUserCvInfo extends StatelessWidget {
                   ],
                 )
               : Container(),
-          Prefs.getString(Prefs.USER_TYPE) == "USER" ? Divider() : Container(),
-          Row(
-            mainAxisAlignment: MainAxisAlignment.spaceBetween,
-            children: [
-              Text("email".tr(),
-                  softWrap: true,
-                  style:
-                      TextStyle(fontSize: 16, color: Colors.grey, height: 2)),
-              Text(user.email != null ? user.email : '-',
-                  softWrap: true,
-                  style: TextStyle(fontSize: 16, color: kColorDark)),
-            ],
-          ),
+          // Prefs.getString(Prefs.USER_TYPE) == "USER" ? Divider() : Container(),
+          // Row(
+          //   mainAxisAlignment: MainAxisAlignment.spaceBetween,
+          //   children: [
+          //     Text("email".tr(),
+          //         softWrap: true,
+          //         style:
+          //             TextStyle(fontSize: 16, color: Colors.grey, height: 2)),
+          //     Text(user.email != null ? user.email : '-',
+          //         softWrap: true,
+          //         style: TextStyle(fontSize: 16, color: kColorDark)),
+          //   ],
+          // ),
           Divider(),
           Row(
             mainAxisAlignment: MainAxisAlignment.spaceBetween,

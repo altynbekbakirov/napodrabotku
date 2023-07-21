@@ -1,7 +1,7 @@
 import 'dart:async';
 import 'dart:convert';
 
-import 'package:buttons_tabbar/buttons_tabbar.dart';
+import 'package:extended_tabs/extended_tabs.dart';
 import 'package:flutter/material.dart';
 import 'package:easy_localization/easy_localization.dart';
 import 'package:flutter_boxicons/flutter_boxicons.dart';
@@ -31,8 +31,17 @@ import 'package:http/http.dart' as http;
 
 import 'package:ishtapp/datas/Skill.dart';
 import 'package:yandex_mapkit/yandex_mapkit.dart';
+import 'package:flutter_intro/flutter_intro.dart';
+import 'dart:math';
 
 class DiscoverTab extends StatefulWidget {
+
+  final Intro intro;
+
+  DiscoverTab({
+    this.intro,
+  });
+
   @override
   _DiscoverTabState createState() => _DiscoverTabState();
 }
@@ -49,7 +58,6 @@ class _DiscoverTabState extends State<DiscoverTab> with SingleTickerProviderStat
 
   int button = 0;
   int offset = 5;
-  bool onMap = false;
 
   Users user;
   int user_id;
@@ -93,7 +101,12 @@ class _DiscoverTabState extends State<DiscoverTab> with SingleTickerProviderStat
 
   List<Vacancy> _vacancyList = [];
 
+  TabController _tabController;
+  int _currentIndex = 0;
+
   final _formKey = GlobalKey<FormState>();
+
+  Intro intro;
 
   getLists() async {
     jobTypeList = await Vacancy.getLists('job_type', null);
@@ -114,6 +127,7 @@ class _DiscoverTabState extends State<DiscoverTab> with SingleTickerProviderStat
     jobTypeList = await Vacancy.getLists('job_type', null);
     vacancyTypeList = await Vacancy.getLists('vacancy_type', null);
     busynessList = await Vacancy.getLists('busyness', null);
+    scheduleList = await Vacancy.getLists('schedule', null);
     countryList = await Vacancy.getLists('countries', null);
     genderList = [
       {
@@ -666,36 +680,6 @@ class _DiscoverTabState extends State<DiscoverTab> with SingleTickerProviderStat
                             MultiSelectFormField(
                               fillColor: kColorWhite,
                               title: Text(
-                                'job_types'.tr(),
-                                style: TextStyle(fontSize: 13, fontWeight: FontWeight.bold, color: Colors.black),
-                              ),
-                              chipLabelStyle: TextStyle(fontSize: 14, fontWeight: FontWeight.w400, color: kColorPrimary),
-                              chipBackGroundColor: kColorPrimary.withOpacity(0.25),
-                              dialogTextStyle: TextStyle(fontSize: 14, fontWeight: FontWeight.w400, color: Colors.black),
-                              validator: (value) {
-                                if (value == null || value.length == 0) {
-                                  return 'select_one_or_more'.tr();
-                                }
-                                return null;
-                              },
-                              dataSource: jobTypeList,
-                              textField: 'name',
-                              valueField: 'id',
-                              okButtonLabel: 'ok'.tr(),
-                              cancelButtonLabel: 'cancel'.tr(),
-                              // required: true,
-                              hintWidget: Text('select_one_or_more'.tr()),
-                              initialValue: _jobTypes,
-                              onSaved: (value) {
-                                if (value == null) return;
-                                setState(() {
-                                  _jobTypes = value;
-                                });
-                              },
-                            ),
-                            MultiSelectFormField(
-                              fillColor: kColorWhite,
-                              title: Text(
                                 'vacancy_types'.tr(),
                                 style: TextStyle(fontSize: 13, fontWeight: FontWeight.bold, color: Colors.black),
                               ),
@@ -745,6 +729,33 @@ class _DiscoverTabState extends State<DiscoverTab> with SingleTickerProviderStat
                                 if (value == null) return;
                                 setState(() {
                                   _businesses = value;
+                                });
+                              },
+                            ),
+                            MultiSelectFormField(
+                              fillColor: kColorWhite,
+                              title: Text(
+                                'schedules'.tr(),
+                                style: TextStyle(fontSize: 13, fontWeight: FontWeight.bold, color: Colors.black),
+                              ),
+                              validator: (value) {
+                                if (value == null || value.length == 0) {
+                                  return 'select_one_or_more'.tr();
+                                }
+                                return null;
+                              },
+                              dataSource: scheduleList,
+                              textField: 'name',
+                              valueField: 'id',
+                              okButtonLabel: 'ok'.tr(),
+                              cancelButtonLabel: 'cancel'.tr(),
+                              // required: true,
+                              hintWidget: Text('select_one_or_more'.tr()),
+                              initialValue: _schedules,
+                              onSaved: (value) {
+                                if (value == null) return;
+                                setState(() {
+                                  _schedules = value;
                                 });
                               },
                             ),
@@ -987,158 +998,6 @@ class _DiscoverTabState extends State<DiscoverTab> with SingleTickerProviderStat
                                 ],
                               ),
                             ),
-                            Container(
-                              child: Column(
-                                children: [
-                                  Container(
-                                    margin: EdgeInsets.only(bottom: 16),
-                                    child: Column(
-                                      children: [
-                                        Align(
-                                            widthFactor: 10,
-                                            heightFactor: 1.5,
-                                            alignment: Alignment.topLeft,
-                                            child: Text('vacancy_salary'.tr().toString().toUpperCase(),
-                                              style: TextStyle(fontSize: 12, color: Colors.black, fontWeight: FontWeight.w700),
-                                            )
-                                        ),
-                                        Flex(
-                                            direction: Axis.horizontal,
-                                            crossAxisAlignment: CrossAxisAlignment.center,
-                                            mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                                            children: [
-                                              Flexible(
-                                                flex: 1,
-                                                child: Container(
-                                                    padding: EdgeInsets.only(right: 10),
-                                                    child: Text('from'.tr())
-                                                ),
-                                              ),
-                                              Expanded(
-                                                // optional flex property if flex is 1 because the default flex is 1
-                                                flex: 3,
-                                                child: TextFormField(
-                                                  controller: _salary_from_controller,
-                                                  focusNode: FocusNode(canRequestFocus: false),
-                                                  decoration: InputDecoration(
-                                                    contentPadding: EdgeInsets.symmetric(vertical: 10, horizontal: 20),
-                                                    border: OutlineInputBorder(),
-                                                    enabledBorder: OutlineInputBorder(borderSide: BorderSide(color: Colors.grey[200], width: 2.0)),
-                                                    errorBorder: OutlineInputBorder(borderSide: BorderSide(color: kColorPrimary, width: 2.0)),
-                                                    errorStyle: TextStyle(color: kColorPrimary, fontWeight: FontWeight.w500),
-                                                    floatingLabelBehavior: FloatingLabelBehavior.always,
-                                                    filled: true,
-                                                    fillColor: kColorWhite,
-                                                  ),
-                                                  inputFormatters: [Utf8LengthLimitingTextInputFormatter(20)],
-                                                  validator: (name) {
-                                                    if (name.isEmpty) {
-                                                      return "please_fill_this_field".tr();
-                                                    }
-                                                    return null;
-                                                  },
-                                                ),
-                                              ),
-                                              Flexible(
-                                                flex: 1,
-                                                child: Container(
-                                                    padding: EdgeInsets.only(right: 10, left: 10),
-                                                    child: Text('to'.tr())
-                                                ),
-                                              ),
-                                              Expanded(
-                                                // optional flex property if flex is 1 because the default flex is 1
-                                                flex: 3,
-                                                child: TextFormField(
-                                                  controller: _salary_to_controller,
-                                                  focusNode: FocusNode(canRequestFocus: false),
-                                                  decoration: InputDecoration(
-                                                    contentPadding: EdgeInsets.symmetric(vertical: 10, horizontal: 20),
-                                                    border: OutlineInputBorder(),
-                                                    enabledBorder: OutlineInputBorder(borderSide: BorderSide(color: Colors.grey[200], width: 2.0)),
-                                                    errorBorder: OutlineInputBorder(borderSide: BorderSide(color: kColorPrimary, width: 2.0)),
-                                                    errorStyle: TextStyle(color: kColorPrimary, fontWeight: FontWeight.w500),
-                                                    floatingLabelBehavior: FloatingLabelBehavior.always,
-                                                    filled: true,
-                                                    fillColor: kColorWhite,
-                                                  ),
-                                                  inputFormatters: [Utf8LengthLimitingTextInputFormatter(20)],
-                                                  validator: (name) {
-                                                    if (name.isEmpty) {
-                                                      return "please_fill_this_field".tr();
-                                                    }
-                                                    return null;
-                                                  },
-                                                ),
-                                              ),
-                                            ]
-                                        ),
-                                      ],
-                                    ),
-                                  ),
-                                  Container(
-                                    margin: EdgeInsets.only(bottom: 16),
-                                    child: Column(
-                                      children: [
-                                        Align(
-                                            widthFactor: 10,
-                                            heightFactor: 1.5,
-                                            alignment: Alignment.topLeft,
-                                            child: Text(
-                                              'period'.tr().toString().toUpperCase(),
-                                              style: TextStyle(fontSize: 12, color: Colors.black, fontWeight: FontWeight.w700),
-                                            )
-                                        ),
-                                        DropdownButtonFormField<int>(
-                                          hint: Text(
-                                            "select".tr(),
-                                            style: TextStyle(
-                                                fontSize: 14
-                                            ),
-                                          ),
-                                          value: _salaryPeriodId,
-                                          onChanged: (int newValue) async {
-                                            setState(() {
-                                              _salaryPeriodId = newValue;
-                                            });
-                                          },
-                                          focusNode: FocusNode(canRequestFocus: false),
-                                          validator: (value) => value == null ? "please_fill_this_field".tr() : null,
-                                          decoration: InputDecoration(
-                                            contentPadding: EdgeInsets.symmetric(vertical: 10, horizontal: 20),
-                                            border: OutlineInputBorder(),
-                                            enabledBorder: OutlineInputBorder(borderSide: BorderSide(color: Colors.grey[200], width: 2.0)),
-                                            errorBorder: OutlineInputBorder(borderSide: BorderSide(color: kColorPrimary, width: 2.0)),
-                                            errorStyle: TextStyle(color: kColorPrimary, fontWeight: FontWeight.w500),
-                                            floatingLabelBehavior: FloatingLabelBehavior.always,
-                                            filled: true,
-                                            fillColor: kColorWhite,
-                                          ),
-                                          items: [
-                                            DropdownMenuItem<int>(
-                                              value: 0,
-                                              child: Text('Ставка за час'),
-                                            ),
-                                            DropdownMenuItem<int>(
-                                              value: 1,
-                                              child: Text('Ставка за смену'),
-                                            ),
-                                            DropdownMenuItem<int>(
-                                              value: 2,
-                                              child: Text('В неделю'),
-                                            ),
-                                            DropdownMenuItem<int>(
-                                              value: 3,
-                                              child: Text('В месяц'),
-                                            )
-                                          ],
-                                        ),
-                                      ],
-                                    ),
-                                  ),
-                                ],
-                              ),
-                            ),
                             SizedBox(height: 30),
 
                             SizedBox(
@@ -1161,34 +1020,34 @@ class _DiscoverTabState extends State<DiscoverTab> with SingleTickerProviderStat
                                         textColor: kColorPrimary,
                                         onPressed: () {
 
-                                          // setState(() {
-                                          //   _typeAheadController.text = '';
-                                          //   _suggestions = [];
-                                          //   _regionId = null;
-                                          //   _regions = [];
-                                          //   _districts = [];
-                                          //   _jobTypes = [];
-                                          //   _vacancyTypes = [];
-                                          //   _businesses = [];
-                                          //   _schedules = [];
-                                          // });
-                                          //
-                                          // if (user != null) {
-                                          //   user.saveFilters(_regions, _districts, _jobTypes, _vacancyTypes, _businesses, _schedules);
-                                          // }
-                                          //
-                                          // StoreProvider.of<AppState>(context).dispatch(setFilter(
-                                          //     schedule_ids: _schedules,
-                                          //     busyness_ids: _businesses,
-                                          //     region_ids: [_regionId],
-                                          //     district_ids: _districts,
-                                          //     vacancy_type_ids: _vacancyTypes,
-                                          //     job_type_ids: _jobTypes)
-                                          // );
-                                          //
-                                          // StoreProvider.of<AppState>(context).dispatch(getVacancies());
-                                          //
-                                          // Navigator.of(context).pop();
+                                          setState(() {
+                                            _typeAheadController.text = '';
+                                            _suggestions = [];
+                                            _regionId = null;
+                                            _regions = [];
+                                            _districts = [];
+                                            _jobTypes = [];
+                                            _vacancyTypes = [];
+                                            _businesses = [];
+                                            _schedules = [];
+                                          });
+
+                                          if (user != null) {
+                                            // user.saveFilters(_regions, _districts, _jobTypes, _vacancyTypes, _businesses, _schedules);
+                                          }
+
+                                          StoreProvider.of<AppState>(context).dispatch(setUserFilter(
+                                              schedule_ids: _schedules,
+                                              busyness_ids: _businesses,
+                                              region_ids: [_regionId],
+                                              district_ids: _districts,
+                                              vacancy_type_ids: _vacancyTypes,
+                                              job_type_ids: _jobTypes)
+                                          );
+
+                                          StoreProvider.of<AppState>(context).dispatch(getUsers());
+
+                                          Navigator.of(context).pop();
                                           // _nextTab(0);
                                         },
                                         text: 'reset'.tr(),
@@ -1245,8 +1104,165 @@ class _DiscoverTabState extends State<DiscoverTab> with SingleTickerProviderStat
         });
   }
 
+  _handleTabSelection() {
+    setState(() {
+      _currentIndex = _tabController.index;
+    });
+  }
+
+  Widget customThemeWidgetBuilder(StepWidgetParams stepWidgetParams) {
+
+    Map _smartGetPosition({
+      Size size,
+      Size screenSize,
+      Offset offset,
+    }) {
+      double height = size.height;
+      double width = size.width;
+      double screenWidth = screenSize.width;
+      double screenHeight = screenSize.height;
+      double bottomArea = screenHeight - offset.dy - height;
+      double topArea = screenHeight - height - bottomArea;
+      double rightArea = screenWidth - offset.dx - width;
+      double leftArea = screenWidth - width - rightArea;
+      Map position = Map();
+      position['crossAxisAlignment'] = CrossAxisAlignment.start;
+      if (topArea > bottomArea) {
+        position['bottom'] = bottomArea + height + 16;
+      } else {
+        position['top'] = offset.dy + height + 12;
+      }
+      if (leftArea > rightArea) {
+        position['right'] = rightArea <= 0 ? 16.0 : rightArea;
+        position['crossAxisAlignment'] = CrossAxisAlignment.end;
+        position['width'] = min(leftArea + width - 16, screenWidth * 0.618);
+      } else {
+        position['left'] = offset.dx <= 0 ? 16.0 : offset.dx;
+        position['width'] = min(rightArea + width - 16, screenWidth * 0.618);
+      }
+
+      /// The distance on the right side is very large, it is more beautiful on the right side
+      if (rightArea > 0.8 * topArea && rightArea > 0.8 * bottomArea) {
+        position['left'] = offset.dx + width + 16;
+        position['top'] = offset.dy - 4;
+        position['bottom'] = null;
+        position['right'] = null;
+        position['width'] = min<double>(position['width'], rightArea * 0.8);
+      }
+
+      /// The distance on the left is large, it is more beautiful on the left side
+      if (leftArea > 0.8 * topArea && leftArea > 0.8 * bottomArea) {
+        position['right'] = rightArea + width + 16;
+        position['top'] = offset.dy - 4;
+        position['bottom'] = null;
+        position['left'] = null;
+        position['crossAxisAlignment'] = CrossAxisAlignment.end;
+        position['width'] = min<double>(position['width'], leftArea * 0.8);
+      }
+      return position;
+    }
+
+    List<String> texts = [
+      'Настрой поиск под себя',
+      'Выбери нужный период актуальности вакансии',
+      'Выбери способ отображения предложений',
+    ];
+
+    int currentStepIndex = stepWidgetParams.currentStepIndex;
+    int stepCount = stepWidgetParams.stepCount;
+    Offset offset = stepWidgetParams.offset;
+
+    Map position = _smartGetPosition(
+      screenSize: stepWidgetParams.screenSize,
+      size: stepWidgetParams.size,
+      offset: offset,
+    );
+
+    return Container(
+      child: GestureDetector(
+        onTap: () {
+          if(stepCount - 1 == currentStepIndex){
+            stepWidgetParams.onFinish();
+            Prefs.setBool(Prefs.INTRO, true);
+          } else {
+            stepWidgetParams.onNext();
+          }
+        },
+        behavior: HitTestBehavior.opaque,
+        child: Stack(
+          children: [
+            Positioned(
+              child: Container(
+                width: position['width'],
+                child: Column(
+                  mainAxisSize: MainAxisSize.min,
+                  crossAxisAlignment: position['crossAxisAlignment'],
+                  children: [
+                    Text(
+                      currentStepIndex > texts.length - 1
+                          ? ''
+                          : texts[currentStepIndex],
+                      softWrap: true,
+                      style: TextStyle(
+                        fontSize: 20,
+                        fontWeight: FontWeight.bold,
+                        color: Colors.white,
+                      ),
+                    ),
+                    SizedBox(
+                      height: 12,
+                    ),
+                    SizedBox(
+                      height: 40,
+                      child: OutlineButton(
+                        padding: EdgeInsets.symmetric(
+                          vertical: 0,
+                          horizontal: 30,
+                        ),
+                        shape: RoundedRectangleBorder(
+                          borderRadius: BorderRadius.all(
+                            Radius.circular(64),
+                          ),
+                        ),
+                        highlightedBorderColor: Colors.white,
+                        borderSide: BorderSide(color: Colors.white),
+                        textColor: Colors.white,
+                        onPressed: stepCount - 1 == currentStepIndex
+                            ? stepWidgetParams.onFinish
+                            : stepWidgetParams.onNext,
+                        child: Text(
+                          currentStepIndex < stepCount - 1 ? 'Дальше' : 'Завершить',
+                          style: TextStyle(
+                            fontSize: 16,
+                            fontWeight: FontWeight.bold,
+                          ),
+                        ),
+                      ),
+                    ),
+                  ],
+                ),
+              ),
+              left: position['left'],
+              top: position['top'],
+              bottom: position['bottom'],
+              right: position['right'],
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+
   @override
   void initState() {
+
+    intro = Intro(
+      // maskColor: Color.fromRGBO(0, 0, 0, 0.80),
+      // borderRadius: BorderRadius.all(Radius.circular(64.0)),
+      padding: EdgeInsets.zero,
+      stepCount: 3,
+      widgetBuilder: customThemeWidgetBuilder,
+    );
 
     super.initState();
     Prefs.setInt(Prefs.OFFSET, 0);
@@ -1258,6 +1274,17 @@ class _DiscoverTabState extends State<DiscoverTab> with SingleTickerProviderStat
     } else {
       getCompanyLists();
     }
+
+    if (Prefs.getString(Prefs.USER_TYPE) == 'USER') {
+      // if (Prefs.getBool(Prefs.INTRO)) {
+      // Future.delayed(Duration.zero, () {
+      //   intro.start(context);
+      // });
+      // }
+    }
+
+    _tabController = TabController(length: 2, vsync: this);
+    _tabController.addListener(_handleTabSelection);
   }
 
   @override
@@ -1335,16 +1362,16 @@ class _DiscoverTabState extends State<DiscoverTab> with SingleTickerProviderStat
                                       color: kColorWhite,
                                       width: 2.0
                                   ),
-                                  color: StoreProvider.of<AppState>(context).state.vacancy.type == 'day' ? Colors.white : Colors.transparent,
-                                  textColor: StoreProvider.of<AppState>(context).state.vacancy.type == 'day' ? kColorPrimary : Colors.white,
+                                  color: StoreProvider.of<AppState>(context).state.user.type == 'day' ? Colors.white : Colors.transparent,
+                                  textColor: StoreProvider.of<AppState>(context).state.user.type == 'day' ? kColorPrimary : Colors.white,
                                   textSize: 14,
                                   padding: EdgeInsets.all(0),
                                   height: 40.0,
                                   onPressed: () {
                                     Prefs.setInt(Prefs.OFFSET, 0);
                                     StoreProvider.of<AppState>(context).dispatch(setTimeFilter(
-                                        type: StoreProvider.of<AppState>(context).state.vacancy.type == 'day' ? 'all' : 'day'));
-                                    StoreProvider.of<AppState>(context).dispatch(getVacancies());
+                                        type: StoreProvider.of<AppState>(context).state.user.type == 'day' ? 'all' : 'day'));
+                                    StoreProvider.of<AppState>(context).dispatch(getUsers());
                                   },
                                   text: 'day'.tr(),
                                 ),
@@ -1359,17 +1386,17 @@ class _DiscoverTabState extends State<DiscoverTab> with SingleTickerProviderStat
                                       color: kColorWhite,
                                       width: 2.0
                                   ),
-                                  color: StoreProvider.of<AppState>(context).state.vacancy.type == 'week' ? Colors.white : Colors.transparent,
-                                  textColor: StoreProvider.of<AppState>(context).state.vacancy.type == 'week' ? kColorPrimary : Colors.white,
+                                  color: StoreProvider.of<AppState>(context).state.user.type == 'week' ? Colors.white : Colors.transparent,
+                                  textColor: StoreProvider.of<AppState>(context).state.user.type == 'week' ? kColorPrimary : Colors.white,
                                   textSize: 14,
                                   padding: EdgeInsets.all(0),
                                   height: 40.0,
                                   onPressed: () {
                                     Prefs.setInt(Prefs.OFFSET, 0);
                                     StoreProvider.of<AppState>(context).dispatch(setTimeFilter(
-                                        type: StoreProvider.of<AppState>(context).state.vacancy.type == 'week' ? 'all' : 'week')
+                                        type: StoreProvider.of<AppState>(context).state.user.type == 'week' ? 'all' : 'week')
                                     );
-                                    StoreProvider.of<AppState>(context).dispatch(getVacancies());
+                                    StoreProvider.of<AppState>(context).dispatch(getUsers());
                                   },
                                   text: 'week'.tr(),
                                 ),
@@ -1384,16 +1411,16 @@ class _DiscoverTabState extends State<DiscoverTab> with SingleTickerProviderStat
                                       color: kColorWhite,
                                       width: 2.0
                                   ),
-                                  color: StoreProvider.of<AppState>(context).state.vacancy.type == 'month' ? Colors.white : Colors.transparent,
-                                  textColor: StoreProvider.of<AppState>(context).state.vacancy.type == 'month' ? kColorPrimary : Colors.white,
+                                  color: StoreProvider.of<AppState>(context).state.user.type == 'month' ? Colors.white : Colors.transparent,
+                                  textColor: StoreProvider.of<AppState>(context).state.user.type == 'month' ? kColorPrimary : Colors.white,
                                   textSize: 14,
                                   padding: EdgeInsets.all(0),
                                   height: 40.0,
                                   onPressed: () {
                                     Prefs.setInt(Prefs.OFFSET, 0);
                                     StoreProvider.of<AppState>(context).dispatch(setTimeFilter(
-                                        type: StoreProvider.of<AppState>(context).state.vacancy.type == 'month' ? 'all' : 'month'));
-                                    StoreProvider.of<AppState>(context).dispatch(getVacancies());
+                                        type: StoreProvider.of<AppState>(context).state.user.type == 'month' ? 'all' : 'month'));
+                                    StoreProvider.of<AppState>(context).dispatch(getUsers());
                                     setState(() {
                                       button == 3 ? button = 0 : button = 3;
                                     });
@@ -1459,6 +1486,7 @@ class _DiscoverTabState extends State<DiscoverTab> with SingleTickerProviderStat
               return body;
             },
     ) :
+
     StoreConnector<AppState, VacanciesScreenProps>(
       converter: (store) => mapStateToProps(store),
       onInitialBuild: (props) => this.handleInitialBuild(props),
@@ -1475,201 +1503,222 @@ class _DiscoverTabState extends State<DiscoverTab> with SingleTickerProviderStat
           );
         } else {
           var _index = 0;
-          body = onMap ?
-          Container(
-            color: kColorGray,
-            child: Stack(
-              children: [
-                YandexMap(
-                  onMapCreated: (YandexMapController controller) async {
-                    _yandexMapController = controller;
 
-                    for (var i = 0; i < data.length; i++) {
-                      if(data[i].latitude != null && data[i].longitude != null){
-                        await _yandexMapController.addPlacemark(
-                            Placemark(
-                                point: Point(
-                                    latitude: double.parse(data[i].latitude),
-                                    longitude: double.parse(data[i].longitude)
+          body =
+          Column(
+            children: [
+              Expanded(
+                child: ExtendedTabBarView(
+                  physics: const NeverScrollableScrollPhysics(),
+                  link: true,
+                  cacheExtent: 1,
+                  controller: _tabController,
+                  children: <Widget>[
+                    Container(
+                      child: data != null && data.isNotEmpty ?
+                      Container(
+                        // color: kColorProductLab,
+                        padding: EdgeInsets.only(bottom: 10),
+                        child: TinderSwapCard(
+                          orientation: AmassOrientation.BOTTOM,
+                          totalNum: data.length,
+                          swipeUp: false,
+                          stackNum: 4,
+                          swipeEdge: 5.0,
+                          maxWidth: MediaQuery.of(context).size.width * 0.96,
+                          maxHeight: MediaQuery.of(context).size.width * 0.85,
+                          minWidth: MediaQuery.of(context).size.width * 0.72,
+                          minHeight: MediaQuery.of(context).size.width * 0.82,
+                          cardController: cardController,
+                          cardBuilder: (context, index) {
+                            _index = index;
+                            return data != null && data.isNotEmpty ?
+                            Container(
+                              child: Stack(
+                                children: <Widget>[
+                                  GestureDetector(
+                                    child: ProfileCard(
+                                      props: props,
+                                      page: 'discover',
+                                      vacancy: StoreProvider.of<AppState>(context).state.vacancy.list.data[index],
+                                      index: index,
+                                      cardController: cardController,
+                                    ),
+                                    onTap: () {
+                                      VacancySkill.getVacancySkills(StoreProvider.of<AppState>(context).state.vacancy.list.data[index].id).then((value) {
+                                        List<VacancySkill> vacancySkills = [];
+
+                                        for (var i in value) {
+                                          vacancySkills.add(new VacancySkill(
+                                            id: i.id,
+                                            name: i.name,
+                                            vacancyId: i.vacancyId,
+                                            isRequired: i.isRequired,
+                                          ));
+                                        }
+                                        Navigator.of(context).push(MaterialPageRoute(builder: (BuildContext context) {
+                                          return Scaffold(
+                                            backgroundColor: kColorPrimary,
+                                            appBar: AppBar(
+                                              title: Text("vacancy_view".tr()),
+                                            ),
+                                            body: VacancyView(
+                                              page: "view",
+                                              vacancy: StoreProvider.of<AppState>(context).state.vacancy.list.data[index],
+                                              vacancySkill: vacancySkills,
+                                            ),
+                                          );
+                                        }));
+                                      });
+                                    },
+                                  ),
+                                ],
+                              ),
+                            ) : Container();
+                          },
+                          swipeCompleteCallback: (CardSwipeOrientation orientation, int index) {
+                            if (orientation.index == CardSwipeOrientation.LEFT.index) {
+                              print('Left');
+                              removeCards(
+                                  props: props,
+                                  type: "DISLIKED",
+                                  vacancyId: StoreProvider.of<AppState>(context).state.vacancy.list.data[_index].id,
+                                  context: context
+                              );
+                            }
+
+                            if (orientation.index == CardSwipeOrientation.RIGHT.index) {
+                              print('Right');
+                              removeCards(
+                                  props: props,
+                                  type: "LIKED",
+                                  vacancyId: StoreProvider.of<AppState>(context).state.vacancy.list.data[_index].id,
+                                  context: context
+                              );
+                            }
+                          },
+                        ),
+                      )  :
+                      Container(
+                        padding: EdgeInsets.symmetric(horizontal: 30),
+                        child: Center(
+                            child: Column(
+                              mainAxisAlignment: MainAxisAlignment.center,
+                              children: [
+                                Container(
+                                  margin: EdgeInsets.only(bottom: 10),
+                                  child: Text(
+                                    "vacancies_empty".tr(),
+                                    textAlign: TextAlign.center,
+                                    style: TextStyle(
+                                        color: Colors.white,
+                                        fontSize: 16
+                                    ),
+                                  ),
                                 ),
-                                style: PlacemarkStyle(
-                                    iconName: 'assets/marker.png',
-                                    opacity: 1.0
+                                GestureDetector(
+                                  onTap: () {
+                                    Users.resetDislikedVacancies().then((value) {
+                                      StoreProvider.of<AppState>(context).dispatch(setTimeFilter(type: 'all'));
+                                      StoreProvider.of<AppState>(context).dispatch(getVacancies());
+                                    });
+                                  },
+                                  child: Text(
+                                    "show_again".tr(),
+                                    textAlign: TextAlign.center,
+                                    style: TextStyle(
+                                        color: Colors.white,
+                                        fontSize: 16,
+                                        fontWeight: FontWeight.w500,
+                                        decoration: TextDecoration.underline,
+                                        decorationColor: kColorWhite,
+                                        decorationStyle: TextDecorationStyle.solid,
+                                        decorationThickness: 3
+                                    ),
+                                  ),
                                 ),
-                                onTap: (Point point) {
-                                  openVacancyDialog(context, props, data[i]);
-                                }
+                              ],
                             )
-                        );
-                      }
-                    }
+                        ),
+                      ),
+                    ),
+                    Container(
+                      color: kColorGray,
+                      child: Stack(
+                        children: [
+                          YandexMap(
+                            onMapRendered: () {
+                              print(123);
+                            },
+                            onMapCreated: (YandexMapController controller) async {
+                              _yandexMapController = controller;
 
-                    await _yandexMapController.move(
-                        point: _point,
-                        animation: const MapAnimation(smooth: true, duration: 2.0),
-                        zoom: 8
-                    );
-                  },
-                ),
-                Positioned(
-                    right: 10.0,
-                    bottom: 10.0,
-                    child: new Container(
-                      width: 40.0,
-                      height: 40.0,
-                      decoration: new BoxDecoration(
-                        color: kColorWhite,
-                        borderRadius: BorderRadius.circular(8),
-                        boxShadow: [
-                          BoxShadow(
-                            offset: Offset(0, 1),
-                            blurRadius: 10,
-                            color: Colors.black.withOpacity(0.2),
+                              for (var i = 0; i < data.length; i++) {
+                                if(data[i].latitude != null && data[i].longitude != null){
+                                  await _yandexMapController.addPlacemark(
+                                      Placemark(
+                                          point: Point(
+                                              latitude: double.parse(data[i].latitude),
+                                              longitude: double.parse(data[i].longitude)
+                                          ),
+                                          style: PlacemarkStyle(
+                                              iconName: 'assets/marker.png',
+                                              opacity: 1.0
+                                          ),
+                                          onTap: (Point point) {
+                                            openVacancyDialog(context, props, data[i]);
+                                          }
+                                      )
+                                  );
+                                }
+                              }
+
+                              await _yandexMapController.move(
+                                  point: _point,
+                                  animation: const MapAnimation(smooth: true, duration: 2.0),
+                                  zoom: 8
+                              );
+                            },
+                          ),
+                          Positioned(
+                              right: 10.0,
+                              bottom: 10.0,
+                              child: new Container(
+                                width: 40.0,
+                                height: 40.0,
+                                decoration: new BoxDecoration(
+                                  color: kColorWhite,
+                                  borderRadius: BorderRadius.circular(8),
+                                  boxShadow: [
+                                    BoxShadow(
+                                      offset: Offset(0, 1),
+                                      blurRadius: 10,
+                                      color: Colors.black.withOpacity(0.2),
+                                    ),
+                                  ],
+                                ),
+                                child: GestureDetector(
+                                  child: Icon(
+                                    Boxicons.bx_navigation,
+                                    color: kColorPrimary,
+                                  ),
+                                  onTap: () async {
+                                    await _yandexMapController.move(
+                                        point: _point,
+                                        animation: const MapAnimation(smooth: true, duration: 2.0),
+                                        zoom: 8
+                                    );
+                                  },
+                                ),
+                              )
                           ),
                         ],
                       ),
-                      child: GestureDetector(
-                        child: Icon(
-                          Boxicons.bx_navigation,
-                          color: kColorPrimary,
-                        ),
-                        onTap: () async {
-                          await _yandexMapController.move(
-                              point: _point,
-                              animation: const MapAnimation(smooth: true, duration: 2.0),
-                              zoom: 8
-                          );
-                        },
-                      ),
-                    )
+                    ),
+                  ],
                 ),
-              ],
-            ),
-          ) : data != null && data.isNotEmpty ?
-          Container(
-            // color: kColorProductLab,
-            padding: EdgeInsets.only(bottom: 10),
-            child: TinderSwapCard(
-              orientation: AmassOrientation.BOTTOM,
-              totalNum: data.length,
-              swipeUp: false,
-              stackNum: 4,
-              swipeEdge: 5.0,
-              maxWidth: MediaQuery.of(context).size.width * 0.96,
-              maxHeight: MediaQuery.of(context).size.width * 0.85,
-              minWidth: MediaQuery.of(context).size.width * 0.72,
-              minHeight: MediaQuery.of(context).size.width * 0.82,
-              cardController: cardController,
-              cardBuilder: (context, index) {
-                _index = index;
-                return data != null && data.isNotEmpty ?
-                Container(
-                  child: Stack(
-                    children: <Widget>[
-                      GestureDetector(
-                        child: ProfileCard(
-                          props: props,
-                          page: 'discover',
-                          vacancy: StoreProvider.of<AppState>(context).state.vacancy.list.data[index],
-                          index: index,
-                          cardController: cardController,
-                        ),
-                        onTap: () {
-                          VacancySkill.getVacancySkills(StoreProvider.of<AppState>(context).state.vacancy.list.data[index].id).then((value) {
-                            List<VacancySkill> vacancySkills = [];
-
-                            for (var i in value) {
-                              vacancySkills.add(new VacancySkill(
-                                id: i.id,
-                                name: i.name,
-                                vacancyId: i.vacancyId,
-                                isRequired: i.isRequired,
-                              ));
-                            }
-                            Navigator.of(context).push(MaterialPageRoute(builder: (BuildContext context) {
-                              return Scaffold(
-                                backgroundColor: kColorPrimary,
-                                appBar: AppBar(
-                                  title: Text("vacancy_view".tr()),
-                                ),
-                                body: VacancyView(
-                                  page: "view",
-                                  vacancy: StoreProvider.of<AppState>(context).state.vacancy.list.data[index],
-                                  vacancySkill: vacancySkills,
-                                ),
-                              );
-                            }));
-                          });
-                        },
-                      ),
-                    ],
-                  ),
-                ) : Container();
-              },
-              swipeCompleteCallback: (CardSwipeOrientation orientation, int index) {
-                if (orientation.index == CardSwipeOrientation.LEFT.index) {
-                  print('Left');
-                  removeCards(
-                      props: props,
-                      type: "DISLIKED",
-                      vacancyId: StoreProvider.of<AppState>(context).state.vacancy.list.data[_index].id,
-                      context: context
-                  );
-                }
-
-                if (orientation.index == CardSwipeOrientation.RIGHT.index) {
-                  print('Right');
-                  removeCards(
-                      props: props,
-                      type: "LIKED",
-                      vacancyId: StoreProvider.of<AppState>(context).state.vacancy.list.data[_index].id,
-                      context: context
-                  );
-                }
-              },
-            ),
-          )  :
-          Container(
-            padding: EdgeInsets.symmetric(horizontal: 30),
-            child: Center(
-              child: Column(
-                mainAxisAlignment: MainAxisAlignment.center,
-                children: [
-                  Container(
-                    margin: EdgeInsets.only(bottom: 10),
-                    child: Text(
-                      "vacancies_empty".tr(),
-                      textAlign: TextAlign.center,
-                      style: TextStyle(
-                          color: Colors.white,
-                          fontSize: 16
-                      ),
-                    ),
-                  ),
-                  GestureDetector(
-                    onTap: () {
-                      Users.resetDislikedVacancies().then((value) {
-                        StoreProvider.of<AppState>(context).dispatch(setTimeFilter(type: 'all'));
-                        StoreProvider.of<AppState>(context).dispatch(getVacancies());
-                      });
-                    },
-                    child: Text(
-                      "show_again".tr(),
-                      textAlign: TextAlign.center,
-                      style: TextStyle(
-                          color: Colors.white,
-                          fontSize: 16,
-                          fontWeight: FontWeight.w500,
-                          decoration: TextDecoration.underline,
-                          decorationColor: kColorWhite,
-                          decorationStyle: TextDecorationStyle.solid,
-                          decorationThickness: 3
-                      ),
-                    ),
-                  ),
-                ],
               )
-            ),
+            ],
           );
         }
 
@@ -1702,11 +1751,12 @@ class _DiscoverTabState extends State<DiscoverTab> with SingleTickerProviderStat
                                     Flexible(
                                       flex: 1,
                                       child: Container(
+                                        key: intro.keys[0],
                                         margin: EdgeInsets.symmetric(horizontal: 5),
                                         child: GestureDetector(
                                           child: RawMaterialButton(
                                               onPressed: () async {
-                                                Prefs.getString(Prefs.USER_TYPE) == 'COMPANY' ? await openFilterDialog(context) : await openFilterDialog(context);
+                                                await openFilterDialog(context);
                                               },
                                               elevation: 0,
                                               fillColor: Colors.transparent,
@@ -1723,7 +1773,7 @@ class _DiscoverTabState extends State<DiscoverTab> with SingleTickerProviderStat
                                                   mainAxisAlignment: MainAxisAlignment.center,
                                                   children: <Widget>[
                                                     Icon(
-                                                      Prefs.getString(Prefs.USER_TYPE) == 'COMPANY' ? Boxicons.bxs_plus_square : Boxicons.bx_filter,
+                                                      Boxicons.bx_filter,
                                                       color: Colors.white,
                                                       size: 24,
                                                     )
@@ -1738,79 +1788,88 @@ class _DiscoverTabState extends State<DiscoverTab> with SingleTickerProviderStat
                                       ),
                                     ),
                                     Flexible(
-                                      flex: 2,
-                                      child: Container(
-                                        margin: EdgeInsets.symmetric(horizontal: 5),
-                                        child: CustomButton(
-                                          borderSide: BorderSide(
-                                              color: kColorWhite,
-                                              width: 2.0
+                                      key: intro.keys[1],
+                                      flex: 6,
+                                      child: Flex(
+                                        direction: Axis.horizontal,
+                                        children: [
+                                          Flexible(
+                                            flex: 2,
+                                            child: Container(
+                                              margin: EdgeInsets.symmetric(horizontal: 5),
+                                              child: CustomButton(
+                                                borderSide: BorderSide(
+                                                    color: kColorWhite,
+                                                    width: 2.0
+                                                ),
+                                                color: StoreProvider.of<AppState>(context).state.vacancy.type == 'day' ? Colors.white : Colors.transparent,
+                                                textColor: StoreProvider.of<AppState>(context).state.vacancy.type == 'day' ? kColorPrimary : Colors.white,
+                                                textSize: 14,
+                                                padding: EdgeInsets.all(0),
+                                                height: 40.0,
+                                                onPressed: () {
+                                                  Prefs.setInt(Prefs.OFFSET, 0);
+                                                  StoreProvider.of<AppState>(context).dispatch(setTimeFilter(
+                                                      type: StoreProvider.of<AppState>(context).state.vacancy.type == 'day' ? 'all' : 'day'));
+                                                  StoreProvider.of<AppState>(context).dispatch(getVacancies());
+                                                },
+                                                text: 'day'.tr(),
+                                              ),
+                                            ),
                                           ),
-                                          color: StoreProvider.of<AppState>(context).state.vacancy.type == 'day' ? Colors.white : Colors.transparent,
-                                          textColor: StoreProvider.of<AppState>(context).state.vacancy.type == 'day' ? kColorPrimary : Colors.white,
-                                          textSize: 14,
-                                          padding: EdgeInsets.all(0),
-                                          height: 40.0,
-                                          onPressed: () {
-                                            Prefs.setInt(Prefs.OFFSET, 0);
-                                            StoreProvider.of<AppState>(context).dispatch(setTimeFilter(
-                                                type: StoreProvider.of<AppState>(context).state.vacancy.type == 'day' ? 'all' : 'day'));
-                                            StoreProvider.of<AppState>(context).dispatch(getVacancies());
-                                          },
-                                          text: 'day'.tr(),
-                                        ),
-                                      ),
-                                    ),
-                                    Flexible(
-                                      flex: 2,
-                                      child: Container(
-                                        margin: EdgeInsets.symmetric(horizontal: 5),
-                                        child: CustomButton(
-                                          borderSide: BorderSide(
-                                              color: kColorWhite,
-                                              width: 2.0
+                                          Flexible(
+                                            flex: 2,
+                                            child: Container(
+                                              margin: EdgeInsets.symmetric(horizontal: 5),
+                                              child: CustomButton(
+                                                borderSide: BorderSide(
+                                                    color: kColorWhite,
+                                                    width: 2.0
+                                                ),
+                                                color: StoreProvider.of<AppState>(context).state.vacancy.type == 'week' ? Colors.white : Colors.transparent,
+                                                textColor: StoreProvider.of<AppState>(context).state.vacancy.type == 'week' ? kColorPrimary : Colors.white,
+                                                textSize: 14,
+                                                padding: EdgeInsets.all(0),
+                                                height: 40.0,
+                                                onPressed: () {
+                                                  Prefs.setInt(Prefs.OFFSET, 0);
+                                                  StoreProvider.of<AppState>(context).dispatch(setTimeFilter(
+                                                      type: StoreProvider.of<AppState>(context).state.vacancy.type == 'week' ? 'all' : 'week')
+                                                  );
+                                                  StoreProvider.of<AppState>(context).dispatch(getVacancies());
+                                                },
+                                                text: 'week'.tr(),
+                                              ),
+                                            ),
                                           ),
-                                          color: StoreProvider.of<AppState>(context).state.vacancy.type == 'week' ? Colors.white : Colors.transparent,
-                                          textColor: StoreProvider.of<AppState>(context).state.vacancy.type == 'week' ? kColorPrimary : Colors.white,
-                                          textSize: 14,
-                                          padding: EdgeInsets.all(0),
-                                          height: 40.0,
-                                          onPressed: () {
-                                            Prefs.setInt(Prefs.OFFSET, 0);
-                                            StoreProvider.of<AppState>(context).dispatch(setTimeFilter(
-                                                type: StoreProvider.of<AppState>(context).state.vacancy.type == 'week' ? 'all' : 'week')
-                                            );
-                                            StoreProvider.of<AppState>(context).dispatch(getVacancies());
-                                          },
-                                          text: 'week'.tr(),
-                                        ),
-                                      ),
-                                    ),
-                                    Flexible(
-                                      flex: 2,
-                                      child: Container(
-                                        margin: EdgeInsets.symmetric(horizontal: 5),
-                                        child: CustomButton(
-                                          borderSide: BorderSide(
-                                              color: kColorWhite,
-                                              width: 2.0
+                                          Flexible(
+                                            flex: 2,
+                                            child: Container(
+                                              margin: EdgeInsets.symmetric(horizontal: 5),
+                                              child: CustomButton(
+                                                borderSide: BorderSide(
+                                                    color: kColorWhite,
+                                                    width: 2.0
+                                                ),
+                                                color: StoreProvider.of<AppState>(context).state.vacancy.type == 'month' ? Colors.white : Colors.transparent,
+                                                textColor: StoreProvider.of<AppState>(context).state.vacancy.type == 'month' ? kColorPrimary : Colors.white,
+                                                textSize: 14,
+                                                padding: EdgeInsets.all(0),
+                                                height: 40.0,
+                                                onPressed: () {
+                                                  Prefs.setInt(Prefs.OFFSET, 0);
+                                                  StoreProvider.of<AppState>(context).dispatch(setTimeFilter(
+                                                      type: StoreProvider.of<AppState>(context).state.vacancy.type == 'month' ? 'all' : 'month'));
+                                                  StoreProvider.of<AppState>(context).dispatch(getVacancies());
+                                                  setState(() {
+                                                    button == 3 ? button = 0 : button = 3;
+                                                  });
+                                                },
+                                                text: 'month'.tr(),
+                                              ),
+                                            ),
                                           ),
-                                          color: StoreProvider.of<AppState>(context).state.vacancy.type == 'month' ? Colors.white : Colors.transparent,
-                                          textColor: StoreProvider.of<AppState>(context).state.vacancy.type == 'month' ? kColorPrimary : Colors.white,
-                                          textSize: 14,
-                                          padding: EdgeInsets.all(0),
-                                          height: 40.0,
-                                          onPressed: () {
-                                            Prefs.setInt(Prefs.OFFSET, 0);
-                                            StoreProvider.of<AppState>(context).dispatch(setTimeFilter(
-                                                type: StoreProvider.of<AppState>(context).state.vacancy.type == 'month' ? 'all' : 'month'));
-                                            StoreProvider.of<AppState>(context).dispatch(getVacancies());
-                                            setState(() {
-                                              button == 3 ? button = 0 : button = 3;
-                                            });
-                                          },
-                                          text: 'month'.tr(),
-                                        ),
+                                        ],
                                       ),
                                     ),
                                   ],
@@ -1829,6 +1888,7 @@ class _DiscoverTabState extends State<DiscoverTab> with SingleTickerProviderStat
                               mainAxisAlignment: MainAxisAlignment.center,
                               children: [
                                 Flex(
+                                  key: intro.keys[2],
                                   direction: Axis.horizontal,
                                   mainAxisAlignment: MainAxisAlignment.spaceAround,
                                   children: [
@@ -1843,16 +1903,11 @@ class _DiscoverTabState extends State<DiscoverTab> with SingleTickerProviderStat
                                           ),
                                           height: 40.0,
                                           padding: EdgeInsets.all(0),
-                                          color: !onMap ? Colors.white : Colors.transparent,
-                                          textColor: !onMap ? kColorPrimary : kColorWhite,
+                                          color: _currentIndex == 0 ? Colors.white : Colors.transparent,
+                                          textColor: _currentIndex == 0 ? kColorPrimary : kColorWhite,
                                           onPressed: () {
-                                            setState(() {
-                                              onMap = false;
-                                            });
+                                            _tabController.animateTo(0);
                                             Prefs.setInt(Prefs.OFFSET, 0);
-                                            /*StoreProvider.of<AppState>(context).dispatch(setTimeFilter(
-                                                type: StoreProvider.of<AppState>(context).state.vacancy.type == 'day' ? 'all' : 'day'));
-                                            StoreProvider.of<AppState>(context).dispatch(getVacancies());*/
                                           },
                                           text: 'list'.tr(),
                                         ),
@@ -1869,17 +1924,11 @@ class _DiscoverTabState extends State<DiscoverTab> with SingleTickerProviderStat
                                           ),
                                           height: 40.0,
                                           padding: EdgeInsets.all(0),
-                                          color: onMap ? Colors.white : Colors.transparent,
-                                          textColor: onMap ? kColorPrimary : kColorWhite,
+                                          color: _currentIndex == 1 ? Colors.white : Colors.transparent,
+                                          textColor: _currentIndex == 1 ? kColorPrimary : kColorWhite,
                                           onPressed: () {
-                                            setState(() {
-                                              onMap = true;
-                                            });
+                                            _tabController.animateTo(1);
                                             Prefs.setInt(Prefs.OFFSET, 0);
-                                            /*StoreProvider.of<AppState>(context).dispatch(setTimeFilter(
-                                                type: StoreProvider.of<AppState>(context).state.vacancy.type == 'week' ? 'all' : 'week')
-                                            );
-                                            StoreProvider.of<AppState>(context).dispatch(getVacancies());*/
                                           },
                                           text: 'on_the_map'.tr(),
                                         ),

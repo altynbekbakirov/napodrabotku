@@ -365,8 +365,8 @@ class Users {
         Prefs.setString(Prefs.USER_LAT, responseData["lat"]);
         Prefs.setString(Prefs.USER_LONG, responseData["long"]);
         Prefs.setInt(Prefs.USER_STATUS, responseData["active"]);
-        // Prefs.setList(Prefs.SCHEDULES, responseData["schedules"]);
-        // Prefs.setList(Prefs.VACANCY_TYPES, responseData["vacancy_types"]);
+        // Prefs.setList(Prefs.SCHEDULES, responseData["schedules"].toList());
+        // Prefs.setList(Prefs.VACANCY_TYPES, responseData["vacancy_types"].toList());
         return "OK";
       } else {
         return "FAILED";
@@ -402,8 +402,8 @@ class Users {
         Prefs.setString(Prefs.USER_LAT, responseData["lat"]);
         Prefs.setString(Prefs.USER_LONG, responseData["long"]);
         Prefs.setInt(Prefs.USER_STATUS, responseData["active"]);
-        // Prefs.setList(Prefs.SCHEDULES, responseData["schedules"]);
-        // Prefs.setList(Prefs.VACANCY_TYPES, responseData["vacancy_types"]);
+        // Prefs.setList(Prefs.SCHEDULES, responseData["schedules"].toList());
+        // Prefs.setList(Prefs.VACANCY_TYPES, responseData["vacancy_types"].toList());
         return "OK";
       } else {
         return "FAILED";
@@ -440,8 +440,8 @@ class Users {
         Prefs.setString(Prefs.USER_LAT, responseData["lat"]);
         Prefs.setString(Prefs.USER_LONG, responseData["long"]);
         Prefs.setInt(Prefs.USER_STATUS, responseData["active"]);
-        // Prefs.setList(Prefs.SCHEDULES, responseData["schedules"]);
-        // Prefs.setList(Prefs.VACANCY_TYPES, responseData["vacancy_types"]);
+        // Prefs.setList(Prefs.SCHEDULES, List<String>.from(responseData["schedules"]));
+        // Prefs.setList(Prefs.VACANCY_TYPES, List<String>.from(responseData["vacancy_types"]));
         return "OK";
       } else {
         return "FAILED";
@@ -452,9 +452,9 @@ class Users {
   }
 
   static Map<String, dynamic> loginRequestBodyToJson(String email, String password) => {
-        'email': email,
-        'password': password,
-      };
+    'email': email,
+    'password': password,
+  };
 
   static Map<String, dynamic> loginRequestBodyToJsonPhone(String phone, String password) => {
     'phone_number': phone,
@@ -884,7 +884,7 @@ class Users {
     try {
       Map<String, String> headers = {"Content-type": "application/json"};
       final response = await http.get(url, headers: headers);
-      return json.decode(utf8.decode(response.bodyBytes));
+      return json.decode(response.body);
     } catch (error) {
       throw error;
     }
@@ -895,7 +895,7 @@ class Users {
     try {
       Map<String, String> headers = {"Content-type": "application/json"};
       final response = await http.get(url, headers: headers);
-      return json.decode(utf8.decode(response.bodyBytes));
+      return json.decode(response.body);
     } catch (error) {
       throw error;
     }
@@ -909,6 +909,7 @@ class UserState {
   ListUsersState list;
   UserCvState user_cv;
   UserFullInfoState user_full_info;
+  String type;
 
   ListUsersState submitted_users;
   ListUsersState invited_users;
@@ -924,19 +925,21 @@ class UserState {
     this.submitted_users,
     this.invited_users,
     this.all_users,
+    this.type,
   });
 
   factory UserState.initial() => UserState(
-        user: UserDetailState.initial(),
-        user_cv: UserCvState.initial(),
-        list: ListUsersState.initial(),
-        submitted_user_list: ListUserDetailState.initial(),
-        liked_user_list: LikedUserState.initial(),
-        user_full_info: UserFullInfoState.initial(),
-        submitted_users: ListUsersState.initial(),
-        invited_users: ListUsersState.initial(),
-        all_users: ListUsersState.initial(),
-      );
+    user: UserDetailState.initial(),
+    user_cv: UserCvState.initial(),
+    list: ListUsersState.initial(),
+    submitted_user_list: ListUserDetailState.initial(),
+    liked_user_list: LikedUserState.initial(),
+    user_full_info: UserFullInfoState.initial(),
+    submitted_users: ListUsersState.initial(),
+    invited_users: ListUsersState.initial(),
+    all_users: ListUsersState.initial(),
+    type: 'all',
+  );
 }
 
 class ListUsersState {

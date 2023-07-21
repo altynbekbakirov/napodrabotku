@@ -13,10 +13,30 @@ const LIST_USERS_REQUEST = 'LIST_USERS_REQUEST';
 const LIST_USERS_SUCCESS = 'LIST_USERS_SUCCESS';
 const LIST_USERS_FAILURE = 'LIST_USERS_FAILURE';
 
-RSAA getUsersRequest() {
+RSAA getUsersRequest({
+  String type,
+  List job_type_ids,
+  List region_ids,
+  List district_ids,
+  List schedule_ids,
+  List busyness_ids,
+  List vacancy_type_ids,
+}) {
   return RSAA(
-    method: 'GET',
-    endpoint: API_IP + API_USER_LIST + "?lang=" + Prefs.getString(Prefs.LANGUAGE) + "&route=" + Prefs.getString(Prefs.ROUTE),
+    method: 'POST',
+    endpoint: API_IP + API_USERS_LIST,
+    body: json.encode({
+      'limit': 5,
+      'lang': Prefs.getString(Prefs.LANGUAGE),
+      'offset': 0,
+      'type': type,
+      'type_ids': vacancy_type_ids,
+      'job_type_ids': job_type_ids,
+      'schedule_ids': schedule_ids,
+      'region_ids': region_ids,
+      'district_ids': district_ids,
+      'busyness_ids': busyness_ids,
+    }),
     types: [
       LIST_USERS_REQUEST,
       LIST_USERS_SUCCESS,
@@ -29,7 +49,32 @@ RSAA getUsersRequest() {
   );
 }
 
-ThunkAction<AppState> getUsers() => (Store<AppState> store) => store.dispatch(getUsersRequest());
+ThunkAction<AppState> getUsers() => (Store<AppState> store) => store.dispatch(getUsersRequest(
+  type: store.state.user.type,
+  job_type_ids: store.state.vacancy.job_type_ids,
+  region_ids: store.state.vacancy.region_ids,
+  district_ids: store.state.vacancy.district_ids,
+  schedule_ids: store.state.vacancy.schedule_ids,
+  busyness_ids: store.state.vacancy.busyness_ids,
+  vacancy_type_ids: store.state.vacancy.vacancy_type_ids,
+));
+
+ThunkAction<AppState> setUserFilter({
+  List region_ids,
+  List district_ids,
+  List job_type_ids,
+  List vacancy_type_ids,
+  List schedule_ids,
+  List busyness_ids,
+}) =>
+        (Store<AppState> store) {
+      store.state.vacancy.region_ids = region_ids;
+      store.state.vacancy.district_ids = district_ids;
+      store.state.vacancy.job_type_ids = job_type_ids;
+      store.state.vacancy.vacancy_type_ids = vacancy_type_ids;
+      store.state.vacancy.schedule_ids = schedule_ids;
+      store.state.vacancy.busyness_ids = busyness_ids;
+    };
 
 const LIST_VACANCIES_REQUEST = 'LIST_VACANCIES_REQUEST';
 const LIST_VACANCIES_SUCCESS = 'LIST_VACANCIES_SUCCESS';
@@ -123,6 +168,7 @@ ThunkAction<AppState> setFilter({
 
 ThunkAction<AppState> setTimeFilter({String type}) => (Store<AppState> store) {
   store.state.vacancy.type = type;
+  store.state.user.type = type;
 };
 
 const GET_LIKED_VACANCY_REQUEST = 'GET_LIKED_VACANCY_REQUEST';

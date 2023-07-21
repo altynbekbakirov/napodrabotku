@@ -55,11 +55,20 @@ class _ProfileTabState extends State<ProfileTab> {
   }
 
   getSchedules(id) async {
-    _schedules = await Users.getSchedules(id);
+    setState(() async {
+      _schedules = await Users.getSchedules(id);
+    });
   }
 
   getVacancyTypes(id) async {
-    _vacancyTypes = await Users.getVacancyTypes(id);
+    setState(() async {
+      _vacancyTypes = await Users.getVacancyTypes(id);
+    });
+    // await Users.getVacancyTypes(id).then((value) {
+    //   setState(() {
+    //     _vacancyTypes = value;
+    //   });
+    // });
   }
 
   void handleInitialBuild(ProfileScreenProps props) {
@@ -341,7 +350,7 @@ class _ProfileTabState extends State<ProfileTab> {
                                   _vacancyTypes = value;
                                 });
 
-                                await Users.changeVacancyTypes(vacancyTypes: _vacancyTypes);
+                                //await Users.changeVacancyTypes(vacancyTypes: _vacancyTypes);
                               },
                             ),
                             SizedBox(height: 10),
@@ -675,6 +684,7 @@ class _ProfileTabState extends State<ProfileTab> {
                           Prefs.setString(Prefs.USER_TYPE, "USER");
                           Prefs.setString(Prefs.ROUTE, null);
                           Prefs.setInt(Prefs.USER_ID, null);
+                          Prefs.setInt(Prefs.USER_STATUS, null);
                           Navigator.of(context).popUntil((route) => route.isFirst);
                           Navigator.pushReplacementNamed(context, Routes.select_mode);
                         },

@@ -255,9 +255,9 @@ class _CompanyVacanciesScreenState extends State<CompanyVacanciesScreen> {
                                                   ),
                                                   inputFormatters: [Utf8LengthLimitingTextInputFormatter(20)],
                                                   validator: (name) {
-                                                    if (name.isEmpty) {
-                                                      return "please_fill_this_field".tr();
-                                                    }
+                                                    // if (name.isEmpty) {
+                                                    //   return "please_fill_this_field".tr();
+                                                    // }
                                                     return null;
                                                   },
                                                 ),
@@ -889,6 +889,8 @@ class _CompanyVacanciesScreenState extends State<CompanyVacanciesScreen> {
 
                                         Vacancy.saveCompanyVacancy(vacancy: company_vacancy).then((value) {
                                           StoreProvider.of<AppState>(context).dispatch(getCompanyVacancies());
+                                          StoreProvider.of<AppState>(context).dispatch(getCompanyActiveVacancies());
+                                          StoreProvider.of<AppState>(context).dispatch(getCompanyInactiveVacancies());
                                           setState(() {
                                             loading = false;
                                           });

@@ -373,8 +373,7 @@ class _ProfileCardUserState extends State<ProfileCardUser> {
                                             ),
                                             children: <TextSpan>[
                                               TextSpan(
-                                                  text:
-                                                  widget.user.region != null ? widget.user.age != null ? widget.user.region + ', ' + widget.user.age + ' ' + 'years'.tr() : widget.user.region : '',
+                                                  text: widget.user.district != null ? widget.user.age != null ? widget.user.district + ', ' + widget.user.age + ' ' + 'years'.tr() : widget.user.district : '',
                                                   style: TextStyle(
                                                       fontFamily: 'Manrope',
                                                       fontSize: 12,
@@ -556,6 +555,7 @@ class _ProfileCardUserState extends State<ProfileCardUser> {
                           children: [
                             widget.page == 'company_home' || widget.page == 'company_responses' ? Flexible(
                               child: Container(
+                                width: double.maxFinite,
                                 child: RichText(
                                   overflow: TextOverflow.ellipsis,
                                   maxLines: 3,

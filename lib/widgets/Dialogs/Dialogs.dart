@@ -157,11 +157,11 @@ class Dialogs {
 //                  StoreProvider.of<AppState>(context).dispatch(getCompanyVacancies());
                   StoreProvider.of<AppState>(context).dispatch(getNumberOfActiveVacancies());
                   StoreProvider.of<AppState>(context).dispatch(getNumberOfInactiveVacancies());
-                  if (active)
+                  if (active){
                     StoreProvider.of<AppState>(context).state.vacancy.inactive_list.data.remove(vacancy);
-                  else
-                    StoreProvider.of<AppState>(context).state.vacancy.list.data.remove(vacancy);
-//                  Navigator.of(ctx).pop();
+                  } else {
+                    StoreProvider.of<AppState>(context).state.vacancy.active_list.data.remove(vacancy);
+                  }
                   Navigator.of(ctx).pop();
                 });
               },

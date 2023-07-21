@@ -425,10 +425,7 @@ class _ProfileCardState extends State<ProfileCard> {
                                       widget.cardController.triggerRight();
                                     } else if (widget.page == 'match') {
                                       Dialogs.openLoadingDialog(context);
-                                      Vacancy.saveVacancyUser(
-                                          vacancy_id: widget.vacancy.id,
-                                          type: "SUBMITTED")
-                                          .then((value) {
+                                      Vacancy.saveVacancyUser(vacancy_id: widget.vacancy.id, type: "SUBMITTED").then((value) {
                                         if (value == "OK") {
                                           Users user = new Users();
                                           Dialogs.showDialogBox(context,"successfully_submitted".tr());
