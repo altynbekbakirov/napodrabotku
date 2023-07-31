@@ -8,6 +8,7 @@ const kColorPink = Color(0xffff748d);
 const kColorGray = Color(0xffEDEDED);
 const kColorGreen = Color(0xff20f5a7);
 const kColorBlue = Color(0xff88ddff);
+const kColorYellow = Color(0xffffdd8d);
 
 const kInputTextStyle = TextStyle(
     fontSize: 14,

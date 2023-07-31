@@ -54,29 +54,35 @@ class _ProfileTabState extends State<ProfileTab> {
     scheduleList = await Vacancy.getLists('schedule', null);
   }
 
-  getSchedules(id) async {
-    setState(() async {
-      _schedules = await Users.getSchedules(id);
-    });
-  }
-
-  getVacancyTypes(id) async {
-    setState(() async {
-      _vacancyTypes = await Users.getVacancyTypes(id);
-    });
-    // await Users.getVacancyTypes(id).then((value) {
-    //   setState(() {
-    //     _vacancyTypes = value;
-    //   });
-    // });
-  }
+  // getSchedules(id) async {
+  //   await Users.getSchedules(id).then((value) {
+  //     setState(() {
+  //       _schedules = value;
+  //     });
+  //   });
+  // }
+  //
+  // getVacancyTypes(id) async {
+  //   await Users.getVacancyTypes(id).then((value) {
+  //     setState(() {
+  //       _vacancyTypes = value;
+  //     });
+  //   });
+  // }
 
   void handleInitialBuild(ProfileScreenProps props) {
-    if (Prefs.getString(Prefs.TOKEN) == "null" || Prefs.getString(Prefs.TOKEN) == null) {
-    } else {
-      props.getUser();
-      props.getUserCv();
-      props.getSubmittedNumber();
+    if (Prefs.getString(Prefs.TOKEN) != "null" && Prefs.getString(Prefs.TOKEN) != null) {
+      if(Prefs.getString(Prefs.USER_TYPE) == "USER") {
+        props.getUser();
+        props.getUserCv();
+        props.getSubmittedNumber();
+      } else {
+        props.getUser();
+        props.getUserCv();
+        props.getCompanyVacancies();
+        props.getCompanyActiveVacancies();
+        props.getCompanyInactiveVacancies();
+      }
     }
   }
 
@@ -149,8 +155,8 @@ class _ProfileTabState extends State<ProfileTab> {
   void initState() {
     selectedStatus = Prefs.getInt(Prefs.USER_STATUS);
     getLists();
-    getSchedules(Prefs.getInt(Prefs.USER_ID));
-    getVacancyTypes(Prefs.getInt(Prefs.USER_ID));
+    // getSchedules(Prefs.getInt(Prefs.USER_ID));
+    // getVacancyTypes(Prefs.getInt(Prefs.USER_ID));
     super.initState();
   }
 
@@ -172,6 +178,11 @@ class _ProfileTabState extends State<ProfileTab> {
             ),
           );
         } else {
+
+          if(Prefs.getString(Prefs.USER_TYPE) == "USER") {
+            _vacancyTypes = props.user.data.vacancy_types;
+            _schedules = props.user.data.schedules;
+          }
 
           body = SingleChildScrollView(
             padding: const EdgeInsets.all(20),
@@ -350,7 +361,7 @@ class _ProfileTabState extends State<ProfileTab> {
                                   _vacancyTypes = value;
                                 });
 
-                                //await Users.changeVacancyTypes(vacancyTypes: _vacancyTypes);
+                                await Users.changeVacancyTypes(vacancyTypes: _vacancyTypes);
                               },
                             ),
                             SizedBox(height: 10),
@@ -446,7 +457,7 @@ class _ProfileTabState extends State<ProfileTab> {
                               Flexible(
                                 child: Container(
                                   child: Text(
-                                    StoreProvider.of<AppState>(context).state.vacancy.list.data.length > 0 ? StoreProvider.of<AppState>(context).state.vacancy.list.data.length.toString() : '0',
+                                    props.list.data != null && props.list.data.length > 0 ? props.list.data.length.toString() : '0',
                                     style: TextStyle(color: Colors.grey[400]),
                                   ),
                                 ),
@@ -518,7 +529,8 @@ class _ProfileTabState extends State<ProfileTab> {
                                     ),
                                   ) :
                                   Text(
-                                    StoreProvider.of<AppState>(context).state.vacancy.active_list.data != null && StoreProvider.of<AppState>(context).state.vacancy.active_list.data.length > 0 ? StoreProvider.of<AppState>(context).state.vacancy.active_list.data.length.toString() : '0',
+                                    props.active_list.data != null && props.active_list.data.length > 0 ?
+                                      props.active_list.data.length.toString() : '0',
                                     style: TextStyle(color: Colors.grey[400]),
                                   ),
                                 ),
@@ -577,7 +589,8 @@ class _ProfileTabState extends State<ProfileTab> {
                               Flexible(
                                 child: Container(
                                   child:  Text(
-                                    StoreProvider.of<AppState>(context).state.vacancy.inactive_list.data != null && StoreProvider.of<AppState>(context).state.vacancy.inactive_list.data.length > 0 ? StoreProvider.of<AppState>(context).state.vacancy.inactive_list.data.length.toString() : '0',
+                                    props.inactive_list.data != null && props.inactive_list.data.length > 0 ?
+                                    props.inactive_list.data.length.toString() : '0',
                                     style: TextStyle(color: Colors.grey[400]),
                                   ),
                                 ),
@@ -731,7 +744,7 @@ class _ProfileTabState extends State<ProfileTab> {
               onPressed: () {
                 Navigator.of(ctx).pop();
                 if (!error){
-                  Navigator.pushReplacementNamed(context, Routes.home);
+                  // Navigator.pushReplacementNamed(context, Routes.home);
                 }
               },
             )

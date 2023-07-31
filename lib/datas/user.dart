@@ -50,6 +50,9 @@ class Users {
   String period;
   String description;
   String age;
+  String response_type;
+  List vacancy_types;
+  List schedules;
 
   Users({
     this.id,
@@ -89,6 +92,9 @@ class Users {
     this.period,
     this.description,
     this.age,
+    this.response_type,
+    this.vacancy_types,
+    this.schedules,
   });
 
   factory Users.fromJson(Map<String, dynamic> json) => new Users(
@@ -127,6 +133,9 @@ class Users {
       period: json['period'],
       description: json['description'],
       age: json['age'],
+      response_type: json['response_type'],
+      vacancy_types: json['vacancy_types'],
+      schedules: json['schedules'],
   );
 
   Future<void> setRecruit(int userId, int userVacancyId, int recruited) async {
@@ -915,6 +924,14 @@ class UserState {
   ListUsersState invited_users;
   ListUsersState all_users;
 
+  List region_ids;
+  List district_ids;
+  List schedule_ids;
+  List busyness_ids;
+  List vacancy_type_ids;
+  List gender_ids;
+  List country_ids;
+
   UserState({
     this.user,
     this.user_cv,
@@ -926,6 +943,12 @@ class UserState {
     this.invited_users,
     this.all_users,
     this.type,
+    this.region_ids,
+    this.schedule_ids,
+    this.busyness_ids,
+    this.vacancy_type_ids,
+    this.gender_ids,
+    this.country_ids,
   });
 
   factory UserState.initial() => UserState(
@@ -939,6 +962,12 @@ class UserState {
     invited_users: ListUsersState.initial(),
     all_users: ListUsersState.initial(),
     type: 'all',
+    region_ids: [],
+    schedule_ids: [],
+    busyness_ids: [],
+    vacancy_type_ids: [],
+    gender_ids: [],
+    country_ids: [],
   );
 }
 

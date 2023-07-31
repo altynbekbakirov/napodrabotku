@@ -14,6 +14,7 @@ import 'package:ishtapp/utils/constants.dart';
 import 'package:ishtapp/utils/textFormatter/lengthLimitingTextInputFormatter.dart';
 import 'package:ishtapp/widgets/profile_card.dart';
 import 'package:ishtapp/widgets/users_grid.dart';
+import 'package:ishtapp/widgets/vacancy_card.dart';
 import 'package:ishtapp/widgets/vacancy_view.dart';
 import 'package:redux/redux.dart';
 
@@ -972,7 +973,7 @@ class _CompanyVacanciesScreenState extends State<CompanyVacanciesScreen> {
                   child: UsersGrid(
                       children: StoreProvider.of<AppState>(context).state.vacancy.list.data.map((vacancy) {
                         return GestureDetector(
-                          child: ProfileCard(
+                          child: VacancyCard(
                             vacancy: vacancy,
                             page: 'company',
                           ),

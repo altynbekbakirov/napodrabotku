@@ -10,6 +10,7 @@ import 'package:ishtapp/utils/constants.dart';
 import 'package:ishtapp/widgets/profile_card.dart';
 import 'package:ishtapp/widgets/svg_icon.dart';
 import 'package:ishtapp/widgets/users_grid.dart';
+import 'package:ishtapp/widgets/vacancy_card.dart';
 import 'package:ishtapp/widgets/vacancy_view.dart';
 import 'package:redux/redux.dart';
 
@@ -106,23 +107,23 @@ class ProfileVisitsScreen extends StatelessWidget {
                         child: UsersGrid(
                                 children: StoreProvider.of<AppState>(context).state.vacancy.inactive_list.data.map((vacancy) {
                                 return GestureDetector(
-                                  child: ProfileCard(
+                                  child: VacancyCard(
                                     vacancy: vacancy,
                                     page: 'company_inactive',
                                   ),
                                   onTap: () {
 
-                                    VacancySkill.getVacancySkills(vacancy.id).then((value) {
-                                      List<VacancySkill> vacancySkills = [];
-
-                                      for (var i in value) {
-                                        vacancySkills.add(new VacancySkill(
-                                          id: i.id,
-                                          name: i.name,
-                                          vacancyId: i.vacancyId,
-                                          isRequired: i.isRequired,
-                                        ));
-                                      }
+                                    // VacancySkill.getVacancySkills(vacancy.id).then((value) {
+                                    //   List<VacancySkill> vacancySkills = [];
+                                    //
+                                    //   for (var i in value) {
+                                    //     vacancySkills.add(new VacancySkill(
+                                    //       id: i.id,
+                                    //       name: i.name,
+                                    //       vacancyId: i.vacancyId,
+                                    //       isRequired: i.isRequired,
+                                    //     ));
+                                    //   }
 
                                       Navigator.of(context).push(MaterialPageRoute(
                                           builder: (BuildContext context) {
@@ -134,12 +135,11 @@ class ProfileVisitsScreen extends StatelessWidget {
                                               body: VacancyView(
                                                 page: "inactive",
                                                 vacancy: vacancy,
-                                                vacancySkill: vacancySkills,
                                               ),
                                             );
                                           })
                                       );
-                                    });
+                                    // });
                                   },
                                 );
                               }).toList()),

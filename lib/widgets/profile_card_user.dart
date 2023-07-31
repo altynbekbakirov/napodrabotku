@@ -5,6 +5,7 @@ import 'package:ishtapp/datas/user.dart';
 import 'package:ishtapp/datas/vacancy.dart';
 import 'package:ishtapp/routes/routes.dart';
 import 'package:ishtapp/screens/tabs/discover_tab.dart';
+import 'package:ishtapp/screens/tabs/vacancies_tab.dart';
 import 'package:swipe_stack/swipe_stack.dart';
 import 'package:easy_localization/easy_localization.dart';
 import 'package:flutter_redux/flutter_redux.dart';
@@ -23,6 +24,7 @@ class ProfileCardUser extends StatefulWidget {
   /// User object
   final Users user;
   final UsersScreenProps props;
+  final UsersScreenProps1 props1;
 
   /// Screen to be checked
   final String page;
@@ -39,6 +41,7 @@ class ProfileCardUser extends StatefulWidget {
     @required this.user,
     this.index,
     this.props,
+    this.props1,
     this.cardController,
     this.vacancyList,
   });
@@ -343,10 +346,9 @@ class _ProfileCardUserState extends State<ProfileCardUser> {
                     Flexible(
                       flex: 2,
                       child: Container(
-                        color: kColorGray,
+                        color: widget.user.response_type == 'INVITED' ? kColorYellow : kColorGray,
                         height: double.infinity,
-                        padding: const EdgeInsets.symmetric(
-                            vertical: 10, horizontal: 20),
+                        padding: const EdgeInsets.symmetric(vertical: 10, horizontal: 20),
                         child: Flex(
                           direction: Axis.horizontal,
                           mainAxisAlignment: MainAxisAlignment.spaceBetween,
@@ -423,118 +425,62 @@ class _ProfileCardUserState extends State<ProfileCardUser> {
                       child: Container(
                         padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 15),
                         child: Flex(
-                          direction: Axis.horizontal,
-                          mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                          direction: Axis.vertical,
+                          mainAxisAlignment: MainAxisAlignment.start,
                           crossAxisAlignment: CrossAxisAlignment.start,
                           children: [
-                            /// Labels
-                            Flexible(
-                              flex: 4,
-                              child: Container(
-                                child: Flex(
-                                  direction: Axis.vertical,
-                                  mainAxisAlignment: MainAxisAlignment.start,
-                                  crossAxisAlignment: CrossAxisAlignment.start,
-                                  children: [
-                                    // Интересуемые вакансии
-                                    widget.user.vacancy_type != 'null' ? Container(
-                                      padding: EdgeInsets.symmetric(horizontal: 10, vertical: 5),
-                                      decoration: BoxDecoration(
-                                          color: kColorGray,
-                                          borderRadius: BorderRadius.circular(4)
-                                      ),
-                                      child: Text(
-                                        widget.user.vacancy_type != 'null' ? widget.user.vacancy_type.toString() : '',
-                                        style: TextStyle(
-                                          fontSize: 12,
-                                          fontWeight: FontWeight.w700,
-                                          color: kColorDark,
-                                        ),
-                                      ),
-                                    ) : Container(),
-
-                                    // Вид занятости
-                                    widget.user.business != 'null' ?
-                                    Container(
-                                      padding: EdgeInsets.symmetric(horizontal: 10, vertical: 5),
-                                      margin: EdgeInsets.only(top: 5),
-                                      decoration: BoxDecoration(
-                                          color: kColorGray,
-                                          borderRadius: BorderRadius.circular(4)
-                                      ),
-                                      child: Text(
-                                        widget.user.business != 'null' ? widget.user.business.toString() : '',
-                                        style: TextStyle(
-                                            fontSize: 12,
-                                            fontWeight: FontWeight.bold,
-                                            fontFamily: 'Manrope',
-                                            color: kColorDark
-                                        ),
-                                      ),
-                                    )  : Container(),
-
-                                    // Статус
-                                    Container(
-                                      padding: EdgeInsets.symmetric(horizontal: 10, vertical: 5),
-                                      margin: EdgeInsets.only(top: 5),
-                                      decoration: BoxDecoration(
-                                          color: widget.user.status == 1 ? kColorBlue :
-                                                widget.user.status == 2  ? kColorGreen : kColorGray,
-                                          borderRadius: BorderRadius.circular(4)
-                                      ),
-                                      child: Text(
-                                        widget.user.statusText != null ? widget.user.statusText : '',
-                                        style: TextStyle(
-                                            fontSize: 12,
-                                            fontWeight: FontWeight.bold,
-                                            fontFamily: 'Manrope',
-                                            color: kColorDark
-                                        ),
-                                      ),
-                                    ),
-                                  ],
+                            // Интересуемые вакансии
+                            widget.user.vacancy_type != 'null' ? Container(
+                              padding: EdgeInsets.symmetric(horizontal: 10, vertical: 5),
+                              decoration: BoxDecoration(
+                                  color: kColorGray,
+                                  borderRadius: BorderRadius.circular(4)
+                              ),
+                              child: Text(
+                                widget.user.vacancy_type != 'null' ? widget.user.vacancy_type.toString() : '',
+                                style: TextStyle(
+                                  fontSize: 12,
+                                  fontWeight: FontWeight.w700,
+                                  color: kColorDark,
                                 ),
                               ),
-                            ),
+                            ) : Container(),
 
-                            /// Salary
-                            Flexible(
-                              flex: 2,
-                              child: Container(
-                                child: Flex(
-                                  direction: Axis.vertical,
-                                  crossAxisAlignment: CrossAxisAlignment.end,
-                                  mainAxisAlignment: MainAxisAlignment.start,
-                                  children: [
-                                    Container(
-                                      child: Text(
-                                        (widget.user.salary != null ? widget.user.salary : '') +
-                                            ' ${widget.user.currency}',
-                                        textAlign: TextAlign.end,
-                                        style: TextStyle(
-                                          fontSize: 20,
-                                          fontWeight: FontWeight.w900,
-                                          fontFamily: 'Manrope',
-                                          color: kColorPrimary,
-                                        ),
-                                      ),
-                                    ),
-                                    Container(
-                                      child: Text(
-                                        widget.user.period != null
-                                            ? widget.user.period
-                                            .toLowerCase()
-                                            : '',
-                                        textAlign: TextAlign.end,
-                                        style: TextStyle(
-                                          fontSize: 14,
-                                          fontWeight: FontWeight.w700,
-                                          fontFamily: 'Manrope',
-                                          color: kColorPrimary,
-                                        ),
-                                      ),
-                                    ),
-                                  ],
+                            // Вид занятости
+                            widget.user.business != 'null' ?  Container(
+                              padding: EdgeInsets.symmetric(horizontal: 10, vertical: 5),
+                              margin: EdgeInsets.only(top: 5),
+                              decoration: BoxDecoration(
+                                  color: kColorGray,
+                                  borderRadius: BorderRadius.circular(4)
+                              ),
+                              child: Text(
+                                widget.user.business != 'null' ? widget.user.business.toString() : '',
+                                style: TextStyle(
+                                    fontSize: 12,
+                                    fontWeight: FontWeight.bold,
+                                    fontFamily: 'Manrope',
+                                    color: kColorDark
+                                ),
+                              ),
+                            ) : Container(),
+
+                            // Статус
+                            Container(
+                              padding: EdgeInsets.symmetric(horizontal: 10, vertical: 5),
+                              margin: EdgeInsets.only(top: 5),
+                              decoration: BoxDecoration(
+                                  color: widget.user.status == 0 ? kColorBlue :
+                                  widget.user.status == 1  ? kColorGreen : kColorGray,
+                                  borderRadius: BorderRadius.circular(4)
+                              ),
+                              child: Text(
+                                widget.user.statusText != null ? widget.user.statusText : '',
+                                style: TextStyle(
+                                    fontSize: 12,
+                                    fontWeight: FontWeight.bold,
+                                    fontFamily: 'Manrope',
+                                    color: kColorDark
                                 ),
                               ),
                             ),
@@ -597,19 +543,30 @@ class _ProfileCardUserState extends State<ProfileCardUser> {
                                   textColor: kColorPrimary,
                                   onPressed: () async {
                                     if (Prefs.getString(Prefs.TOKEN) == null) {
-                                    } else if (widget.page == 'company_home') {
-                                      removeCard(
-                                          props: widget.props,
-                                          type: "LIKED",
-                                          userId: widget.user.id,
-                                          user: widget.user,
-                                          context: context
-                                      );
+                                      if (widget.page == 'company_home') {
+                                        removeCard(
+                                            props: widget.props,
+                                            type: "LIKED",
+                                            userId: widget.user.id,
+                                            user: widget.user,
+                                            context: context
+                                        );
+                                      }
+                                    } else {
+                                      if (widget.page == 'company_responses') {
+                                        removeCard(
+                                            props: widget.props1,
+                                            type: "LIKED_THEN_DELETED",
+                                            userId: widget.user.id,
+                                            user: widget.user,
+                                            context: context
+                                        );
+                                      }
                                     }
                                   },
                                   text: widget.page == 'company_home'
                                       ? 'select_user'.tr()
-                                      : 'skip'.tr(),
+                                      : 'delete'.tr(),
                                 ),
                               ),
                             ),
@@ -651,14 +608,19 @@ class _ProfileCardUserState extends State<ProfileCardUser> {
   void removeCard({String type, int userId, props, context, Users user}) {
 
     if (Prefs.getString(Prefs.TOKEN) != null) {
-      if (type == "LIKED") {
-        // props.addOneToMatches();
+      if (type == "LIKED_THEN_DELETED") {
+        Users.saveUserCompany(userId: userId, type: type).then((value) {
+          props.allUsers.data.remove(user);
+          StoreProvider.of<AppState>(context).dispatch(getAllUsers());
+          StoreProvider.of<AppState>(context).dispatch(getSubmitUsers());
+          StoreProvider.of<AppState>(context).dispatch(getInviteUsers());
+        });
+      } else {
+        Users.saveUserCompany(userId: userId, type: type).then((value) {
+          props.listResponse.data.remove(user);
+          StoreProvider.of<AppState>(context).dispatch(getUsers());
+        });
       }
-      Users.saveUserCompany(userId: userId, type: type).then((value) {
-        props.listResponse.data.remove(user);
-        StoreProvider.of<AppState>(context).dispatch(getUsers());
-        // Navigator.of(context).pop();
-      });
     } else {
     }
   }

@@ -38,7 +38,7 @@ class _VacanciesTabState extends State<VacanciesTab> {
     props.getInvitedVacancies();
   }
 
-  void handleInitialBuildCompany(UsersScreenProps props) {
+  void handleInitialBuildCompany(UsersScreenProps1 props) {
     props.getAllUsers();
     props.getSubmittedUsers();
     props.getInvitedUsers();
@@ -52,7 +52,7 @@ class _VacanciesTabState extends State<VacanciesTab> {
   Widget build(BuildContext context) {
 
     if (Prefs.getString(Prefs.USER_TYPE) == 'COMPANY') {
-      return StoreConnector<AppState, UsersScreenProps>(
+      return StoreConnector<AppState, UsersScreenProps1>(
         converter: (store) => mapStateToUsersProps(store),
         onInitialBuild: (props) => this.handleInitialBuildCompany(props),
         builder: (context, props) {
@@ -183,7 +183,8 @@ class _VacanciesTabState extends State<VacanciesTab> {
                                 child: Container(
                                     child: ProfileCardUser(
                                         user: user,
-                                        page: "company_responses"
+                                        page: "company_responses",
+                                      props1: props,
                                     )
                                 ),
                                 onTap: () {
@@ -391,7 +392,7 @@ class _VacanciesTabState extends State<VacanciesTab> {
   }
 }
 
-class UsersScreenProps {
+class UsersScreenProps1 {
   final Function getSubmittedUsers;
   final Function getInvitedUsers;
   final Function getAllUsers;
@@ -399,7 +400,7 @@ class UsersScreenProps {
   final ListUsersState invitedUsers;
   final ListUsersState allUsers;
 
-  UsersScreenProps({
+  UsersScreenProps1({
     this.getSubmittedUsers,
     this.getInvitedUsers,
     this.getAllUsers,
@@ -409,8 +410,8 @@ class UsersScreenProps {
   });
 }
 
-UsersScreenProps mapStateToUsersProps(Store<AppState> store) {
-  return UsersScreenProps(
+UsersScreenProps1 mapStateToUsersProps(Store<AppState> store) {
+  return UsersScreenProps1(
     submittedUsers: store.state.user.submitted_users,
     invitedUsers: store.state.user.invited_users,
     allUsers: store.state.user.all_users,

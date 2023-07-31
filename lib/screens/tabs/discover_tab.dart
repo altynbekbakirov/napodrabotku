@@ -106,8 +106,6 @@ class _DiscoverTabState extends State<DiscoverTab> with SingleTickerProviderStat
 
   final _formKey = GlobalKey<FormState>();
 
-  Intro intro;
-
   getLists() async {
     jobTypeList = await Vacancy.getLists('job_type', null);
     vacancyTypeList = await Vacancy.getLists('vacancy_type', null);
@@ -313,11 +311,11 @@ class _DiscoverTabState extends State<DiscoverTab> with SingleTickerProviderStat
                                         if(region != '' && region != null){
                                           int regionId = await Vacancy.getRegionByName(region);
                                           setState(() {
-                                            this._regions.add(regionId);
                                             this._point = Point(
                                                 latitude: latitude,
                                                 longitude: longitude
                                             );
+                                            this._regions.add(regionId);
                                           });
                                         }
                                       }
@@ -1022,14 +1020,19 @@ class _DiscoverTabState extends State<DiscoverTab> with SingleTickerProviderStat
 
                                           setState(() {
                                             _typeAheadController.text = '';
+                                            _age_from_controller.text = '';
+                                            _age_to_controller.text = '';
+                                            _experience_from_controller.text = '';
+                                            _experience_to_controller.text = '';
                                             _suggestions = [];
                                             _regionId = null;
                                             _regions = [];
                                             _districts = [];
-                                            _jobTypes = [];
                                             _vacancyTypes = [];
                                             _businesses = [];
                                             _schedules = [];
+                                            _genders = [];
+                                            _countries = [];
                                           });
 
                                           if (user != null) {
@@ -1039,11 +1042,12 @@ class _DiscoverTabState extends State<DiscoverTab> with SingleTickerProviderStat
                                           StoreProvider.of<AppState>(context).dispatch(setUserFilter(
                                               schedule_ids: _schedules,
                                               busyness_ids: _businesses,
+                                              vacancy_type_ids: _vacancyTypes,
                                               region_ids: [_regionId],
                                               district_ids: _districts,
-                                              vacancy_type_ids: _vacancyTypes,
-                                              job_type_ids: _jobTypes)
-                                          );
+                                              gender_ids: _genders,
+                                              country_ids: _countries
+                                          ));
 
                                           StoreProvider.of<AppState>(context).dispatch(getUsers());
 
@@ -1063,27 +1067,23 @@ class _DiscoverTabState extends State<DiscoverTab> with SingleTickerProviderStat
                                         color: kColorPrimary,
                                         textColor: Colors.white,
                                         onPressed: () async {
+
                                           // if (user != null) {
                                           //   user.saveFilters(_regions, _districts, _jobTypes, _vacancyTypes, _businesses, _schedules);
                                           // }
-                                          // StoreProvider.of<AppState>(context).dispatch(setFilter(
-                                          //     schedule_ids: _schedules,
-                                          //     busyness_ids: _businesses,
-                                          //     // region_ids: [_regionId],
-                                          //     region_ids: _regions,
-                                          //     district_ids: _districts,
-                                          //     vacancy_type_ids: _vacancyTypes,
-                                          //     job_type_ids: _jobTypes)
-                                          // );
-                                          // StoreProvider.of<AppState>(context).dispatch(getVacancies());
-                                          // Navigator.of(context).pop();
-                                          // (await _controller.future).move(
-                                          //   point: _point,
-                                          //   animation: const MapAnimation(smooth: true, duration: 1),
-                                          //   zoom: 8,
-                                          // );
+                                          StoreProvider.of<AppState>(context).dispatch(setUserFilter(
+                                              schedule_ids: _schedules,
+                                              busyness_ids: _businesses,
+                                              region_ids: _regions,
+                                              district_ids: _districts,
+                                              vacancy_type_ids: _vacancyTypes,
+                                              gender_ids: _genders,
+                                              country_ids: _countries
+                                          ));
 
-                                          print(_genders);
+                                          StoreProvider.of<AppState>(context).dispatch(getUsers());
+
+                                          Navigator.of(context).pop();
                                         },
                                         text: 'save'.tr(),
                                       ),
@@ -1110,159 +1110,8 @@ class _DiscoverTabState extends State<DiscoverTab> with SingleTickerProviderStat
     });
   }
 
-  Widget customThemeWidgetBuilder(StepWidgetParams stepWidgetParams) {
-
-    Map _smartGetPosition({
-      Size size,
-      Size screenSize,
-      Offset offset,
-    }) {
-      double height = size.height;
-      double width = size.width;
-      double screenWidth = screenSize.width;
-      double screenHeight = screenSize.height;
-      double bottomArea = screenHeight - offset.dy - height;
-      double topArea = screenHeight - height - bottomArea;
-      double rightArea = screenWidth - offset.dx - width;
-      double leftArea = screenWidth - width - rightArea;
-      Map position = Map();
-      position['crossAxisAlignment'] = CrossAxisAlignment.start;
-      if (topArea > bottomArea) {
-        position['bottom'] = bottomArea + height + 16;
-      } else {
-        position['top'] = offset.dy + height + 12;
-      }
-      if (leftArea > rightArea) {
-        position['right'] = rightArea <= 0 ? 16.0 : rightArea;
-        position['crossAxisAlignment'] = CrossAxisAlignment.end;
-        position['width'] = min(leftArea + width - 16, screenWidth * 0.618);
-      } else {
-        position['left'] = offset.dx <= 0 ? 16.0 : offset.dx;
-        position['width'] = min(rightArea + width - 16, screenWidth * 0.618);
-      }
-
-      /// The distance on the right side is very large, it is more beautiful on the right side
-      if (rightArea > 0.8 * topArea && rightArea > 0.8 * bottomArea) {
-        position['left'] = offset.dx + width + 16;
-        position['top'] = offset.dy - 4;
-        position['bottom'] = null;
-        position['right'] = null;
-        position['width'] = min<double>(position['width'], rightArea * 0.8);
-      }
-
-      /// The distance on the left is large, it is more beautiful on the left side
-      if (leftArea > 0.8 * topArea && leftArea > 0.8 * bottomArea) {
-        position['right'] = rightArea + width + 16;
-        position['top'] = offset.dy - 4;
-        position['bottom'] = null;
-        position['left'] = null;
-        position['crossAxisAlignment'] = CrossAxisAlignment.end;
-        position['width'] = min<double>(position['width'], leftArea * 0.8);
-      }
-      return position;
-    }
-
-    List<String> texts = [
-      'Настрой поиск под себя',
-      'Выбери нужный период актуальности вакансии',
-      'Выбери способ отображения предложений',
-    ];
-
-    int currentStepIndex = stepWidgetParams.currentStepIndex;
-    int stepCount = stepWidgetParams.stepCount;
-    Offset offset = stepWidgetParams.offset;
-
-    Map position = _smartGetPosition(
-      screenSize: stepWidgetParams.screenSize,
-      size: stepWidgetParams.size,
-      offset: offset,
-    );
-
-    return Container(
-      child: GestureDetector(
-        onTap: () {
-          if(stepCount - 1 == currentStepIndex){
-            stepWidgetParams.onFinish();
-            Prefs.setBool(Prefs.INTRO, true);
-          } else {
-            stepWidgetParams.onNext();
-          }
-        },
-        behavior: HitTestBehavior.opaque,
-        child: Stack(
-          children: [
-            Positioned(
-              child: Container(
-                width: position['width'],
-                child: Column(
-                  mainAxisSize: MainAxisSize.min,
-                  crossAxisAlignment: position['crossAxisAlignment'],
-                  children: [
-                    Text(
-                      currentStepIndex > texts.length - 1
-                          ? ''
-                          : texts[currentStepIndex],
-                      softWrap: true,
-                      style: TextStyle(
-                        fontSize: 20,
-                        fontWeight: FontWeight.bold,
-                        color: Colors.white,
-                      ),
-                    ),
-                    SizedBox(
-                      height: 12,
-                    ),
-                    SizedBox(
-                      height: 40,
-                      child: OutlineButton(
-                        padding: EdgeInsets.symmetric(
-                          vertical: 0,
-                          horizontal: 30,
-                        ),
-                        shape: RoundedRectangleBorder(
-                          borderRadius: BorderRadius.all(
-                            Radius.circular(64),
-                          ),
-                        ),
-                        highlightedBorderColor: Colors.white,
-                        borderSide: BorderSide(color: Colors.white),
-                        textColor: Colors.white,
-                        onPressed: stepCount - 1 == currentStepIndex
-                            ? stepWidgetParams.onFinish
-                            : stepWidgetParams.onNext,
-                        child: Text(
-                          currentStepIndex < stepCount - 1 ? 'Дальше' : 'Завершить',
-                          style: TextStyle(
-                            fontSize: 16,
-                            fontWeight: FontWeight.bold,
-                          ),
-                        ),
-                      ),
-                    ),
-                  ],
-                ),
-              ),
-              left: position['left'],
-              top: position['top'],
-              bottom: position['bottom'],
-              right: position['right'],
-            ),
-          ],
-        ),
-      ),
-    );
-  }
-
   @override
   void initState() {
-
-    intro = Intro(
-      // maskColor: Color.fromRGBO(0, 0, 0, 0.80),
-      // borderRadius: BorderRadius.all(Radius.circular(64.0)),
-      padding: EdgeInsets.zero,
-      stepCount: 3,
-      widgetBuilder: customThemeWidgetBuilder,
-    );
 
     super.initState();
     Prefs.setInt(Prefs.OFFSET, 0);
@@ -1276,11 +1125,6 @@ class _DiscoverTabState extends State<DiscoverTab> with SingleTickerProviderStat
     }
 
     if (Prefs.getString(Prefs.USER_TYPE) == 'USER') {
-      // if (Prefs.getBool(Prefs.INTRO)) {
-      // Future.delayed(Duration.zero, () {
-      //   intro.start(context);
-      // });
-      // }
     }
 
     _tabController = TabController(length: 2, vsync: this);
@@ -1517,86 +1361,78 @@ class _DiscoverTabState extends State<DiscoverTab> with SingleTickerProviderStat
                     Container(
                       child: data != null && data.isNotEmpty ?
                       Container(
+                        key: widget.intro.keys[3],
                         // color: kColorProductLab,
                         padding: EdgeInsets.only(bottom: 10),
-                        child: TinderSwapCard(
-                          orientation: AmassOrientation.BOTTOM,
-                          totalNum: data.length,
-                          swipeUp: false,
-                          stackNum: 4,
-                          swipeEdge: 5.0,
-                          maxWidth: MediaQuery.of(context).size.width * 0.96,
-                          maxHeight: MediaQuery.of(context).size.width * 0.85,
-                          minWidth: MediaQuery.of(context).size.width * 0.72,
-                          minHeight: MediaQuery.of(context).size.width * 0.82,
-                          cardController: cardController,
-                          cardBuilder: (context, index) {
-                            _index = index;
-                            return data != null && data.isNotEmpty ?
-                            Container(
-                              child: Stack(
-                                children: <Widget>[
-                                  GestureDetector(
-                                    child: ProfileCard(
-                                      props: props,
-                                      page: 'discover',
-                                      vacancy: StoreProvider.of<AppState>(context).state.vacancy.list.data[index],
-                                      index: index,
-                                      cardController: cardController,
-                                    ),
-                                    onTap: () {
-                                      VacancySkill.getVacancySkills(StoreProvider.of<AppState>(context).state.vacancy.list.data[index].id).then((value) {
-                                        List<VacancySkill> vacancySkills = [];
-
-                                        for (var i in value) {
-                                          vacancySkills.add(new VacancySkill(
-                                            id: i.id,
-                                            name: i.name,
-                                            vacancyId: i.vacancyId,
-                                            isRequired: i.isRequired,
-                                          ));
-                                        }
-                                        Navigator.of(context).push(MaterialPageRoute(builder: (BuildContext context) {
-                                          return Scaffold(
-                                            backgroundColor: kColorPrimary,
-                                            appBar: AppBar(
-                                              title: Text("vacancy_view".tr()),
-                                            ),
-                                            body: VacancyView(
-                                              page: "view",
-                                              vacancy: StoreProvider.of<AppState>(context).state.vacancy.list.data[index],
-                                              vacancySkill: vacancySkills,
-                                            ),
-                                          );
-                                        }));
-                                      });
-                                    },
+                        child: Center(
+                          child: Container(
+                            child: TinderSwapCard(
+                              orientation: AmassOrientation.BOTTOM,
+                              totalNum: data.length,
+                              swipeUp: false,
+                              stackNum: 4,
+                              swipeEdge: 5.0,
+                              maxWidth: MediaQuery.of(context).size.width * 0.96,
+                              maxHeight: MediaQuery.of(context).size.width * 0.85,
+                              minWidth: MediaQuery.of(context).size.width * 0.72,
+                              minHeight: MediaQuery.of(context).size.width * 0.82,
+                              cardController: cardController,
+                              cardBuilder: (context, index) {
+                                _index = index;
+                                return data != null && data.isNotEmpty ?
+                                Container(
+                                  child: Stack(
+                                    children: <Widget>[
+                                      GestureDetector(
+                                        child: ProfileCard(
+                                          props: props,
+                                          page: 'discover',
+                                          vacancy: StoreProvider.of<AppState>(context).state.vacancy.list.data[index],
+                                          index: index,
+                                          cardController: cardController,
+                                        ),
+                                        onTap: () {
+                                          Navigator.of(context).push(MaterialPageRoute(builder: (BuildContext context) {
+                                            return Scaffold(
+                                              backgroundColor: kColorPrimary,
+                                              appBar: AppBar(
+                                                title: Text("vacancy_view".tr()),
+                                              ),
+                                              body: VacancyView(
+                                                page: "view",
+                                                vacancy: StoreProvider.of<AppState>(context).state.vacancy.list.data[index],
+                                              ),
+                                            );
+                                          }));
+                                        },
+                                      ),
+                                    ],
                                   ),
-                                ],
-                              ),
-                            ) : Container();
-                          },
-                          swipeCompleteCallback: (CardSwipeOrientation orientation, int index) {
-                            if (orientation.index == CardSwipeOrientation.LEFT.index) {
-                              print('Left');
-                              removeCards(
-                                  props: props,
-                                  type: "DISLIKED",
-                                  vacancyId: StoreProvider.of<AppState>(context).state.vacancy.list.data[_index].id,
-                                  context: context
-                              );
-                            }
+                                ) : Container();
+                              },
+                              swipeCompleteCallback: (CardSwipeOrientation orientation, int index) {
+                                if (orientation.index == CardSwipeOrientation.LEFT.index) {
+                                  print('Left');
+                                  removeCards(
+                                      props: props,
+                                      type: "DISLIKED",
+                                      vacancyId: StoreProvider.of<AppState>(context).state.vacancy.list.data[_index].id,
+                                      context: context
+                                  );
+                                }
 
-                            if (orientation.index == CardSwipeOrientation.RIGHT.index) {
-                              print('Right');
-                              removeCards(
-                                  props: props,
-                                  type: "LIKED",
-                                  vacancyId: StoreProvider.of<AppState>(context).state.vacancy.list.data[_index].id,
-                                  context: context
-                              );
-                            }
-                          },
+                                if (orientation.index == CardSwipeOrientation.RIGHT.index) {
+                                  print('Right');
+                                  removeCards(
+                                      props: props,
+                                      type: "LIKED",
+                                      vacancyId: StoreProvider.of<AppState>(context).state.vacancy.list.data[_index].id,
+                                      context: context
+                                  );
+                                }
+                              },
+                            ),
+                          ),
                         ),
                       )  :
                       Container(
@@ -1647,9 +1483,6 @@ class _DiscoverTabState extends State<DiscoverTab> with SingleTickerProviderStat
                       child: Stack(
                         children: [
                           YandexMap(
-                            onMapRendered: () {
-                              print(123);
-                            },
                             onMapCreated: (YandexMapController controller) async {
                               _yandexMapController = controller;
 
@@ -1673,11 +1506,11 @@ class _DiscoverTabState extends State<DiscoverTab> with SingleTickerProviderStat
                                 }
                               }
 
-                              await _yandexMapController.move(
-                                  point: _point,
-                                  animation: const MapAnimation(smooth: true, duration: 2.0),
-                                  zoom: 8
-                              );
+                              // await _yandexMapController.move(
+                              //     point: _point,
+                              //     animation: const MapAnimation(smooth: true, duration: 2.0),
+                              //     zoom: 8
+                              // );
                             },
                           ),
                           Positioned(
@@ -1751,7 +1584,7 @@ class _DiscoverTabState extends State<DiscoverTab> with SingleTickerProviderStat
                                     Flexible(
                                       flex: 1,
                                       child: Container(
-                                        key: intro.keys[0],
+                                        key: widget.intro.keys[0],
                                         margin: EdgeInsets.symmetric(horizontal: 5),
                                         child: GestureDetector(
                                           child: RawMaterialButton(
@@ -1788,7 +1621,7 @@ class _DiscoverTabState extends State<DiscoverTab> with SingleTickerProviderStat
                                       ),
                                     ),
                                     Flexible(
-                                      key: intro.keys[1],
+                                      key: widget.intro.keys[1],
                                       flex: 6,
                                       child: Flex(
                                         direction: Axis.horizontal,
@@ -1888,7 +1721,7 @@ class _DiscoverTabState extends State<DiscoverTab> with SingleTickerProviderStat
                               mainAxisAlignment: MainAxisAlignment.center,
                               children: [
                                 Flex(
-                                  key: intro.keys[2],
+                                  key: widget.intro.keys[2],
                                   direction: Axis.horizontal,
                                   mainAxisAlignment: MainAxisAlignment.spaceAround,
                                   children: [
@@ -1960,7 +1793,7 @@ class _DiscoverTabState extends State<DiscoverTab> with SingleTickerProviderStat
 
   Future<List<dynamic>> _fetchAddressSuggestions(String pattern) async {
     List<dynamic> suggestions = [];
-    String token = "132a62a4c888a776c87241ed9e615638651f14a8";
+    String token = "d06b572efe686359a407652e5f66ef079ea649dc";
 
     if(pattern.length > 3) {
       final response = await http.post(
@@ -2003,12 +1836,12 @@ class _DiscoverTabState extends State<DiscoverTab> with SingleTickerProviderStat
       appLatLong = MoscowLocation();
     }
 
-    setState(() {
+    // setState(() {
       _point = Point(
           latitude: appLatLong.lat,
           longitude: appLatLong.long
       );
-    });
+    // });
   }
 
   void removeCards({String type, int vacancyId, props, context}) {

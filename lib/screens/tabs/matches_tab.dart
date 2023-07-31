@@ -147,7 +147,7 @@ class _MatchesTabState extends State<MatchesTab> {
                                                                         ),
                                                                         children: <TextSpan>[
                                                                           TextSpan(
-                                                                              text: user.region != null ? user.region : '',
+                                                                              text: user.district != null ? user.district : '',
                                                                               style: TextStyle(
                                                                                   fontFamily: 'Manrope',
                                                                                   fontSize: 12,
@@ -489,17 +489,17 @@ class _MatchesTabState extends State<MatchesTab> {
                                     ),
                                 ),
                                 onTap: () {
-                                  VacancySkill.getVacancySkills(vacancy.id).then((value) {
-                                    List<VacancySkill> vacancySkills = [];
-
-                                    for (var i in value) {
-                                      vacancySkills.add(new VacancySkill(
-                                        id: i.id,
-                                        name: i.name,
-                                        vacancyId: i.vacancyId,
-                                        isRequired: i.isRequired,
-                                      ));
-                                    }
+                                  // VacancySkill.getVacancySkills(vacancy.id).then((value) {
+                                  //   List<VacancySkill> vacancySkills = [];
+                                  //
+                                  //   for (var i in value) {
+                                  //     vacancySkills.add(new VacancySkill(
+                                  //       id: i.id,
+                                  //       name: i.name,
+                                  //       vacancyId: i.vacancyId,
+                                  //       isRequired: i.isRequired,
+                                  //     ));
+                                  //   }
 
                                     Navigator.of(context).push(MaterialPageRoute(builder: (BuildContext context) {
                                       return Scaffold(
@@ -510,14 +510,13 @@ class _MatchesTabState extends State<MatchesTab> {
                                         body: VacancyView(
                                           page: "user_match",
                                           vacancy: vacancy,
-                                          vacancySkill: vacancySkills,
                                         ),
                                       );
                                     })).then((value) {
                                       handleInitialBuild(props);
                                       StoreProvider.of<AppState>(context).dispatch(getNumOfLikedVacancyRequest());
                                     });
-                                  });
+                                  // });
                                 },
                               );
                             }).toList()

@@ -213,39 +213,9 @@ class _EditProfileScreenState extends State<EditProfileScreen> {
     });
   }
 
-  getJobSphere() async {
-    var list = await Vacancy.getLists('job_sphere', null);
-    list.forEach((sphere) {
-      setState(() {
-        spheres.add(sphere['name']);
-      });
-    });
-  }
-
-  getDepartments(String sphere) async {
-    departments = [];
-    var list = await Vacancy.getLists2('department', sphere);
-    list.forEach((department) {
-      setState(() {
-        departments.add(department['name']);
-      });
-    });
-  }
-
-  getSocialOrientations() async {
-    var list = await Vacancy.getLists('social_orientation', null);
-    list.forEach((item) {
-      setState(() {
-        socialOrientations.add(item['name']);
-      });
-    });
-  }
-
   @override
   void initState() {
     getLists();
-    getJobSphere();
-    getSocialOrientations();
     super.initState();
   }
 
@@ -271,10 +241,6 @@ class _EditProfileScreenState extends State<EditProfileScreen> {
       getDistricts(user.region);
       selectedDistrict = user.district;
 
-      selectedJobSphere = user.job_sphere;
-      selectedDepartment = user.department;
-      getDepartments(user.job_sphere);
-      selectedSocialOrientation = user.social_orientation;
       _fullname_of_contact_person.text = user.contact_person_fullname;
       _position_of_contact_person.text = user.contact_person_position;
       _address_of_company.text = user.address;
@@ -646,8 +612,8 @@ class _EditProfileScreenState extends State<EditProfileScreen> {
                             heightFactor: 1.5,
                             alignment: Alignment.topLeft,
                             child: Text(
-                              'position'.tr(),
-                              style: TextStyle(fontSize: 16, color: Colors.black),
+                              'position'.tr().toUpperCase(),
+                              style: TextStyle(fontSize: 12, color: Colors.black, fontWeight: FontWeight.w700),
                             )),
                         TextFormField(
                           enabled: true,
@@ -663,44 +629,6 @@ class _EditProfileScreenState extends State<EditProfileScreen> {
                             fillColor: kColorWhite,
                           ),
                           style: TextStyle(color: kColorPrimary.withOpacity(0.6)),
-                        ),
-                        SizedBox(height: 20),
-                      ],
-                    ) : Container(),
-
-                    /// Выбор сферы деятельности
-                    Prefs.getString(Prefs.USER_TYPE) == "COMPANY" ?
-                    Column(
-                      children: <Widget>[
-                        Align(
-                          widthFactor: 10,
-                          heightFactor: 1.5,
-                          alignment: Alignment.topLeft,
-                          child: Text(
-                            'job_type'.tr().toString().toUpperCase() + '*',
-                            style: TextStyle(fontSize: 12, color: Colors.black, fontWeight: FontWeight.w700),
-                          )
-                        ),
-                        DropdownSearch<String>(
-                            showSelectedItem: true,
-                            items: spheres,
-                            onChanged: (value) {
-                              getDepartments(value);
-                              setState(() {
-                                selectedJobSphere = value;
-                              });
-                            },
-                            dropdownSearchDecoration: InputDecoration(
-                              contentPadding: EdgeInsets.symmetric(vertical: 0, horizontal: 20),
-                              border: OutlineInputBorder(),
-                              enabledBorder: OutlineInputBorder(borderSide: BorderSide(color: Colors.grey[200], width: 2.0)),
-                              errorBorder: OutlineInputBorder(borderSide: BorderSide(color: kColorPrimary, width: 2.0)),
-                              errorStyle: TextStyle(color: kColorPrimary, fontWeight: FontWeight.w500),
-                              floatingLabelBehavior: FloatingLabelBehavior.always,
-                              filled: true,
-                              fillColor: kColorWhite,
-                            ),
-                            selectedItem: selectedJobSphere
                         ),
                         SizedBox(height: 20),
                       ],

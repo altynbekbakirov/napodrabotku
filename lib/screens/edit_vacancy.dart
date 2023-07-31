@@ -198,8 +198,8 @@ class _EditVacancyState extends State<EditVacancy> {
     selectedDistrict = widget.vacancy.district;
     is_disability_person_vacancy = widget.vacancy.is_disability_person_vacancy == 1;
 
-    _experienceId = int.parse(widget.vacancy.experience);
-    _payPeriodId = int.parse(widget.vacancy.payPeriod);
+    _experienceId = widget.vacancy.experience != null ? int.parse(widget.vacancy.experience) : 0;
+    _payPeriodId = widget.vacancy.payPeriod != null ? int.parse(widget.vacancy.payPeriod) : 0;
 
     String _salaryPeriodString = widget.vacancy.period;
     if(_salaryPeriodString == 'Ставка за час'){

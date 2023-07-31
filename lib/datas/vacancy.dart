@@ -43,7 +43,7 @@ class Vacancy {
   String vacancyLink;
   String deadline;
   String status;
-  String status_color;
+  String statusText;
 
   Vacancy({
     this.id,
@@ -83,6 +83,7 @@ class Vacancy {
     this.vacancyLink,
     this.deadline,
     this.status,
+    this.statusText,
   });
 
   static void deactivateVacancyWithOverDeadline() async {
@@ -214,7 +215,8 @@ class Vacancy {
         isProductLabVacancy: json['is_product_lab_vacancy'] == 1,
         vacancyLink: json['vacancy_link'],
         deadline: json['deadline'],
-        status: json['status']
+        status: json['status'],
+        statusText: json['status_text']
       );
 
   static Map<String, dynamic> vacancyToJsonMap(Vacancy vacancy) => {
@@ -252,6 +254,7 @@ class Vacancy {
         'vacancy_link': vacancy.vacancyLink,
         'deadline': vacancy.deadline,
         'status': vacancy.status,
+        'status_text': vacancy.statusText,
   };
 
   static List<Vacancy> getListOfVacancies() {

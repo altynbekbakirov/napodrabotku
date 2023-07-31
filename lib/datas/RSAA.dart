@@ -21,6 +21,8 @@ RSAA getUsersRequest({
   List schedule_ids,
   List busyness_ids,
   List vacancy_type_ids,
+  List gender_ids,
+  List country_ids,
 }) {
   return RSAA(
     method: 'POST',
@@ -36,6 +38,8 @@ RSAA getUsersRequest({
       'region_ids': region_ids,
       'district_ids': district_ids,
       'busyness_ids': busyness_ids,
+      'gender_ids': gender_ids,
+      'country_ids': country_ids,
     }),
     types: [
       LIST_USERS_REQUEST,
@@ -51,29 +55,32 @@ RSAA getUsersRequest({
 
 ThunkAction<AppState> getUsers() => (Store<AppState> store) => store.dispatch(getUsersRequest(
   type: store.state.user.type,
-  job_type_ids: store.state.vacancy.job_type_ids,
-  region_ids: store.state.vacancy.region_ids,
-  district_ids: store.state.vacancy.district_ids,
-  schedule_ids: store.state.vacancy.schedule_ids,
-  busyness_ids: store.state.vacancy.busyness_ids,
-  vacancy_type_ids: store.state.vacancy.vacancy_type_ids,
+  region_ids: store.state.user.region_ids,
+  district_ids: store.state.user.district_ids,
+  schedule_ids: store.state.user.schedule_ids,
+  busyness_ids: store.state.user.busyness_ids,
+  vacancy_type_ids: store.state.user.vacancy_type_ids,
+  gender_ids: store.state.user.gender_ids,
+  country_ids: store.state.user.country_ids,
 ));
 
 ThunkAction<AppState> setUserFilter({
   List region_ids,
   List district_ids,
-  List job_type_ids,
   List vacancy_type_ids,
   List schedule_ids,
   List busyness_ids,
+  List gender_ids,
+  List country_ids,
 }) =>
         (Store<AppState> store) {
-      store.state.vacancy.region_ids = region_ids;
-      store.state.vacancy.district_ids = district_ids;
-      store.state.vacancy.job_type_ids = job_type_ids;
-      store.state.vacancy.vacancy_type_ids = vacancy_type_ids;
-      store.state.vacancy.schedule_ids = schedule_ids;
-      store.state.vacancy.busyness_ids = busyness_ids;
+      store.state.user.region_ids = region_ids;
+      store.state.user.district_ids = district_ids;
+      store.state.user.vacancy_type_ids = vacancy_type_ids;
+      store.state.user.schedule_ids = schedule_ids;
+      store.state.user.busyness_ids = busyness_ids;
+      store.state.user.gender_ids = busyness_ids;
+      store.state.user.country_ids = busyness_ids;
     };
 
 const LIST_VACANCIES_REQUEST = 'LIST_VACANCIES_REQUEST';
@@ -96,7 +103,7 @@ RSAA getVacanciesRequest(
     method: 'POST',
     endpoint: API_IP + API_VACANCY_LIST + "?lang=" + Prefs.getString(Prefs.LANGUAGE) + "&route=" + Prefs.getString(Prefs.ROUTE),
     body: json.encode({
-      'limit': 5,
+      'limit': 99,
       'lang': Prefs.getString(Prefs.LANGUAGE),
       'offset': 0,
       'type': type,

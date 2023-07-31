@@ -179,368 +179,6 @@ class _HomeScreenState extends State<HomeScreen> {
     Vacancy.deactivateVacancyWithOverDeadline();
   }
 
-  Future<void> openFilterDialog(context) async {
-    user = StoreProvider.of<AppState>(context).state.user.user.data;
-
-    if (user != null) {
-      getFilters(user.id);
-    }
-
-    return await showDialog(
-        context: context,
-        builder: (context) {
-          return StatefulBuilder(builder: (context, setState) {
-            return Dialog(
-              insetPadding: EdgeInsets.zero,
-              shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(20.0)),
-              child: Container(
-                constraints: BoxConstraints(maxHeight: MediaQuery.of(context).size.height * 0.9),
-                child: Padding(
-                  padding: const EdgeInsets.all(12.0),
-                  child: ListView(
-                    shrinkWrap: true,
-                    children: [
-                      Align(
-                          alignment: Alignment.center,
-                          child: Text(
-                            'search_filter'.tr(),
-                            style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold, color: Colors.black),
-                          )),
-                      SizedBox(
-                        height: 30,
-                      ),
-
-                      /// Form
-                      Form(
-                        key: _formKey,
-                        child: Column(
-                          children: <Widget>[
-                            Container(
-                              margin: EdgeInsets.only(bottom: 16),
-                              child: Flex(
-                                direction: Axis.vertical,
-                                children: [
-                                  Align(
-                                      widthFactor: 10,
-                                      heightFactor: 1.5,
-                                      alignment: Alignment.topLeft,
-                                      child: Text(
-                                        'location'.tr().toString().toUpperCase(),
-                                        style: TextStyle(fontSize: 12, color: Colors.black, fontWeight: FontWeight.w700),
-                                      )
-                                  ),
-                                  TypeAheadFormField(
-                                    textFieldConfiguration: TextFieldConfiguration(
-                                      controller: _typeAheadController,
-                                      decoration: InputDecoration(
-                                        contentPadding: EdgeInsets.symmetric(vertical: 10, horizontal: 20),
-                                        border: OutlineInputBorder(),
-                                        enabledBorder: OutlineInputBorder(borderSide: BorderSide(color: Colors.grey[200], width: 2.0)),
-                                        errorBorder: OutlineInputBorder(borderSide: BorderSide(color: kColorPrimary, width: 2.0)),
-                                        errorStyle: TextStyle(color: kColorPrimary, fontWeight: FontWeight.w500),
-                                        floatingLabelBehavior: FloatingLabelBehavior.always,
-                                        filled: true,
-                                        fillColor: kColorWhite,
-                                      ),
-                                    ),
-                                    suggestionsCallback: (pattern) async {
-                                      print(pattern);
-                                      if(pattern.length > 3) {
-                                        _suggestions = await _fetchAddressSuggestions(pattern);
-                                      }
-                                      return _suggestions;
-                                    },
-                                    itemBuilder: (context, suggestion) {
-                                      return ListTile(
-                                        title: Text(suggestion['value']),
-                                      );
-                                    },
-                                    noItemsFoundBuilder: (context) {
-                                      return Container(
-                                        padding: EdgeInsets.symmetric(vertical: 10, horizontal: 20),
-                                        child: Text(
-                                          'address_not_found'.tr(),
-                                          style: TextStyle(
-                                              fontSize: 14,
-                                              fontWeight: FontWeight.w500,
-                                              color: Colors.black54
-                                          ),
-                                        ),
-                                      );
-                                    },
-                                    transitionBuilder: (context, suggestionsBox, controller) {
-                                      return suggestionsBox;
-                                    },
-                                    onSuggestionSelected: (suggestion) async {
-                                      _regions = [];
-                                      _typeAheadController.text = suggestion['value'];
-
-                                      String region = suggestion['data']['region_with_type'];
-                                      double latitude = double.parse(suggestion['data']['geo_lat']);
-                                      double longitude = double.parse(suggestion['data']['geo_lon']);
-
-                                      if(region != '' && region != null){
-                                        int regionId = await Vacancy.getRegionByName(region);
-                                        setState(() {
-                                          this._regions.add(regionId);
-                                          this._point = Point(
-                                              latitude: latitude,
-                                              longitude: longitude
-                                          );
-                                        });
-                                      }
-
-                                      print(_regions);
-                                    },
-                                    validator: (value) {
-                                      if (value.isEmpty) {
-                                        return 'Введите адрес';
-                                      }
-                                      return null;
-                                    },
-                                    onSaved: (value) => _selectedCity = value,
-                                  ),
-                                ],
-                              ),
-                            ),
-                            // MultiSelectFormField(
-                            //   dialogShapeBorder: RoundedRectangleBorder(
-                            //       borderRadius: BorderRadius.all(Radius.circular(12.0))
-                            //   ),
-                            //   fillColor: kColorWhite,
-                            //   // autovalidate: AutovalidateMode.disabled,
-                            //   title: Text(
-                            //     'region'.tr(),
-                            //     style: TextStyle(fontSize: 13, fontWeight: FontWeight.bold, color: Colors.black),
-                            //   ),
-                            //   validator: (value) {
-                            //     if (value == null || value.length == 0) {
-                            //       return 'select_one_or_more'.tr();
-                            //     }
-                            //     return null;
-                            //   },
-                            //   dataSource: regionList,
-                            //   textField: 'name',
-                            //   valueField: 'id',
-                            //   okButtonLabel: 'ok'.tr(),
-                            //   cancelButtonLabel: 'cancel'.tr(),
-                            //   // required: true,
-                            //   hintWidget: Text('select_one_or_more'.tr()),
-                            //   initialValue: this._regions,
-                            //   onSaved: (value) {
-                            //     if (value == null) return;
-                            //     setState(() {
-                            //       _regions = value;
-                            //     });
-                            //   },
-                            // ),
-//                          SizedBox(height: 20),
-                            MultiSelectFormField(
-                              fillColor: kColorWhite,
-                              // autovalidate: AutovalidateMode.disabled,
-                              title: Text(
-                                'job_types'.tr(),
-                                style: TextStyle(fontSize: 13, fontWeight: FontWeight.bold, color: Colors.black),
-                              ),
-                              validator: (value) {
-                                if (value == null || value.length == 0) {
-                                  return 'select_one_or_more'.tr();
-                                }
-                                return null;
-                              },
-                              dataSource: jobTypeList,
-                              textField: 'name',
-                              valueField: 'id',
-                              okButtonLabel: 'ok'.tr(),
-                              cancelButtonLabel: 'cancel'.tr(),
-                              // required: true,
-                              hintWidget: Text('select_one_or_more'.tr()),
-                              initialValue: _jobTypes,
-                              onSaved: (value) {
-                                if (value == null) return;
-                                setState(() {
-                                  _jobTypes = value;
-                                });
-                              },
-                            ),
-//                          SizedBox(height: 20),
-                            MultiSelectFormField(
-                              fillColor: kColorWhite,
-                              // autovalidate: AutovalidateMode.disabled,
-                              title: Text(
-                                'vacancy_types'.tr(),
-                                style: TextStyle(fontSize: 13, fontWeight: FontWeight.bold, color: Colors.black),
-                              ),
-                              validator: (value) {
-                                if (value == null || value.length == 0) {
-                                  return 'select_one_or_more'.tr();
-                                }
-                                return null;
-                              },
-                              dataSource: vacancyTypeList,
-                              textField: 'name',
-                              valueField: 'id',
-                              okButtonLabel: 'ok'.tr(),
-                              cancelButtonLabel: 'cancel'.tr(),
-                              // required: true,
-                              hintWidget: Text('select_one_or_more'.tr()),
-                              initialValue: _vacancyTypes,
-                              onSaved: (value) {
-                                if (value == null) return;
-                                setState(() {
-                                  _vacancyTypes = value;
-                                });
-                              },
-                            ),
-//                          SizedBox(height: 20),
-                            MultiSelectFormField(
-                              fillColor: kColorWhite,
-                              // autovalidate: AutovalidateMode.disabled,
-                              title: Text(
-                                'businesses'.tr(),
-                                style: TextStyle(fontSize: 13, fontWeight: FontWeight.bold, color: Colors.black),
-                              ),
-                              validator: (value) {
-                                if (value == null || value.length == 0) {
-                                  return 'select_one_or_more'.tr();
-                                }
-                                return null;
-                              },
-                              dataSource: busynessList,
-                              textField: 'name',
-                              valueField: 'id',
-                              okButtonLabel: 'ok'.tr(),
-                              cancelButtonLabel: 'cancel'.tr(),
-                              // required: true,
-                              hintWidget: Text('select_one_or_more'.tr()),
-                              initialValue: _businesses,
-                              onSaved: (value) {
-                                if (value == null) return;
-                                setState(() {
-                                  _businesses = value;
-                                });
-                              },
-                            ),
-//                          SizedBox(height: 20),
-                            MultiSelectFormField(
-                              fillColor: kColorWhite,
-                              // autovalidate: AutovalidateMode.disabled,
-                              title: Text(
-                                'schedules'.tr(),
-                                style: TextStyle(fontSize: 13, fontWeight: FontWeight.bold, color: Colors.black),
-                              ),
-                              validator: (value) {
-                                if (value == null || value.length == 0) {
-                                  return 'select_one_or_more'.tr();
-                                }
-                                return null;
-                              },
-                              dataSource: scheduleList,
-                              textField: 'name',
-                              valueField: 'id',
-                              okButtonLabel: 'ok'.tr(),
-                              cancelButtonLabel: 'cancel'.tr(),
-                              // required: true,
-                              hintWidget: Text('select_one_or_more'.tr()),
-                              initialValue: _schedules,
-                              onSaved: (value) {
-                                if (value == null) return;
-                                setState(() {
-                                  _schedules = value;
-                                });
-                              },
-                            ),
-                            SizedBox(height: 30),
-
-                            SizedBox(
-                              width: double.maxFinite,
-                              child: Row(
-                                mainAxisAlignment: MainAxisAlignment.spaceAround,
-                                children: [
-                                  CustomButton(
-                                    borderSide: BorderSide(
-                                        color: kColorPrimary,
-                                        width: 2.0
-                                    ),
-                                    color: Colors.transparent,
-                                    textColor: kColorPrimary,
-                                    onPressed: () {
-
-
-                                      setState(() {
-                                        _typeAheadController.text = '';
-                                        _suggestions = [];
-                                        _regionId = null;
-                                        _regions = [];
-                                        _districts = [];
-                                        _jobTypes = [];
-                                        _vacancyTypes = [];
-                                        _businesses = [];
-                                        _schedules = [];
-                                      });
-
-                                      if (user != null) {
-                                        user.saveFilters(_regions, _districts, _jobTypes, _vacancyTypes, _businesses, _schedules);
-                                      }
-
-                                      StoreProvider.of<AppState>(context).dispatch(setFilter(
-                                          schedule_ids: _schedules,
-                                          busyness_ids: _businesses,
-                                          region_ids: [_regionId],
-                                          district_ids: _districts,
-                                          vacancy_type_ids: _vacancyTypes,
-                                          job_type_ids: _jobTypes)
-                                      );
-
-                                      StoreProvider.of<AppState>(context).dispatch(getVacancies());
-
-                                      Navigator.of(context).pop();
-                                      _nextTab(0);
-                                    },
-                                    text: 'reset'.tr(),
-                                  ),
-                                  CustomButton(
-                                    color: kColorPrimary,
-                                    textColor: Colors.white,
-                                    onPressed: () async {
-                                      if (user != null) {
-                                        user.saveFilters(_regions, _districts, _jobTypes, _vacancyTypes, _businesses, _schedules);
-                                      }
-                                      StoreProvider.of<AppState>(context).dispatch(setFilter(
-                                          schedule_ids: _schedules,
-                                          busyness_ids: _businesses,
-                                          // region_ids: [_regionId],
-                                          region_ids: _regions,
-                                          district_ids: _districts,
-                                          vacancy_type_ids: _vacancyTypes,
-                                          job_type_ids: _jobTypes)
-                                      );
-                                      StoreProvider.of<AppState>(context).dispatch(getVacancies());
-                                      Navigator.of(context).pop();
-                                      (await _controller.future).move(
-                                        point: _point,
-                                        animation: const MapAnimation(smooth: true, duration: 1),
-                                        zoom: 8,
-                                      );
-                                      _nextTab(0);
-                                    },
-                                    text: 'save'.tr(),
-                                  ),
-                                ],
-                              ),
-                            ),
-                          ],
-                        ),
-                      ),
-                    ],
-                  ),
-                ),
-              ),
-            );
-          });
-        });
-  }
-
   void _nextTab(int tabIndex, {isProfile = false}) {
     // Update tab index
     setState(() => _tabCurrentIndex = tabIndex);
@@ -793,13 +431,16 @@ class _HomeScreenState extends State<HomeScreen> {
                         onPressed: () {
                           if(stepCount - 1 == currentStepIndex){
                             stepWidgetParams.onFinish();
-                            DiscoverTab().intro.start(context);
+                            // DiscoverTab().intro.start(context);
+                            Future.delayed(Duration.zero, () {
+                              intro2.start(context);
+                            });
                           } else {
                             stepWidgetParams.onNext();
                           }
                         },
                         child: Text(
-                          currentStepIndex < stepCount - 1 ? 'Дальше' : 'Завершить',
+                          'Дальше',
                           style: TextStyle(
                             fontSize: 16,
                             fontWeight: FontWeight.bold,
@@ -877,6 +518,7 @@ class _HomeScreenState extends State<HomeScreen> {
       'Настрой поиск под себя',
       'Выбери нужный период актуальности вакансии',
       'Выбери способ отображения предложений',
+      'Время свайпить подработки',
     ];
 
     int currentStepIndex = stepWidgetParams.currentStepIndex;
@@ -897,11 +539,13 @@ class _HomeScreenState extends State<HomeScreen> {
           children: [
             Positioned(
               child: Container(
-                width: position['width'],
+                width: currentStepIndex < stepCount - 1 ? position['width'] : double.maxFinite,
+                margin: currentStepIndex < stepCount - 1 ? EdgeInsets.zero : EdgeInsets.only(bottom: 0),
                 child: Column(
                   mainAxisSize: MainAxisSize.min,
                   crossAxisAlignment: position['crossAxisAlignment'],
                   children: [
+                    currentStepIndex < stepCount - 1 ?
                     Text(
                       currentStepIndex > texts.length - 1
                           ? ''
@@ -912,10 +556,15 @@ class _HomeScreenState extends State<HomeScreen> {
                         fontWeight: FontWeight.bold,
                         color: Colors.white,
                       ),
+                    ) :
+                    Image(
+                      image: AssetImage('assets/images/intro_1.png'),
+                      fit: BoxFit.contain,
                     ),
                     SizedBox(
                       height: 12,
                     ),
+                    currentStepIndex < stepCount - 1 ?
                     SizedBox(
                       height: 40,
                       child: OutlineButton(
@@ -942,7 +591,8 @@ class _HomeScreenState extends State<HomeScreen> {
                           ),
                         ),
                       ),
-                    ),
+                    ) :
+                    Container(),
                   ],
                 ),
               ),
@@ -950,6 +600,53 @@ class _HomeScreenState extends State<HomeScreen> {
               top: position['top'],
               bottom: position['bottom'],
               right: position['right'],
+            ),
+            currentStepIndex < stepCount - 1 ? Container() :
+            Positioned(
+              bottom: position['bottom']-200,
+              left: 0,
+              right: 0,
+              child: Center(
+                child: Image(
+                  image: AssetImage('assets/images/intro_3.png'),
+                  fit: BoxFit.cover,
+                ),
+              ),
+            ),
+            currentStepIndex < stepCount - 1 ? Container() :
+            Positioned(
+              bottom: 10,
+              left: 0,
+              right: 0,
+              child: Center(
+                child: SizedBox(
+                  height: 40,
+                  child: OutlineButton(
+                    padding: EdgeInsets.symmetric(
+                      vertical: 0,
+                      horizontal: 30,
+                    ),
+                    shape: RoundedRectangleBorder(
+                      borderRadius: BorderRadius.all(
+                        Radius.circular(64),
+                      ),
+                    ),
+                    highlightedBorderColor: Colors.white,
+                    borderSide: BorderSide(color: Colors.white),
+                    textColor: Colors.white,
+                    onPressed: stepCount - 1 == currentStepIndex
+                        ? stepWidgetParams.onFinish
+                        : stepWidgetParams.onNext,
+                    child: Text(
+                      currentStepIndex < stepCount - 1 ? 'Дальше' : 'Завершить',
+                      style: TextStyle(
+                        fontSize: 16,
+                        fontWeight: FontWeight.bold,
+                      ),
+                    ),
+                  ),
+                ),
+              ),
             ),
           ],
         ),
@@ -966,10 +663,45 @@ class _HomeScreenState extends State<HomeScreen> {
       widgetBuilder: customThemeWidgetBuilder,
     );
 
+    intro.setStepConfig(
+      1,
+      padding: EdgeInsets.fromLTRB(
+        20, 5, 20, 25
+      ),
+    );
+
+    intro.setStepConfig(
+      2,
+      padding: EdgeInsets.fromLTRB(
+          25, 5, 25, 25
+      ),
+    );
+
+    intro.setStepConfig(
+      3,
+      padding: EdgeInsets.fromLTRB(
+          5, 2, 5, 22
+      ),
+    );
+
+    intro.setStepConfig(
+      4,
+      padding: EdgeInsets.fromLTRB(
+          5, 2, 5, 22
+      ),
+    );
+
     intro2 = Intro(
       padding: EdgeInsets.zero,
-      stepCount: 3,
+      stepCount: 4,
       widgetBuilder: customThemeWidgetBuilder2,
+    );
+
+    intro2.setStepsConfig(
+      [1,2],
+      padding: EdgeInsets.fromLTRB(
+          0, 5, 0, 5
+      ),
     );
 
     if (Prefs.getString(Prefs.USER_TYPE) == 'COMPANY') {
@@ -1012,7 +744,9 @@ class _HomeScreenState extends State<HomeScreen> {
     return StoreConnector<AppState, VacanciesScreenProps>(
         distinct: true,
         converter: (store) => mapStateToProps(store),
-        onInitialBuild: (props) => this.handleInitialBuild(props),
+        onInitialBuild: (props) {
+          this.handleInitialBuild(props);
+        },
         builder: (context, props) {
 
           return Scaffold(
@@ -1194,7 +928,7 @@ class _HomeScreenState extends State<HomeScreen> {
                     controller: _pageController,
                     physics: NeverScrollableScrollPhysics(),
                     children: [
-                      DiscoverTab(intro: intro2,),
+                      DiscoverTab(intro: intro2),
                       MatchesTab(),
                       VacanciesTab(),
                       ConversationsTab(),

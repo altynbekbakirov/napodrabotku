@@ -228,7 +228,7 @@ class _VacancyViewState extends State<VacancyView> {
                                   ),
                                   children: <TextSpan>[
                                     TextSpan(
-                                        text: widget.vacancy.region != null ? widget.vacancy.region : '',
+                                        text: widget.vacancy.district != null ? widget.vacancy.district : '',
                                         style: TextStyle(
                                             fontFamily: 'Manrope',
                                             fontSize: 12,

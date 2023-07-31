@@ -154,14 +154,14 @@ class Dialogs {
               ),
               onPressed: () {
                 Vacancy.activateDeactiveVacancy(vacancy_id: vacancy.id, active: active).then((value) {
-//                  StoreProvider.of<AppState>(context).dispatch(getCompanyVacancies());
-                  StoreProvider.of<AppState>(context).dispatch(getNumberOfActiveVacancies());
-                  StoreProvider.of<AppState>(context).dispatch(getNumberOfInactiveVacancies());
                   if (active){
                     StoreProvider.of<AppState>(context).state.vacancy.inactive_list.data.remove(vacancy);
                   } else {
                     StoreProvider.of<AppState>(context).state.vacancy.active_list.data.remove(vacancy);
                   }
+                  StoreProvider.of<AppState>(context).dispatch(getCompanyVacancies());
+                  StoreProvider.of<AppState>(context).dispatch(getNumberOfActiveVacancies());
+                  StoreProvider.of<AppState>(context).dispatch(getNumberOfInactiveVacancies());
                   Navigator.of(ctx).pop();
                 });
               },

@@ -8,6 +8,8 @@ import 'package:ishtapp/datas/vacancy.dart';
 import 'package:ishtapp/utils/constants.dart';
 import 'package:ishtapp/widgets/profile_card.dart';
 import 'package:ishtapp/widgets/users_grid.dart';
+import 'package:ishtapp/widgets/vacancy_card.dart';
+import 'package:ishtapp/widgets/vacancy_view.dart';
 import 'package:redux/redux.dart';
 
 import 'package:flutter_redux/flutter_redux.dart';
@@ -48,11 +50,24 @@ class ProfileLikesScreen extends StatelessWidget {
                         child: UsersGrid(
                             children: StoreProvider.of<AppState>(context).state.vacancy.active_list.data.map((vacancy) {
                               return GestureDetector(
-                                child: ProfileCard(
+                                child: VacancyCard(
                                   vacancy: vacancy,
                                   page: 'company',
                                 ),
-                                onTap: () {},
+                                onTap: () {
+                                  Navigator.of(context).push(MaterialPageRoute(builder: (BuildContext context) {
+                                    return Scaffold(
+                                      backgroundColor: kColorPrimary,
+                                      appBar: AppBar(
+                                        title: Text("vacancy_view".tr()),
+                                      ),
+                                      body: VacancyView(
+                                        page: "company_view",
+                                        vacancy: vacancy,
+                                      ),
+                                    );
+                                  }));
+                                },
                               );
                             }).toList()
                         ),

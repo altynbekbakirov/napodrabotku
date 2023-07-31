@@ -142,7 +142,7 @@ class _UserViewState extends State<UserView> {
                                   ),
                                   children: <TextSpan>[
                                     TextSpan(
-                                        text: widget.user.region != null ? widget.user.region : '',
+                                        text: widget.user.district != null ? widget.user.age != null ? widget.user.district + ', ' + widget.user.age + ' ' + 'years'.tr() : widget.user.district : '',
                                         style: TextStyle(
                                             fontFamily: 'Manrope',
                                             fontSize: 12,
