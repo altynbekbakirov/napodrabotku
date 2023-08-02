@@ -41,7 +41,7 @@ class _SignInScreenState extends State<SignInScreen> {
 
   // SMSC.RU credentials
   String smscRuLogin = 'pobed-a';
-  String smscRuPassword = 'podrab-180523';
+  String smscRuPassword = 'qwerty';
   String smscRuMessage = '';
 
   void _showDialog(context, String message) {
@@ -170,6 +170,7 @@ class _SignInScreenState extends State<SignInScreen> {
                       onInputValidated: (bool value) {
                         _isPhoneCorrect = value;
                       },
+                      autoFocus: true,
                       maxLength: initialCountry == 'KG' ? 11 : 13,
                       selectorConfig: const SelectorConfig(selectorType: PhoneInputSelectorType.BOTTOM_SHEET, setSelectorButtonAsPrefixIcon: true, useEmoji: true),
                       ignoreBlank: true,
@@ -207,6 +208,7 @@ class _SignInScreenState extends State<SignInScreen> {
                   Container(
                     margin: EdgeInsets.only(bottom: 20),
                     child: TextFormField(
+                      autofocus: true,
                       controller: _usernameController,
                       keyboardType: TextInputType.emailAddress,
                       textInputAction: TextInputAction.next,

@@ -50,8 +50,16 @@ class _ProfileTabState extends State<ProfileTab> {
   List _schedules = [];
 
   getLists() async {
-    vacancyTypeList = await Vacancy.getLists('vacancy_type', null);
-    scheduleList = await Vacancy.getLists('schedule', null);
+    await Vacancy.getLists('vacancy_type', null).then((value) {
+      setState(() {
+        vacancyTypeList = value;
+      });
+    });
+    await Vacancy.getLists('schedule', null).then((value) {
+      setState(() {
+        scheduleList = value;
+      });
+    });
   }
 
   // getSchedules(id) async {
@@ -179,9 +187,13 @@ class _ProfileTabState extends State<ProfileTab> {
           );
         } else {
 
-          if(Prefs.getString(Prefs.USER_TYPE) == "USER") {
-            _vacancyTypes = props.user.data.vacancy_types;
-            _schedules = props.user.data.schedules;
+          if(Prefs.getString(Prefs.USER_TYPE) == "USER" && StoreProvider.of<AppState>(context).state.user.user.data != null) {
+            if(StoreProvider.of<AppState>(context).state.user.user.data.vacancy_types != null){
+              _vacancyTypes = StoreProvider.of<AppState>(context).state.user.user.data.vacancy_types;
+            }
+            if(StoreProvider.of<AppState>(context).state.user.user.data.schedules != null){
+              _schedules = StoreProvider.of<AppState>(context).state.user.user.data.schedules;
+            }
           }
 
           body = SingleChildScrollView(
@@ -335,8 +347,9 @@ class _ProfileTabState extends State<ProfileTab> {
                                 ),
                               ),
                             ),
-                            MultiSelectFormField(
+                            vacancyTypeList.length > 0 ? MultiSelectFormField(
                               fillColor: kColorWhite,
+                              autovalidate: true,
                               title: Text(
                                 'vacancy_types'.tr(),
                                 style: TextStyle(fontSize: 13, fontWeight: FontWeight.bold, color: Colors.black),
@@ -345,27 +358,33 @@ class _ProfileTabState extends State<ProfileTab> {
                                 if (value == null || value.length == 0) {
                                   return 'select_one_or_more'.tr();
                                 }
+                                if(value.length > 3) {
+                                  return 'max_allowed_3_options'.tr();
+                                }
                                 return null;
+                              },
+                              change: (value) {
+                                print(value);
                               },
                               dataSource: vacancyTypeList,
                               textField: 'name',
                               valueField: 'id',
                               okButtonLabel: 'ok'.tr(),
                               cancelButtonLabel: 'cancel'.tr(),
-                              // required: true,
                               hintWidget: Text('select_one_or_more'.tr()),
                               initialValue: _vacancyTypes,
                               onSaved: (value) async {
-                                if (value == null) return;
+                                if(value == null) return null;
+                                if(value.length > 3) return null;
                                 setState(() {
                                   _vacancyTypes = value;
                                 });
-
                                 await Users.changeVacancyTypes(vacancyTypes: _vacancyTypes);
                               },
-                            ),
+                            ) : Container(),
                             SizedBox(height: 10),
-                            MultiSelectFormField(
+                            scheduleList.length > 0 ? MultiSelectFormField(
+                              autovalidate: true,
                               fillColor: kColorWhite,
                               title: Text(
                                 'schedules'.tr(),
@@ -375,6 +394,9 @@ class _ProfileTabState extends State<ProfileTab> {
                                 if (value == null || value.length == 0) {
                                   return 'select_one_or_more'.tr();
                                 }
+                                if(value.length > 3) {
+                                  return 'max_allowed_3_options'.tr();
+                                }
                                 return null;
                               },
                               dataSource: scheduleList,
@@ -382,18 +404,17 @@ class _ProfileTabState extends State<ProfileTab> {
                               valueField: 'id',
                               okButtonLabel: 'ok'.tr(),
                               cancelButtonLabel: 'cancel'.tr(),
-                              // required: true,
                               hintWidget: Text('select_one_or_more'.tr()),
                               initialValue: _schedules,
                               onSaved: (value) async {
-                                if (value == null) return;
+                                if(value == null) return null;
+                                if(value.length > 3) return null;
                                 setState(() {
                                   _schedules = value;
                                 });
-
                                 await Users.changeSchedule(schedules: _schedules);
                               },
-                            ),
+                            ) : Container(),
                           ],
                         ),
                       ) : Container(),

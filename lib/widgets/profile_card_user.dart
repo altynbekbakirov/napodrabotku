@@ -346,7 +346,7 @@ class _ProfileCardUserState extends State<ProfileCardUser> {
                     Flexible(
                       flex: 2,
                       child: Container(
-                        color: widget.user.response_type == 'INVITED' ? kColorYellow : kColorGray,
+                        color: widget.user.response_type == 'SUBMITTED' ? kColorYellow : kColorGray,
                         height: double.infinity,
                         padding: const EdgeInsets.symmetric(vertical: 10, horizontal: 20),
                         child: Flex(
@@ -400,6 +400,7 @@ class _ProfileCardUserState extends State<ProfileCardUser> {
                                   borderRadius: BorderRadius.circular(4),
                                   child: widget.user.image != null ? Image.network(
                                     SERVER_IP + widget.user.image + "?token=${Guid.newGuid}",
+                                    key: ValueKey(SERVER_IP + widget.user.image + "?token=${Guid.newGuid}"),
                                     headers: {
                                       "Authorization":
                                       Prefs.getString(Prefs.TOKEN)
@@ -423,52 +424,18 @@ class _ProfileCardUserState extends State<ProfileCardUser> {
                     Expanded(
                       flex: 3,
                       child: Container(
-                        padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 15),
-                        child: Flex(
-                          direction: Axis.vertical,
-                          mainAxisAlignment: MainAxisAlignment.start,
-                          crossAxisAlignment: CrossAxisAlignment.start,
+                        padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 10),
+                        child: Wrap(
+                          direction: Axis.horizontal,
+                          // mainAxisAlignment: MainAxisAlignment.start,
+                          // crossAxisAlignment: CrossAxisAlignment.start,
+                          clipBehavior: Clip.antiAlias,
                           children: [
-                            // Интересуемые вакансии
-                            widget.user.vacancy_type != 'null' ? Container(
-                              padding: EdgeInsets.symmetric(horizontal: 10, vertical: 5),
-                              decoration: BoxDecoration(
-                                  color: kColorGray,
-                                  borderRadius: BorderRadius.circular(4)
-                              ),
-                              child: Text(
-                                widget.user.vacancy_type != 'null' ? widget.user.vacancy_type.toString() : '',
-                                style: TextStyle(
-                                  fontSize: 12,
-                                  fontWeight: FontWeight.w700,
-                                  color: kColorDark,
-                                ),
-                              ),
-                            ) : Container(),
-
-                            // Вид занятости
-                            widget.user.business != 'null' ?  Container(
-                              padding: EdgeInsets.symmetric(horizontal: 10, vertical: 5),
-                              margin: EdgeInsets.only(top: 5),
-                              decoration: BoxDecoration(
-                                  color: kColorGray,
-                                  borderRadius: BorderRadius.circular(4)
-                              ),
-                              child: Text(
-                                widget.user.business != 'null' ? widget.user.business.toString() : '',
-                                style: TextStyle(
-                                    fontSize: 12,
-                                    fontWeight: FontWeight.bold,
-                                    fontFamily: 'Manrope',
-                                    color: kColorDark
-                                ),
-                              ),
-                            ) : Container(),
-
                             // Статус
+
                             Container(
                               padding: EdgeInsets.symmetric(horizontal: 10, vertical: 5),
-                              margin: EdgeInsets.only(top: 5),
+                              margin: EdgeInsets.only(right: 5, top: 5),
                               decoration: BoxDecoration(
                                   color: widget.user.status == 0 ? kColorBlue :
                                   widget.user.status == 1  ? kColorGreen : kColorGray,
@@ -484,6 +451,46 @@ class _ProfileCardUserState extends State<ProfileCardUser> {
                                 ),
                               ),
                             ),
+
+
+                            // Интересуемые вакансии
+
+                            for ( var vacancy_type in widget.user.vacancy_types) Container(
+                              padding: EdgeInsets.symmetric(horizontal: 10, vertical: 5),
+                              margin: EdgeInsets.only(right: 5, top: 5),
+                              decoration: BoxDecoration(
+                                  color: kColorGray,
+                                  borderRadius: BorderRadius.circular(4)
+                              ),
+                              child: Text(
+                                vacancy_type.toString(),
+                                style: TextStyle(
+                                  fontSize: 12,
+                                  fontWeight: FontWeight.w700,
+                                  color: kColorDark,
+                                ),
+                              ),
+                            ),
+
+                            // Графики работы
+
+                            for ( var schedule in widget.user.schedules) Container(
+                              padding: EdgeInsets.symmetric(horizontal: 10, vertical: 5),
+                              margin: EdgeInsets.only(right: 5, top: 5),
+                              decoration: BoxDecoration(
+                                  color: kColorGray,
+                                  borderRadius: BorderRadius.circular(4)
+                              ),
+                              child: Text(
+                                schedule.toString(),
+                                style: TextStyle(
+                                  fontSize: 12,
+                                  fontWeight: FontWeight.w700,
+                                  color: kColorDark,
+                                ),
+                              ),
+                            ),
+
                           ],
                         ),
                       ),

@@ -71,6 +71,7 @@ class _DiscoverTabState extends State<DiscoverTab> with SingleTickerProviderStat
   List<dynamic> currencyList = [];
   List<dynamic> genderList = [];
   List<dynamic> countryList = [];
+  List<dynamic> metroList = [];
 
   List<String> regions = [];
   List<String> districts = [];
@@ -83,6 +84,7 @@ class _DiscoverTabState extends State<DiscoverTab> with SingleTickerProviderStat
   List _districts = [];
   List _genders = [];
   List _countries = [];
+  List _metros = [];
 
   int _regionId;
   int _salaryPeriodId;
@@ -332,6 +334,36 @@ class _DiscoverTabState extends State<DiscoverTab> with SingleTickerProviderStat
                                   ),
                                 ],
                               ),
+                            ),
+                            MultiSelectFormField(
+                              fillColor: kColorWhite,
+                              title: Text(
+                                'metro'.tr(),
+                                style: TextStyle(fontSize: 13, fontWeight: FontWeight.bold, color: Colors.black),
+                              ),
+                              chipLabelStyle: TextStyle(fontSize: 14, fontWeight: FontWeight.w400, color: kColorPrimary),
+                              chipBackGroundColor: kColorPrimary.withOpacity(0.25),
+                              dialogTextStyle: TextStyle(fontSize: 14, fontWeight: FontWeight.w400, color: Colors.black),
+                              validator: (value) {
+                                if (value == null || value.length == 0) {
+                                  return 'select_one_or_more'.tr();
+                                }
+                                return null;
+                              },
+                              dataSource: metroList,
+                              textField: 'name',
+                              valueField: 'id',
+                              okButtonLabel: 'ok'.tr(),
+                              cancelButtonLabel: 'cancel'.tr(),
+                              // required: true,
+                              hintWidget: Text('select_one_or_more'.tr()),
+                              initialValue: _metros,
+                              onSaved: (value) {
+                                if (value == null) return;
+                                setState(() {
+                                  _metros = value;
+                                });
+                              },
                             ),
                             MultiSelectFormField(
                               fillColor: kColorWhite,
@@ -1361,7 +1393,6 @@ class _DiscoverTabState extends State<DiscoverTab> with SingleTickerProviderStat
                     Container(
                       child: data != null && data.isNotEmpty ?
                       Container(
-                        key: widget.intro.keys[3],
                         // color: kColorProductLab,
                         padding: EdgeInsets.only(bottom: 10),
                         child: Center(
@@ -1381,6 +1412,7 @@ class _DiscoverTabState extends State<DiscoverTab> with SingleTickerProviderStat
                                 _index = index;
                                 return data != null && data.isNotEmpty ?
                                 Container(
+                                  key: index > 0 ? ValueKey('key') : widget.intro.keys[3],
                                   child: Stack(
                                     children: <Widget>[
                                       GestureDetector(

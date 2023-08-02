@@ -1,4 +1,3 @@
-import 'package:cached_network_image/cached_network_image.dart';
 import 'package:flutter/material.dart';
 import 'package:ishtapp/datas/RSAA.dart';
 import 'package:ishtapp/datas/user.dart';
@@ -134,21 +133,17 @@ class _ProfileCardState extends State<ProfileCard> {
                                 child: ClipRRect(
                                   borderRadius: BorderRadius.circular(4),
                                   child: widget.vacancy.company_logo != null
-                                      ? CachedNetworkImage(
-                                    imageUrl: SERVER_IP + widget.vacancy.company_logo + "?token=${Guid.newGuid}",
-                                    placeholder: (context, url) => Container(
-                                      padding: EdgeInsets.all(20),
-                                      child: CircularProgressIndicator(),
-                                    ),
-                                    errorWidget: (context, url, error) => Icon(Icons.error),
-                                    httpHeaders: {
+                                      ? Image.network(
+                                    SERVER_IP + widget.vacancy.company_logo + "?token=${Guid.newGuid}",
+                                    key: ValueKey(SERVER_IP + widget.vacancy.company_logo + "?token=${Guid.newGuid}"),
+                                    headers: {
                                       "Authorization":
                                       Prefs.getString(Prefs.TOKEN)
                                     },
+                                    fit: BoxFit.cover,
                                     width: 60,
                                     height: 60,
-                                  )
-                                      : Image.asset(
+                                  ) : Image.asset(
                                     'assets/images/default-user.jpg',
                                     fit: BoxFit.cover,
                                     width: 60,

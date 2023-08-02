@@ -1566,9 +1566,8 @@ class _SchoolTabDetailsState extends State<SchoolTabDetails> {
                       fit: StackFit.expand,
                       children: <Widget>[
                         Positioned(
-                          child: CachedNetworkImage(
-                            imageUrl:
-                                "https://img.youtube.com/vi/${videosList[index].youtubeId}/0.jpg",
+                          child: Image.network(
+                            "https://img.youtube.com/vi/${videosList[index].youtubeId}/0.jpg",
                             fit: BoxFit.cover,
                           ),
                         ),

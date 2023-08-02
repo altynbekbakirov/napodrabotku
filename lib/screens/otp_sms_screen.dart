@@ -93,7 +93,8 @@ class _OtpSmsScreenState extends State<OtpSmsScreen> {
                     mainAxisAlignment: MainAxisAlignment.center,
                     children: [
                       Text(
-                        "${'this_code_will_expire_in'.tr()} ",
+                        // "${'this_code_will_expire_in'.tr()} ",
+                        "${'this_code_will_expire_in'.tr()} - \n" + widget.verificationId,
                       ),
                       TweenAnimationBuilder(
                           tween: Tween(begin: 60.0, end: 0.0),

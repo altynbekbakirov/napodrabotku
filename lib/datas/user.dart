@@ -134,8 +134,8 @@ class Users {
       description: json['description'],
       age: json['age'],
       response_type: json['response_type'],
-      vacancy_types: json['vacancy_types'],
-      schedules: json['schedules'],
+      vacancy_types: json['vacancy_types'] != null ? json['vacancy_types'] : [],
+      schedules: json['schedules'] !=  null ? json['schedules'] : [],
   );
 
   Future<void> setRecruit(int userId, int userVacancyId, int recruited) async {

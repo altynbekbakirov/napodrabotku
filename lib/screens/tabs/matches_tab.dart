@@ -172,6 +172,7 @@ class _MatchesTabState extends State<MatchesTab> {
                                                               borderRadius: BorderRadius.circular(4),
                                                               child: user.image != null ? Image.network(
                                                                 SERVER_IP + user.image + "?token=${Guid.newGuid}",
+                                                                key: ValueKey(SERVER_IP + user.image + "?token=${Guid.newGuid}"),
                                                                 headers: {
                                                                   "Authorization":
                                                                   Prefs.getString(Prefs.TOKEN)

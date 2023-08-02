@@ -557,9 +557,13 @@ class _HomeScreenState extends State<HomeScreen> {
                         color: Colors.white,
                       ),
                     ) :
-                    Image(
-                      image: AssetImage('assets/images/intro_1.png'),
-                      fit: BoxFit.contain,
+                    Container(
+                      padding: EdgeInsets.only(bottom: 60),
+                      child: Image(
+                        image: AssetImage('assets/images/intro_1.png'),
+                        fit: BoxFit.cover,
+                        width: MediaQuery.of(context).size.width - 40,
+                      ),
                     ),
                     SizedBox(
                       height: 12,
@@ -603,7 +607,7 @@ class _HomeScreenState extends State<HomeScreen> {
             ),
             currentStepIndex < stepCount - 1 ? Container() :
             Positioned(
-              bottom: position['bottom']-200,
+              bottom: position['bottom']-165,
               left: 0,
               right: 0,
               child: Center(
@@ -724,14 +728,14 @@ class _HomeScreenState extends State<HomeScreen> {
 
   }
 
-  @override
-  void didChangeDependencies() {
-    Timer.periodic(Duration(seconds:300), (Timer t) {
-      StoreProvider.of<AppState>(context).dispatch(getChatList());
-      StoreProvider.of<AppState>(context).dispatch(getNumberOfUnreadMessages());
-    });
-    super.didChangeDependencies();
-  }
+  // @override
+  // void didChangeDependencies() {
+  //   Timer.periodic(Duration(seconds:300), (Timer t) {
+  //     StoreProvider.of<AppState>(context).dispatch(getChatList());
+  //     StoreProvider.of<AppState>(context).dispatch(getNumberOfUnreadMessages());
+  //   });
+  //   super.didChangeDependencies();
+  // }
 
   void handleInitialBuild(VacanciesScreenProps props) {
     props.getLikedNumOfVacancies();
