@@ -78,7 +78,6 @@ class _ProfileCardMapState extends State<ProfileCardMap> {
 
   @override
   Widget build(BuildContext context) {
-    bool isProductLabVacancy = widget.vacancy.isProductLabVacancy == null ? false : widget.vacancy.isProductLabVacancy;
     return Container(
       child: Padding(
         padding: const EdgeInsets.all(0),
@@ -158,6 +157,7 @@ class _ProfileCardMapState extends State<ProfileCardMap> {
                                   child: widget.vacancy.company_logo != null
                                       ? Image.network(
                                     SERVER_IP + widget.vacancy.company_logo + "?token=${Guid.newGuid}",
+                                    key: ValueKey(SERVER_IP + widget.vacancy.company_logo + "?token=${Guid.newGuid}"),
                                     headers: {"Authorization": Prefs.getString(Prefs.TOKEN)},
                                     width: 60,
                                     height: 60,
@@ -211,26 +211,6 @@ class _ProfileCardMapState extends State<ProfileCardMap> {
                                       ),
                                     ) : Container(),
 
-                                    isProductLabVacancy ?
-                                    Container(
-                                      padding: EdgeInsets.symmetric(horizontal: 10, vertical: 5),
-                                      margin: EdgeInsets.only(top: 5),
-                                      decoration: BoxDecoration(
-                                          color: kColorGray,
-                                          borderRadius: BorderRadius.circular(4)
-                                      ),
-                                      child: Text(
-                                        widget.vacancy.opportunityDuration != null
-                                            ? widget.vacancy.opportunityDuration.toString()
-                                            : "",
-                                        style: TextStyle(
-                                            fontSize: 12,
-                                            fontWeight: FontWeight.bold,
-                                            fontFamily: 'Manrope',
-                                            color: kColorDark
-                                        ),
-                                      ),
-                                    ) :
                                     Container(
                                       padding: EdgeInsets.symmetric(horizontal: 10, vertical: 5),
                                       margin: EdgeInsets.only(top: 5),

@@ -31,19 +31,9 @@ class Vacancy {
   String payPeriod;
   String type;
   int company;
-  int is_disability_person_vacancy;
-  String opportunity;
-  String opportunityType;
-  String internshipLanguage;
-  String opportunityDuration;
-  String ageFrom;
-  String ageTo;
-  String typeOfRecommendedLetter;
-  bool isProductLabVacancy;
-  String vacancyLink;
-  String deadline;
   String status;
   String statusText;
+  String responseType;
 
   Vacancy({
     this.id,
@@ -71,19 +61,9 @@ class Vacancy {
     this.payPeriod,
     this.type,
     this.company,
-    this.is_disability_person_vacancy,
-    this.opportunity,
-    this.opportunityType,
-    this.internshipLanguage,
-    this.opportunityDuration,
-    this.ageFrom,
-    this.ageTo,
-    this.typeOfRecommendedLetter,
-    this.isProductLabVacancy,
-    this.vacancyLink,
-    this.deadline,
     this.status,
     this.statusText,
+    this.responseType,
   });
 
   static void deactivateVacancyWithOverDeadline() async {
@@ -115,6 +95,24 @@ class Vacancy {
       final response = await http.get(url, headers: headers);
 
       print(model + ' - ' + utf8.decode(response.bodyBytes));
+
+      return json.decode(utf8.decode(response.bodyBytes));
+    } catch (error) {
+      throw error;
+    }
+  }
+
+  static Future<List<dynamic>> getMetros(List districts) async {
+
+    String url = API_IP + 'metros?lang=' + Prefs.getString(Prefs.LANGUAGE);
+
+    try {
+      Map<String, String> headers = {"Content-type": "application/json"};
+      final response = await http.post(url, headers: headers, body: json.encode({
+        'districts': districts,
+      }));
+
+      print('metros - ' + utf8.decode(response.bodyBytes));
 
       return json.decode(utf8.decode(response.bodyBytes));
     } catch (error) {
@@ -187,7 +185,6 @@ class Vacancy {
         salary: json['salary'],
         salary_from: json['salary_from'],
         salary_to: json['salary_to'],
-        is_disability_person_vacancy: json['is_disability_person_vacancy'],
         company: json['company'],
         company_name: json['company_name'],
         company_logo: json['company_logo'],
@@ -205,18 +202,9 @@ class Vacancy {
         period: json['period'],
         experience: json['experience'],
         payPeriod: json['pay_period'],
-        opportunity: json['opportunity'],
-        opportunityType: json['opportunity_type'],
-        internshipLanguage: json['internship_language'],
-        opportunityDuration: json['opportunity_duration'],
-        ageFrom: json['age_from'],
-        ageTo: json['age_to'],
-        typeOfRecommendedLetter: json['recommendation_letter_type'],
-        isProductLabVacancy: json['is_product_lab_vacancy'] == 1,
-        vacancyLink: json['vacancy_link'],
-        deadline: json['deadline'],
         status: json['status'],
-        statusText: json['status_text']
+        statusText: json['status_text'],
+        responseType: json['response_type']
       );
 
   static Map<String, dynamic> vacancyToJsonMap(Vacancy vacancy) => {
@@ -226,7 +214,6 @@ class Vacancy {
         'salary': vacancy.salary,
         'salary_from': vacancy.salary_from,
         'salary_to': vacancy.salary_to,
-        'is_disability_person_vacancy': vacancy.is_disability_person_vacancy,
         'description': vacancy.description,
         'address': vacancy.address,
         'region': vacancy.region,
@@ -243,18 +230,9 @@ class Vacancy {
         'experience': vacancy.experience,
         'pay_period': vacancy.payPeriod,
         'type': vacancy.type,
-        'opportunity': vacancy.opportunity,
-        'opportunity_type': vacancy.opportunityType,
-        'internship_language': vacancy.internshipLanguage,
-        'opportunity_duration': vacancy.opportunityDuration,
-        'age_from': vacancy.ageFrom,
-        'age_to': vacancy.ageTo,
-        'type_of_recommended_letter': vacancy.typeOfRecommendedLetter,
-        'is_product_lab_vacancy': vacancy.isProductLabVacancy,
-        'vacancy_link': vacancy.vacancyLink,
-        'deadline': vacancy.deadline,
         'status': vacancy.status,
         'status_text': vacancy.statusText,
+        'response_type': vacancy.responseType,
   };
 
   static List<Vacancy> getListOfVacancies() {
@@ -501,6 +479,7 @@ class VacancyState {
   int number_of_inactive_vacancies;
   List region_ids;
   List district_ids;
+  List metros;
   List schedule_ids;
   List busyness_ids;
   List vacancy_type_ids;
@@ -527,6 +506,7 @@ class VacancyState {
       invited_list: ListVacancysState.initial(),
       job_type_ids: [],
       region_ids: [],
+      metros: [],
       schedule_ids: [],
       busyness_ids: [],
       vacancy_type_ids: [],
@@ -539,6 +519,7 @@ class VacancyState {
   VacancyState(
       {this.job_type_ids,
       this.region_ids,
+      this.metros,
       this.schedule_ids,
       this.busyness_ids,
       this.vacancy_type_ids,

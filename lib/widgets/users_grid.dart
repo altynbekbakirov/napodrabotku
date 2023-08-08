@@ -12,7 +12,7 @@ class UsersGrid extends StatelessWidget {
     return children.length>0?GridView.count(
       shrinkWrap: true,
       crossAxisCount: 1,
-      childAspectRatio: 2.15 / 2,
+      childAspectRatio: 2 / 2,
       mainAxisSpacing: 20,
       crossAxisSpacing: 4,
       children: children

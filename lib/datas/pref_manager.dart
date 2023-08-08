@@ -20,6 +20,7 @@ class Prefs {
   static const String INTRO = 'intro';
   static const String SCHEDULES = 'schedules';
   static const String VACANCY_TYPES = 'vacancy_types';
+  static const String NEW_MESSAGES_COUNT = 'new_messages_count';
 
   static SharedPreferences _prefs;
   static Map<String, dynamic> _memoryPrefs = Map<String, dynamic>();

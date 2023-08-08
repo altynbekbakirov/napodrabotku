@@ -196,7 +196,6 @@ class _EditVacancyState extends State<EditVacancy> {
 
     selectedRegion = widget.vacancy.region;
     selectedDistrict = widget.vacancy.district;
-    is_disability_person_vacancy = widget.vacancy.is_disability_person_vacancy == 1;
 
     _experienceId = widget.vacancy.experience != null ? int.parse(widget.vacancy.experience) : 0;
     _payPeriodId = widget.vacancy.payPeriod != null ? int.parse(widget.vacancy.payPeriod) : 0;

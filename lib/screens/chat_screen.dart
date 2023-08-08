@@ -2,14 +2,12 @@ import 'dart:async';
 import 'package:flutter/material.dart';
 import 'package:flutter/scheduler.dart';
 import 'package:easy_localization/easy_localization.dart';
-import 'package:flutter_boxicons/flutter_boxicons.dart';
 import 'package:redux/redux.dart';
 import 'package:flutter_redux/flutter_redux.dart';
 
 import 'package:ishtapp/datas/app_state.dart';
 import 'package:ishtapp/datas/chat.dart';
 import 'package:ishtapp/datas/RSAA.dart';
-import 'package:ishtapp/screens/profile_screen.dart';
 import 'package:ishtapp/widgets/chat_message.dart';
 import 'package:ishtapp/widgets/svg_icon.dart';
 import 'package:ishtapp/datas/pref_manager.dart';
@@ -129,6 +127,14 @@ class _ChatScreenState extends State<ChatScreen> {
 
         return Scaffold(
             appBar: AppBar(
+              leading: new IconButton(
+                  icon: new Icon(Icons.arrow_back),
+                  onPressed: (){
+                    StoreProvider.of<AppState>(context).dispatch(getChatList());
+                    StoreProvider.of<AppState>(context).dispatch(getNumberOfUnreadMessages());
+                    Navigator.pop(context,true);
+                  }
+              ),
               title: GestureDetector(
                 child: ListTile(
                   contentPadding: const EdgeInsets.only(left: 0),

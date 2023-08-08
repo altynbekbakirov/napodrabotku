@@ -55,7 +55,7 @@ class ProfileVisitsScreen extends StatelessWidget {
                             Navigator.of(context).push(MaterialPageRoute(
                                 builder: (BuildContext context) {
                               return Scaffold(
-                                backgroundColor: Prefs.getString(Prefs.ROUTE) == "PRODUCT_LAB" ? kColorProductLab : kColorPrimary,
+                                backgroundColor: kColorPrimary,
                                 appBar: AppBar(
                                   title: Text("vacancy_view".tr()),
                                 ),
@@ -74,7 +74,7 @@ class ProfileVisitsScreen extends StatelessWidget {
               }
 
               return Scaffold(
-                backgroundColor: Prefs.getString(Prefs.ROUTE) == "PRODUCT_LAB" ? kColorProductLab : kColorPrimary,
+                backgroundColor: kColorPrimary,
                 appBar: AppBar(
                   title: Text("visit".tr()),
                 ),
@@ -156,7 +156,7 @@ class ProfileVisitsScreen extends StatelessWidget {
               }
 
               return Scaffold(
-                backgroundColor: Prefs.getString(Prefs.ROUTE) == "PRODUCT_LAB" ? kColorProductLab : kColorPrimary,
+                backgroundColor: kColorPrimary,
                 appBar: AppBar(
                   title: Text("inactive_vacancies".tr()),
                 ),

@@ -50,14 +50,15 @@ class ChatView {
   String last_message;
   int num_of_unreads;
 
-  ChatView(
-      {this.user_id,
+  ChatView({
+        this.user_id,
         this.avatar,
         this.last_message,
         this.name,
         this.vacancy_id,
         this.vacancy,
-        this.num_of_unreads});
+        this.num_of_unreads
+      });
 
   factory ChatView.fromJson(Map<String, dynamic> json) => new ChatView(
       user_id: json["id"],

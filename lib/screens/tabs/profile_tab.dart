@@ -719,6 +719,7 @@ class _ProfileTabState extends State<ProfileTab> {
                           Prefs.setString(Prefs.ROUTE, null);
                           Prefs.setInt(Prefs.USER_ID, null);
                           Prefs.setInt(Prefs.USER_STATUS, null);
+                          Prefs.setInt(Prefs.NEW_MESSAGES_COUNT, 0);
                           Navigator.of(context).popUntil((route) => route.isFirst);
                           Navigator.pushReplacementNamed(context, Routes.select_mode);
                         },

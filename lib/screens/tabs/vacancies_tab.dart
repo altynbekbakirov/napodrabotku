@@ -44,10 +44,6 @@ class _VacanciesTabState extends State<VacanciesTab> {
     props.getInvitedUsers();
   }
 
-  void handleInitialBuildOfCompanyVacancy(CompanyInactiveVacanciesScreenProps props) {
-    props.getCompanyVacancies();
-  }
-
   @override
   Widget build(BuildContext context) {
 
@@ -351,7 +347,10 @@ class _VacanciesTabState extends State<VacanciesTab> {
                             children: data.map((vacancy) {
                               return GestureDetector(
                                 child: Container(
-                                    child: ProfileCard(vacancy: vacancy, page: "submit")
+                                    child: ProfileCard(
+                                        vacancy: vacancy,
+                                        page: "submit"
+                                    )
                                 ),
                                 onTap: () {
                                   Navigator.of(context).push(

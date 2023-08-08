@@ -762,6 +762,7 @@ class Users {
 
   static Future<String> saveUserCompany({
     int userId,
+    int vacancyId,
     String type,
   }) async {
     final url = API_IP + API_USER_COMPANY_SAVE;
@@ -772,7 +773,7 @@ class Users {
       };
       final response = await http.post(url,
           headers: headers,
-          body: json.encode({'user_id': userId, 'type': type})
+          body: json.encode({'user_id': userId, 'type': type, 'vacancy_id': vacancyId})
       );
       if(response.statusCode == 200) {
         return "OK";

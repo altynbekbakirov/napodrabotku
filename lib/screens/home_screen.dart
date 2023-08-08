@@ -3,16 +3,14 @@ import 'package:flutter/material.dart';
 import 'package:easy_localization/easy_localization.dart';
 import 'package:flutter_boxicons/flutter_boxicons.dart';
 import 'package:flutter_intro/flutter_intro.dart';
-import 'package:flutter_typeahead/flutter_typeahead.dart';
 import 'package:ishtapp/datas/RSAA.dart';
 import 'package:ishtapp/datas/app_state.dart';
 import 'package:ishtapp/datas/user.dart';
 import 'package:ishtapp/screens/tabs/vacancies_tab.dart';
-import 'package:multiselect_formfield/multiselect_formfield.dart';
+import 'package:pusher_client/pusher_client.dart';
 import 'package:redux/redux.dart';
 import 'package:flutter_redux/flutter_redux.dart';
 import 'package:ishtapp/widgets/cicle_button.dart';
-import 'package:ishtapp/components/custom_button.dart';
 import 'package:ishtapp/screens/tabs/conversations_tab.dart';
 import 'package:ishtapp/screens/tabs/discover_tab.dart';
 import 'package:ishtapp/screens/tabs/matches_tab.dart';
@@ -78,20 +76,12 @@ class _HomeScreenState extends State<HomeScreen> {
   List<String> regions = [];
   List<String> districts = [];
 
-  List _jobTypes = [];
-  List _vacancyTypes = [];
-  List _businesses = [];
-  List _schedules = [];
-  List _regions = [];
-  List _districts = [];
-  List _currencies = [];
   List spheres = [];
 
   String selectedRegion;
   String selectedDistrict;
   String selectedJobType;
 
-  int _regionId;
   bool loading = false;
   work_mode work = work_mode.isWork;
 
@@ -114,17 +104,6 @@ class _HomeScreenState extends State<HomeScreen> {
   bool isSpecial = false;
   Timer timer;
   int receivedMessageCount = 0;
-
-  TextEditingController _typeAheadController = TextEditingController();
-  TextEditingController _vacancyTypeAheadController = TextEditingController();
-  List<dynamic> _suggestions = [];
-  List<dynamic> _suggestionsAddress = [];
-  String _selectedCity;
-
-  Completer<YandexMapController> _controller = Completer();
-  Point _point;
-
-  VacanciesScreenProps _props;
 
   Future<bool> onWillPop() {
     DateTime now = DateTime.now();
@@ -150,19 +129,6 @@ class _HomeScreenState extends State<HomeScreen> {
       });
     });
     currencyList = await Vacancy.getLists('currencies', null);
-  }
-
-  getFilters(id) async {
-    _jobTypes = await Users.getFilters('activities', id);
-    _vacancyTypes = await Users.getFilters('types', id);
-    _businesses = await Users.getFilters('busyness', id);
-    _schedules = await Users.getFilters('schedules', id);
-    _regions = await Users.getFilters('regions', id);
-    // _districts = await User.getFilters('districts', id);
-  }
-
-  getDistrictsById(region) async {
-    this.districtList = await Vacancy.getDistrictsById('districts', region);
   }
 
   getDistrictsByRegionName(region) async {
@@ -658,6 +624,33 @@ class _HomeScreenState extends State<HomeScreen> {
     );
   }
 
+  int _newMessagesCounter = 0;
+
+  void loadCounter() async {
+    setState(() {
+      _newMessagesCounter = (Prefs.getInt(Prefs.NEW_MESSAGES_COUNT) ?? 0);
+    });
+  }
+
+  void bindEventPusher() async {
+    channel.bind('new-message-sent', (PusherEvent event) {
+      var data = json.decode(event.data);
+      print("New message sent event " + event.data.toString());
+
+      if(data['user_id'] - Prefs.getInt(Prefs.USER_ID) == 0){
+        setState(() {
+          _newMessagesCounter = ((Prefs.getInt(Prefs.NEW_MESSAGES_COUNT) ?? 0) + 1);
+          Prefs.setInt(Prefs.NEW_MESSAGES_COUNT, _newMessagesCounter);
+          StoreProvider.of<AppState>(context).dispatch(getChatList());
+          StoreProvider.of<AppState>(context).dispatch(getMessageList(data['sender_id'], data['vacancy_id']));
+        });
+      }
+    });
+  }
+
+  PusherClient pusher;
+  Channel channel;
+
   @override
   void initState() {
 
@@ -726,16 +719,35 @@ class _HomeScreenState extends State<HomeScreen> {
       // }
     }
 
+    loadCounter();
+
+    PusherClient pusher = PusherClient(
+      '73e14d3cf78debd02655',
+      PusherOptions(
+          cluster: 'ap2'
+      ),
+      autoConnect: true,
+      enableLogging: true,
+    );
+
+    channel = pusher.subscribe("chat");
+
+    pusher.onConnectionStateChange((state) {
+      print("previousState: ${state.previousState}, currentState: ${state.currentState}");
+    });
+
+    pusher.onConnectionError((error) {
+      print("error: ${error.message}");
+    });
+
+    bindEventPusher();
   }
 
-  // @override
-  // void didChangeDependencies() {
-  //   Timer.periodic(Duration(seconds:300), (Timer t) {
-  //     StoreProvider.of<AppState>(context).dispatch(getChatList());
-  //     StoreProvider.of<AppState>(context).dispatch(getNumberOfUnreadMessages());
-  //   });
-  //   super.didChangeDependencies();
-  // }
+  @override
+  void dispose() {
+    // pusherService.unbindEvent('new-message-sent');
+    super.dispose();
+  }
 
   void handleInitialBuild(VacanciesScreenProps props) {
     props.getLikedNumOfVacancies();
@@ -752,6 +764,8 @@ class _HomeScreenState extends State<HomeScreen> {
           this.handleInitialBuild(props);
         },
         builder: (context, props) {
+
+          Prefs.setInt(Prefs.NEW_MESSAGES_COUNT, props.numberOfUnreadMessages);
 
           return Scaffold(
             backgroundColor: isProfile ? kColorWhite : kColorPrimary,
@@ -896,20 +910,20 @@ class _HomeScreenState extends State<HomeScreen> {
                                 Positioned(
                                   top: 0,
                                   left: 0,
-                                  right: StoreProvider.of<AppState>(context).state.chat.number_of_unread > 0 ? null : 0,
+                                  right: Prefs.getInt(Prefs.NEW_MESSAGES_COUNT) > 0 ? null : 0,
                                   child: Icon(
                                     Boxicons.bx_comment_detail,
                                     color: _tabCurrentIndex == 3 ? kColorPrimary : Colors.grey,
                                   ),
                                 ),
 
-                                StoreProvider.of<AppState>(context).state.chat.number_of_unread > 0 ?
+                                Prefs.getInt(Prefs.NEW_MESSAGES_COUNT) > 0 ?
                                 Positioned(
                                   top: 0,
                                   right: 0,
-                                  child: StoreProvider.of<AppState>(context).state.chat.number_of_unread > 0 ?
+                                  child: Prefs.getInt(Prefs.NEW_MESSAGES_COUNT) > 0 ?
                                   Badge(
-                                      text: StoreProvider.of<AppState>(context).state.chat.number_of_unread.toString()
+                                      text: Prefs.getInt(Prefs.NEW_MESSAGES_COUNT).toString()
                                   ) : Container(),
                                 ) :
                                 Container(),
@@ -957,37 +971,6 @@ class _HomeScreenState extends State<HomeScreen> {
           );
         });
   }
-
-  Future<List<dynamic>> _fetchAddressSuggestions(String pattern) async {
-    List<dynamic> suggestions = [];
-    String token = "132a62a4c888a776c87241ed9e615638651f14a8";
-
-    if(pattern.length > 3) {
-      final response = await http.post(
-        Uri.parse('https://suggestions.dadata.ru/suggestions/api/4_1/rs/suggest/address'),
-        headers: <String, String>{
-          'Content-Type': 'application/json',
-          'Accept': 'application/json',
-          'Authorization': 'Token ' + token
-        },
-        body: jsonEncode(<String, String>{
-          'query': pattern,
-          'count': '3'
-        }),
-      );
-
-      if (response.statusCode == 200) {
-        Map<dynamic, dynamic> responseData = json.decode(response.body);
-        for(int i = 0; i < responseData['suggestions'].length; i++) {
-          suggestions.add(responseData['suggestions'][i]);
-        }
-      } else {
-        throw Exception('Не удается найти адрес.');
-      }
-
-    }
-    return suggestions;
-  }
 }
 
 class VacanciesScreenProps {
@@ -995,18 +978,21 @@ class VacanciesScreenProps {
   final Function getSubmittedNumOfVacancies;
   final Function getNumberOfUnreadMessages;
   final int response;
+  final int numberOfUnreadMessages;
 
   VacanciesScreenProps({
     this.getLikedNumOfVacancies,
     this.getSubmittedNumOfVacancies,
     this.getNumberOfUnreadMessages,
     this.response,
+    this.numberOfUnreadMessages,
   });
 }
 
 VacanciesScreenProps mapStateToProps(Store<AppState> store) {
   return VacanciesScreenProps(
     response: store.state.vacancy.number_of_likeds,
+    numberOfUnreadMessages: store.state.chat.number_of_unread,
     getLikedNumOfVacancies: () => store.dispatch(getNumberOfLikedVacancies()),
     getSubmittedNumOfVacancies: () => store.dispatch(getNumberOfSubmittedVacancies()),
     getNumberOfUnreadMessages: () => store.dispatch(getNumberOfUnreadMessages()),

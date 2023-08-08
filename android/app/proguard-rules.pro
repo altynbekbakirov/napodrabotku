@@ -1,1 +1,2 @@
 -keep class io.flutter.plugin.editing.** { *; }
+-keep class com.github.chinloyal.pusher_client.** { *; }

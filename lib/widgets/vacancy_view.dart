@@ -246,6 +246,7 @@ class _VacancyViewState extends State<VacancyView> {
                               borderRadius: BorderRadius.circular(4),
                               child: widget.vacancy.company_logo != null ? Image.network(
                                 SERVER_IP + widget.vacancy.company_logo + "?token=${Guid.newGuid}",
+                                key: ValueKey(SERVER_IP + widget.vacancy.company_logo + "?token=${Guid.newGuid}"),
                                 headers: {"Authorization": Prefs.getString(Prefs.TOKEN)},
                                 width: 60,
                                 height: 60,

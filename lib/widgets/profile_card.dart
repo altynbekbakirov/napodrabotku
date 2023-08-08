@@ -74,7 +74,7 @@ class _ProfileCardState extends State<ProfileCard> {
                     Flexible(
                       flex: 2,
                       child: Container(
-                        color: kColorGray,
+                        color: widget.vacancy.responseType == 'SUBMITTED' ? kColorYellow : kColorGray,
                         height: double.infinity,
                         padding: const EdgeInsets.symmetric(
                             vertical: 10, horizontal: 20),

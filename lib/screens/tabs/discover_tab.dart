@@ -114,7 +114,7 @@ class _DiscoverTabState extends State<DiscoverTab> with SingleTickerProviderStat
     busynessList = await Vacancy.getLists('busyness', null);
     scheduleList = await Vacancy.getLists('schedule', null);
     regionList = await Vacancy.getLists('region', null);
-    districtList = await Vacancy.getLists('districts', null);
+    // districtList = await Vacancy.getLists('districts', null);
     await Vacancy.getLists('region', null).then((value) {
       value.forEach((region) {
         regions.add(region["name"]);
@@ -311,6 +311,9 @@ class _DiscoverTabState extends State<DiscoverTab> with SingleTickerProviderStat
                                         double longitude = double.parse(suggestion['data']['geo_lon']);
 
                                         if(region != '' && region != null){
+                                          districtList = await Vacancy.getLists('districts', region);
+                                          metroList = await Vacancy.getMetros(districtList);
+
                                           int regionId = await Vacancy.getRegionByName(region);
                                           setState(() {
                                             this._point = Point(
@@ -318,6 +321,7 @@ class _DiscoverTabState extends State<DiscoverTab> with SingleTickerProviderStat
                                                 longitude: longitude
                                             );
                                             this._regions.add(regionId);
+
                                           });
                                         }
                                       }
@@ -352,7 +356,7 @@ class _DiscoverTabState extends State<DiscoverTab> with SingleTickerProviderStat
                               },
                               dataSource: metroList,
                               textField: 'name',
-                              valueField: 'id',
+                              valueField: 'name',
                               okButtonLabel: 'ok'.tr(),
                               cancelButtonLabel: 'cancel'.tr(),
                               // required: true,
@@ -511,6 +515,7 @@ class _DiscoverTabState extends State<DiscoverTab> with SingleTickerProviderStat
                                             _vacancyTypes = [];
                                             _businesses = [];
                                             _schedules = [];
+                                            _metros = [];
                                           });
 
                                           if (user != null) {
@@ -522,6 +527,7 @@ class _DiscoverTabState extends State<DiscoverTab> with SingleTickerProviderStat
                                               busyness_ids: _businesses,
                                               region_ids: [_regionId],
                                               district_ids: _districts,
+                                              metros: _metros,
                                               vacancy_type_ids: _vacancyTypes,
                                               job_type_ids: _jobTypes)
                                           );
@@ -547,12 +553,14 @@ class _DiscoverTabState extends State<DiscoverTab> with SingleTickerProviderStat
                                           if (user != null) {
                                             user.saveFilters(_regions, _districts, _jobTypes, _vacancyTypes, _businesses, _schedules);
                                           }
+                                          print(Prefs.getString(Prefs.TOKEN));
                                           StoreProvider.of<AppState>(context).dispatch(setFilter(
                                               schedule_ids: _schedules,
                                               busyness_ids: _businesses,
                                               // region_ids: [_regionId],
                                               region_ids: _regions,
                                               district_ids: _districts,
+                                              metros: _metros,
                                               vacancy_type_ids: _vacancyTypes,
                                               job_type_ids: _jobTypes)
                                           );

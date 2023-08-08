@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:easy_localization/easy_localization.dart';
 import 'package:ishtapp/datas/pref_manager.dart';
 import 'package:ishtapp/constants/configs.dart';
+import 'package:ishtapp/screens/home_screen.dart';
 import 'package:redux/redux.dart';
 import 'package:ishtapp/datas/app_state.dart';
 import 'package:ishtapp/datas/chat.dart';
@@ -67,7 +68,7 @@ class _ConversationsTabState extends State<ConversationsTab> {
               ),
             );
           } else {
-            body = data.length > 0
+            body = data != null && data.length > 0
                 ? Column(
                     children: [
                       /// Conversations
@@ -111,10 +112,18 @@ class _ConversationsTabState extends State<ConversationsTab> {
                               ),
                               subtitle: Text(data[index].last_message),
                               trailing: data[index].num_of_unreads > 0
-                                  ? Badge(
-                                      text: data[index].num_of_unreads.toString())
+                                  ? Badge(text: data[index].num_of_unreads.toString())
                                   : null,
                               onTap: () {
+                                if(Prefs.getInt(Prefs.NEW_MESSAGES_COUNT) > 0){
+                                  if(data[index].num_of_unreads > Prefs.getInt(Prefs.NEW_MESSAGES_COUNT)){
+                                    Prefs.setInt(Prefs.NEW_MESSAGES_COUNT, 0 );
+                                  } else {
+                                    Prefs.setInt(Prefs.NEW_MESSAGES_COUNT, Prefs.getInt(Prefs.NEW_MESSAGES_COUNT) - data[index].num_of_unreads);
+                                  }
+                                }
+                                // Prefs.setInt(Prefs.NEW_MESSAGES_COUNT, 0);
+
                                 StoreProvider.of<AppState>(context).dispatch(getChatList());
                                 StoreProvider.of<AppState>(context).dispatch(getNumberOfUnreadMessages());
 

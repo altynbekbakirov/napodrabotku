@@ -1,9 +1,7 @@
 import 'package:flutter/material.dart';
-import 'package:flutter_typeahead/flutter_typeahead.dart';
 import 'package:ishtapp/datas/RSAA.dart';
 import 'package:ishtapp/datas/user.dart';
 import 'package:ishtapp/datas/vacancy.dart';
-import 'package:ishtapp/routes/routes.dart';
 import 'package:ishtapp/screens/tabs/discover_tab.dart';
 import 'package:ishtapp/screens/tabs/vacancies_tab.dart';
 import 'package:swipe_stack/swipe_stack.dart';
@@ -15,7 +13,6 @@ import 'default_card_border.dart';
 import 'package:ishtapp/utils/constants.dart';
 import 'package:ishtapp/datas/pref_manager.dart';
 import 'package:ishtapp/constants/configs.dart';
-import 'package:ishtapp/screens/chat_screen.dart';
 import '../widgets/Dialogs/Dialogs.dart';
 import 'package:flutter_tindercard/flutter_tindercard.dart';
 import 'package:flutter_guid/flutter_guid.dart';
@@ -61,8 +58,6 @@ class _ProfileCardUserState extends State<ProfileCardUser> {
 
   Future<void> openInviteDialog(context) async {
 
-    print(widget.vacancyList);
-
     _vacancyList = widget.vacancyList.map<DropdownMenuItem<int>>((dynamic value) {
       var jj = new Vacancy(id: value.id, name: value.name);
       return DropdownMenuItem<int>(
@@ -70,8 +65,6 @@ class _ProfileCardUserState extends State<ProfileCardUser> {
         child: Text(jj.name.toString()),
       );
     }).toList();
-
-    print(_vacancyList);
 
     return showDialog(
         context: context,
@@ -192,125 +185,6 @@ class _ProfileCardUserState extends State<ProfileCardUser> {
               ),
             ),
           );
-
-          // return StatefulBuilder(builder: (context, setState) {
-          //   return Dialog(
-          //     insetPadding: EdgeInsets.zero,
-          //     shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(20.0)),
-          //     child: Container(
-          //       constraints: BoxConstraints(maxHeight: MediaQuery.of(context).size.height * 0.9, maxWidth: MediaQuery.of(context).size.width * 0.9),
-          //       child: Padding(
-          //         padding: const EdgeInsets.symmetric(horizontal: 20.0, vertical: 30.0),
-          //         child: ListView(
-          //           shrinkWrap: true,
-          //           children: [
-          //             Container(
-          //               child: Align(
-          //                   alignment: Alignment.center,
-          //                   child: Text(
-          //                     'choose_vacancy'.tr(),
-          //                     style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold, color: Colors.black),
-          //                   )
-          //               ),
-          //             ),
-          //
-          //             /// Form
-          //             Form(
-          //               key: _vacancyAddFormKey,
-          //               child: Column(
-          //                 children: <Widget>[
-          //                   Container(
-          //                     margin: EdgeInsets.symmetric(vertical: 40),
-          //                     child: Column(
-          //
-          //                       children: [
-          //                         _vacancyList.isEmpty ? DropdownButtonFormField<int>(
-          //                           isExpanded: true,
-          //                           hint: Text("select".tr()),
-          //                           value: vacancyId,
-          //                           onChanged: (int newValue) {
-          //                             setState(() {
-          //                               vacancyId = newValue;
-          //                             });
-          //                           },
-          //                           focusNode: FocusNode(canRequestFocus: false),
-          //                           validator: (value) => value == null ? "please_fill_this_field".tr() : null,
-          //                           decoration: InputDecoration(
-          //                             contentPadding: EdgeInsets.symmetric(vertical: 0, horizontal: 20),
-          //                             border: OutlineInputBorder(),
-          //                             enabledBorder: OutlineInputBorder(borderSide: BorderSide(color: Colors.grey[200], width: 2.0)),
-          //                             errorBorder: OutlineInputBorder(borderSide: BorderSide(color: kColorPrimary, width: 2.0)),
-          //                             errorStyle: TextStyle(color: kColorPrimary, fontWeight: FontWeight.w500),
-          //                             floatingLabelBehavior: FloatingLabelBehavior.always,
-          //                             filled: true,
-          //                             fillColor: kColorWhite,
-          //                           ),
-          //                           items: _vacancyList,
-          //                         ) : Container(),
-          //                       ],
-          //                     ),
-          //                   ),
-          //
-          //                   Container(
-          //                     width: double.maxFinite,
-          //                     child: Flex(
-          //                       direction: Axis.horizontal,
-          //                       mainAxisAlignment: MainAxisAlignment.spaceBetween,
-          //                       children: [
-          //
-          //                         CustomButton(
-          //                           borderSide: BorderSide(
-          //                               color: kColorPrimary,
-          //                               width: 2.0
-          //                           ),
-          //                           color: Colors.transparent,
-          //                           textColor: kColorPrimary,
-          //                           onPressed: () {
-          //                             setState(() {
-          //                               vacancyId = null;
-          //                             });
-          //                             Navigator.of(context).pop();
-          //                           },
-          //                           text: 'cancel'.tr(),
-          //                         ),
-          //                         CustomButton(
-          //                           color: kColorPrimary,
-          //                           textColor: Colors.white,
-          //                           onPressed: () {
-          //                             if (_vacancyAddFormKey.currentState.validate()) {
-          //
-          //                               Vacancy.saveVacancyUserInvite(vacancy_id: vacancyId, type: "INVITED", user_id: widget.user.id).then((value) {
-          //                                 if (value == "OK") {
-          //                                   // Dialogs.showDialogBox(context,"successfully_submitted".tr());
-          //                                   StoreProvider.of<AppState>(context).state.user.list.data.remove(widget.user);
-          //                                   StoreProvider.of<AppState>(context).dispatch(getUsers());
-          //                                   Navigator.of(context).pop();
-          //                                 } else {
-          //                                   Dialogs.showDialogBox(context,"some_error_occurred_try_again".tr());
-          //                                 }
-          //                               });
-          //
-          //                               setState(() {
-          //                                 vacancyId = null;
-          //                               });
-          //                             } else {
-          //                               print('invalid');
-          //                             }
-          //                           },
-          //                           text: 'send'.tr(),
-          //                         ),
-          //                       ],
-          //                     ),
-          //                   ),
-          //                 ],
-          //               ),
-          //             ),
-          //           ],
-          //         ),
-          //       ),
-          //     ),
-          //   );
-          // });
         });
   }
 
@@ -409,6 +283,7 @@ class _ProfileCardUserState extends State<ProfileCardUser> {
                                     height: 60,
                                   ) : Image.asset(
                                     'assets/images/default-user.jpg',
+                                    key: ValueKey("token=${Guid.newGuid}"),
                                     fit: BoxFit.cover,
                                     width: 60,
                                     height: 60,
@@ -420,6 +295,31 @@ class _ProfileCardUserState extends State<ProfileCardUser> {
                         ),
                       ),
                     ),
+
+                    widget.page == 'company_responses' ? Flexible(
+                      flex: 1,
+                      child: Container(
+                        color: widget.user.response_type == 'SUBMITTED' ? kColorGray : kColorYellow,
+                        height: double.infinity,
+                        padding: const EdgeInsets.symmetric(vertical: 10, horizontal: 20),
+                        child: Flex(
+                          direction: Axis.horizontal,
+                          mainAxisSize: MainAxisSize.max,
+                          mainAxisAlignment: MainAxisAlignment.center,
+                          crossAxisAlignment: CrossAxisAlignment.center,
+                          children: [
+                            Text(
+                              'отклик на вакансию "${widget.user.vacancy_name}"',
+                              style: TextStyle(
+                                fontSize: 12,
+                                fontWeight: FontWeight.bold,
+                                color: kColorDark,
+                              ),
+                            ),
+                          ],
+                        ),
+                      ),
+                    ) : Container(),
 
                     Expanded(
                       flex: 3,
@@ -616,7 +516,7 @@ class _ProfileCardUserState extends State<ProfileCardUser> {
 
     if (Prefs.getString(Prefs.TOKEN) != null) {
       if (type == "LIKED_THEN_DELETED") {
-        Users.saveUserCompany(userId: userId, type: type).then((value) {
+        Users.saveUserCompany(userId: userId, type: type, vacancyId: user.userVacancyId).then((value) {
           props.allUsers.data.remove(user);
           StoreProvider.of<AppState>(context).dispatch(getAllUsers());
           StoreProvider.of<AppState>(context).dispatch(getSubmitUsers());
