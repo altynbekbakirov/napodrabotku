@@ -12,6 +12,9 @@ import 'package:ishtapp/widgets/chat_message.dart';
 import 'package:ishtapp/widgets/svg_icon.dart';
 import 'package:ishtapp/datas/pref_manager.dart';
 import 'package:ishtapp/constants/configs.dart';
+import 'package:pusher_client/pusher_client.dart';
+import 'dart:convert';
+import 'dart:math';
 
 class ChatScreen extends StatefulWidget {
   /// Get user object
@@ -40,9 +43,48 @@ class _ChatScreenState extends State<ChatScreen> {
 
   ScrollController controller = new ScrollController();
 
+  PusherClient pusher;
+  Channel channel;
+
+  // void bindEventPusher() async {
+  //   channel.bind('new-message-sent', (PusherEvent event) {
+  //     var data = json.decode(event.data);
+  //     print("New message sent event " + event.data.toString());
+  //
+  //     if(data['user_id'] - Prefs.getInt(Prefs.USER_ID) == 0 && data['vacancy_id'] - widget.vacancy_id == 0){
+  //       setState(() {
+  //         StoreProvider.of<AppState>(context).dispatch(getChatList());
+  //         StoreProvider.of<AppState>(context).dispatch(getNumberOfUnreadMessages());
+  //         StoreProvider.of<AppState>(context).dispatch(getMessageList(data['sender_id'], data['vacancy_id']));
+  //       });
+  //     }
+  //   });
+  // }
+
   @override
   void initState() {
     super.initState();
+
+    // PusherClient pusher = PusherClient(
+    //   '73e14d3cf78debd02655',
+    //   PusherOptions(
+    //       cluster: 'ap2'
+    //   ),
+    //   autoConnect: true,
+    //   enableLogging: true,
+    // );
+    //
+    // channel = pusher.subscribe("chat");
+    //
+    // pusher.onConnectionStateChange((state) {
+    //   print("previousState: ${state.previousState}, currentState: ${state.currentState}");
+    // });
+    //
+    // pusher.onConnectionError((error) {
+    //   print("error: ${error.message}");
+    // });
+    //
+    // bindEventPusher();
   }
 
   @override
@@ -131,7 +173,7 @@ class _ChatScreenState extends State<ChatScreen> {
                   icon: new Icon(Icons.arrow_back),
                   onPressed: (){
                     StoreProvider.of<AppState>(context).dispatch(getChatList());
-                    StoreProvider.of<AppState>(context).dispatch(getNumberOfUnreadMessages());
+                    // StoreProvider.of<AppState>(context).dispatch(getNumberOfUnreadMessages());
                     Navigator.pop(context,true);
                   }
               ),

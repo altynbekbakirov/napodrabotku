@@ -1,5 +1,6 @@
 import 'dart:convert';
 import 'dart:io';
+import 'dart:math';
 import 'package:path/path.dart';
 import 'package:async/async.dart';
 import 'package:flutter/material.dart';
@@ -19,7 +20,7 @@ import 'package:translit/translit.dart';
 class OtpSmsScreen extends StatefulWidget {
   OtpSmsScreen({Key key, @required this.verificationId, @required this.users, @required this.phone, this.imageFile, this.login})
       : super(key: key);
-  final String verificationId, phone;
+  String verificationId, phone;
   final Users users;
   final bool login;
   final PickedFile imageFile;
@@ -30,6 +31,12 @@ class OtpSmsScreen extends StatefulWidget {
 
 class _OtpSmsScreenState extends State<OtpSmsScreen> {
   bool isSubmitEnabled = false;
+  bool isExpired = false;
+
+  // SMSC.RU credentials
+  String smscRuLogin = 'pobed-a';
+  String smscRuPassword = 'qwerty';
+  String smscRuMessage = '';
 
   final firstController = TextEditingController();
   final secondController = TextEditingController();
@@ -92,16 +99,42 @@ class _OtpSmsScreenState extends State<OtpSmsScreen> {
                   Row(
                     mainAxisAlignment: MainAxisAlignment.center,
                     children: [
-                      Text(
-                        // "${'this_code_will_expire_in'.tr()} ",
-                        "${'this_code_will_expire_in'.tr()} - \n" + widget.verificationId,
+                      !isExpired ? Text(
+                        "${'this_code_will_expire_in'.tr()} - ",
+                        // "${'this_code_will_expire_in'.tr()} - \n" + widget.verificationId,
+                      ) : GestureDetector(
+                        onTap: () async {
+                          int min = 100000;
+                          int max = 999999;
+                          var randomizer = new Random();
+                          var rNum = min + randomizer.nextInt(max - min);
+
+                          String smscRuMessage = 'Код подтверждения - $rNum';
+
+                          final response = await http.get(Uri.parse('https://smsc.ru/sys/send.php?login=$smscRuLogin&psw=$smscRuPassword&phones=${widget.phone}&mes=$smscRuMessage'));
+
+                          setState(() {
+                            isExpired = false;
+                            widget.verificationId = rNum.toString();
+                          });
+                        },
+                        child: Text(
+                          'send_code_again'.tr(),
+                          // "${'this_code_will_expire_in'.tr()} - \n" + widget.verificationId,
+                        ),
                       ),
-                      TweenAnimationBuilder(
+                      !isExpired ? TweenAnimationBuilder(
+                          onEnd: () {
+                            setState(() {
+                              isExpired = true;
+                            });
+                          },
                           tween: Tween(begin: 60.0, end: 0.0),
                           duration: const Duration(seconds: 60),
                           builder: (context, value, child) => Text(
                             '${value.toInt()}',
-                          )),
+                          )
+                      ) : Container(),
                     ],
                   ),
                   const SizedBox(

@@ -24,7 +24,6 @@ import 'dart:async';
 import 'package:http/http.dart' as http;
 import 'dart:convert';
 import 'dart:math';
-import 'package:yandex_mapkit/yandex_mapkit.dart';
 
 enum work_mode { isWork, isTraining }
 
@@ -422,6 +421,41 @@ class _HomeScreenState extends State<HomeScreen> {
               bottom: position['bottom'],
               right: position['right'],
             ),
+            currentStepIndex == 0 ? Positioned(
+              bottom: 10,
+              left: 0,
+              right: 0,
+              child: Center(
+                child: SizedBox(
+                  height: 40,
+                  child: OutlineButton(
+                    padding: EdgeInsets.symmetric(
+                      vertical: 0,
+                      horizontal: 30,
+                    ),
+                    shape: RoundedRectangleBorder(
+                      borderRadius: BorderRadius.all(
+                        Radius.circular(64),
+                      ),
+                    ),
+                    highlightedBorderColor: Colors.white,
+                    borderSide: BorderSide(color: Colors.white),
+                    textColor: Colors.white,
+                    onPressed: () {
+                      Prefs.setInt(Prefs.INTRO, 1);
+                      stepWidgetParams.onFinish();
+                    },
+                    child: Text(
+                      'Пропустить',
+                      style: TextStyle(
+                        fontSize: 16,
+                        fontWeight: FontWeight.bold,
+                      ),
+                    ),
+                  ),
+                ),
+              ),
+            ) : Container(),
           ],
         ),
       ),
@@ -550,9 +584,14 @@ class _HomeScreenState extends State<HomeScreen> {
                         highlightedBorderColor: Colors.white,
                         borderSide: BorderSide(color: Colors.white),
                         textColor: Colors.white,
-                        onPressed: stepCount - 1 == currentStepIndex
-                            ? stepWidgetParams.onFinish
-                            : stepWidgetParams.onNext,
+                        onPressed: () {
+                          if(stepCount - 1 == currentStepIndex){
+                            Prefs.setInt(Prefs.INTRO, 1);
+                            stepWidgetParams.onFinish();
+                          } else {
+                            stepWidgetParams.onNext();
+                          }
+                        },
                         child: Text(
                           currentStepIndex < stepCount - 1 ? 'Дальше' : 'Завершить',
                           style: TextStyle(
@@ -604,9 +643,14 @@ class _HomeScreenState extends State<HomeScreen> {
                     highlightedBorderColor: Colors.white,
                     borderSide: BorderSide(color: Colors.white),
                     textColor: Colors.white,
-                    onPressed: stepCount - 1 == currentStepIndex
-                        ? stepWidgetParams.onFinish
-                        : stepWidgetParams.onNext,
+                    onPressed: () {
+                      if(stepCount - 1 == currentStepIndex){
+                        Prefs.setInt(Prefs.INTRO, 1);
+                        stepWidgetParams.onFinish();
+                      } else {
+                        stepWidgetParams.onNext();
+                      }
+                    },
                     child: Text(
                       currentStepIndex < stepCount - 1 ? 'Дальше' : 'Завершить',
                       style: TextStyle(
@@ -639,10 +683,11 @@ class _HomeScreenState extends State<HomeScreen> {
 
       if(data['user_id'] - Prefs.getInt(Prefs.USER_ID) == 0){
         setState(() {
-          _newMessagesCounter = ((Prefs.getInt(Prefs.NEW_MESSAGES_COUNT) ?? 0) + 1);
-          Prefs.setInt(Prefs.NEW_MESSAGES_COUNT, _newMessagesCounter);
+          // _newMessagesCounter = ((Prefs.getInt(Prefs.NEW_MESSAGES_COUNT) ?? 0) + 1);
+          // Prefs.setInt(Prefs.NEW_MESSAGES_COUNT, _newMessagesCounter);
           StoreProvider.of<AppState>(context).dispatch(getChatList());
-          StoreProvider.of<AppState>(context).dispatch(getMessageList(data['sender_id'], data['vacancy_id']));
+          StoreProvider.of<AppState>(context).dispatch(getNumberOfUnreadMessages());
+          // StoreProvider.of<AppState>(context).dispatch(getMessageList(data['sender_id'], data['vacancy_id']));
         });
       }
     });
@@ -709,14 +754,14 @@ class _HomeScreenState extends State<HomeScreen> {
 
     super.initState();
 
-    print(Prefs.getBool(Prefs.INTRO));
+    print('INTRO - ' + Prefs.getInt(Prefs.INTRO).toString());
 
     if (Prefs.getString(Prefs.USER_TYPE) == 'USER') {
-      // if (Prefs.getBool(Prefs.INTRO)) {
+      if (Prefs.getInt(Prefs.INTRO) == null || Prefs.getInt(Prefs.INTRO) == 0) {
         Future.delayed(Duration.zero, () {
           intro.start(context);
         });
-      // }
+      }
     }
 
     loadCounter();
@@ -765,7 +810,9 @@ class _HomeScreenState extends State<HomeScreen> {
         },
         builder: (context, props) {
 
-          Prefs.setInt(Prefs.NEW_MESSAGES_COUNT, props.numberOfUnreadMessages);
+          // if(Prefs.getInt(Prefs.NEW_MESSAGES_COUNT) == 1){
+          //   Prefs.setInt(Prefs.NEW_MESSAGES_COUNT, props.numberOfUnreadMessages);
+          // }
 
           return Scaffold(
             backgroundColor: isProfile ? kColorWhite : kColorPrimary,
@@ -910,20 +957,21 @@ class _HomeScreenState extends State<HomeScreen> {
                                 Positioned(
                                   top: 0,
                                   left: 0,
-                                  right: Prefs.getInt(Prefs.NEW_MESSAGES_COUNT) > 0 ? null : 0,
+                                  right: StoreProvider.of<AppState>(context).state.chat.number_of_unread > 0 ? null : 0,
                                   child: Icon(
                                     Boxicons.bx_comment_detail,
                                     color: _tabCurrentIndex == 3 ? kColorPrimary : Colors.grey,
                                   ),
                                 ),
 
-                                Prefs.getInt(Prefs.NEW_MESSAGES_COUNT) > 0 ?
+                                StoreProvider.of<AppState>(context).state.chat.number_of_unread > 0 ?
                                 Positioned(
                                   top: 0,
                                   right: 0,
-                                  child: Prefs.getInt(Prefs.NEW_MESSAGES_COUNT) > 0 ?
+                                  child: StoreProvider.of<AppState>(context).state.chat.number_of_unread > 0 ?
                                   Badge(
-                                      text: Prefs.getInt(Prefs.NEW_MESSAGES_COUNT).toString()
+                                      // text: Prefs.getInt(Prefs.NEW_MESSAGES_COUNT).toString()
+                                      text: StoreProvider.of<AppState>(context).state.chat.number_of_unread.toString()
                                   ) : Container(),
                                 ) :
                                 Container(),

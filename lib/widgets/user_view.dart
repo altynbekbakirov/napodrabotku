@@ -1,3 +1,4 @@
+import 'package:cached_network_image/cached_network_image.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_guid/flutter_guid.dart';
 import 'package:flutter_redux/flutter_redux.dart';
@@ -158,11 +159,29 @@ class _UserViewState extends State<UserView> {
                           Container(
                             child: ClipRRect(
                               borderRadius: BorderRadius.circular(4),
-                              child: widget.user.image != null ? Image.network(
-                                SERVER_IP + widget.user.image + "?token=${Guid.newGuid}",
-                                headers: {"Authorization": Prefs.getString(Prefs.TOKEN)},
-                                width: 60,
-                                height: 60,
+                              child: widget.user.image != null ?
+                              CachedNetworkImage(
+                                imageUrl: SERVER_IP + widget.user.image + "?token=${Guid.newGuid}",
+                                imageBuilder: (context, imageProvider) => Container(
+                                  width: 60,
+                                  height: 60,
+                                  decoration: BoxDecoration(
+                                    image: DecorationImage(
+                                      image: imageProvider,
+                                      fit: BoxFit.cover,
+                                    ),
+                                  ),
+                                ),
+                                httpHeaders: {
+                                  "Authorization": Prefs.getString(Prefs.TOKEN)
+                                },
+                                placeholder: (context, url) => Container(
+                                  padding: EdgeInsets.all(10),
+                                  width: 60,
+                                  height: 60,
+                                  child: CircularProgressIndicator(),
+                                ),
+                                errorWidget: (context, url, error) => Image.asset("assets/images/default-user.jpg"),
                               ) : Image.asset(
                                 'assets/images/default-user.jpg',
                                 fit: BoxFit.cover,

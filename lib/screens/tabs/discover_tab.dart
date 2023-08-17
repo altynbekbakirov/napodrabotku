@@ -340,12 +340,13 @@ class _DiscoverTabState extends State<DiscoverTab> with SingleTickerProviderStat
                               ),
                             ),
                             MultiSelectFormField(
-                              fillColor: kColorWhite,
+                              enabled: metroList.length > 0 ? true : false,
+                              fillColor: metroList.length > 0 ? kColorWhite : kColorGray,
                               title: Text(
-                                'metro'.tr(),
-                                style: TextStyle(fontSize: 13, fontWeight: FontWeight.bold, color: Colors.black),
+                                'metro'.tr().toUpperCase(),
+                                style: TextStyle(fontSize: 12, fontWeight: FontWeight.bold, color: Colors.black),
                               ),
-                              chipLabelStyle: TextStyle(fontSize: 14, fontWeight: FontWeight.w400, color: kColorPrimary),
+                              chipLabelStyle: TextStyle(fontSize: 12, fontWeight: FontWeight.w400, color: kColorPrimary),
                               chipBackGroundColor: kColorPrimary.withOpacity(0.25),
                               dialogTextStyle: TextStyle(fontSize: 14, fontWeight: FontWeight.w400, color: Colors.black),
                               validator: (value) {
@@ -360,7 +361,10 @@ class _DiscoverTabState extends State<DiscoverTab> with SingleTickerProviderStat
                               okButtonLabel: 'ok'.tr(),
                               cancelButtonLabel: 'cancel'.tr(),
                               // required: true,
-                              hintWidget: Text('select_one_or_more'.tr()),
+                              hintWidget: Text(
+                                'select_one_or_more'.tr(),
+                                style: TextStyle(fontSize: 12, color: kColorPrimary),
+                              ),
                               initialValue: _metros,
                               onSaved: (value) {
                                 if (value == null) return;
@@ -372,10 +376,10 @@ class _DiscoverTabState extends State<DiscoverTab> with SingleTickerProviderStat
                             MultiSelectFormField(
                               fillColor: kColorWhite,
                               title: Text(
-                                'job_types'.tr(),
-                                style: TextStyle(fontSize: 13, fontWeight: FontWeight.bold, color: Colors.black),
+                                'job_types'.tr().toUpperCase(),
+                                style: TextStyle(fontSize: 12, fontWeight: FontWeight.bold, color: Colors.black),
                               ),
-                              chipLabelStyle: TextStyle(fontSize: 14, fontWeight: FontWeight.w400, color: kColorPrimary),
+                              chipLabelStyle: TextStyle(fontSize: 12, fontWeight: FontWeight.w400, color: kColorPrimary),
                               chipBackGroundColor: kColorPrimary.withOpacity(0.25),
                               dialogTextStyle: TextStyle(fontSize: 14, fontWeight: FontWeight.w400, color: Colors.black),
                               validator: (value) {
@@ -390,7 +394,10 @@ class _DiscoverTabState extends State<DiscoverTab> with SingleTickerProviderStat
                               okButtonLabel: 'ok'.tr(),
                               cancelButtonLabel: 'cancel'.tr(),
                               // required: true,
-                              hintWidget: Text('select_one_or_more'.tr()),
+                              hintWidget: Text(
+                                'select_one_or_more'.tr(),
+                                style: TextStyle(fontSize: 12, color: kColorPrimary),
+                              ),
                               initialValue: _jobTypes,
                               onSaved: (value) {
                                 if (value == null) return;
@@ -403,9 +410,12 @@ class _DiscoverTabState extends State<DiscoverTab> with SingleTickerProviderStat
                             MultiSelectFormField(
                               fillColor: kColorWhite,
                               title: Text(
-                                'vacancy_types'.tr(),
-                                style: TextStyle(fontSize: 13, fontWeight: FontWeight.bold, color: Colors.black),
+                                'vacancy_types'.tr().toUpperCase(),
+                                style: TextStyle(fontSize: 12, fontWeight: FontWeight.bold, color: Colors.black),
                               ),
+                              chipLabelStyle: TextStyle(fontSize: 12, fontWeight: FontWeight.w400, color: kColorPrimary),
+                              chipBackGroundColor: kColorPrimary.withOpacity(0.25),
+                              dialogTextStyle: TextStyle(fontSize: 14, fontWeight: FontWeight.w400, color: Colors.black),
                               validator: (value) {
                                 if (value == null || value.length == 0) {
                                   return 'select_one_or_more'.tr();
@@ -418,7 +428,10 @@ class _DiscoverTabState extends State<DiscoverTab> with SingleTickerProviderStat
                               okButtonLabel: 'ok'.tr(),
                               cancelButtonLabel: 'cancel'.tr(),
                               // required: true,
-                              hintWidget: Text('select_one_or_more'.tr()),
+                              hintWidget: Text(
+                                'select_one_or_more'.tr(),
+                                style: TextStyle(fontSize: 12, color: kColorPrimary),
+                              ),
                               initialValue: _vacancyTypes,
                               onSaved: (value) {
                                 if (value == null) return;
@@ -431,9 +444,12 @@ class _DiscoverTabState extends State<DiscoverTab> with SingleTickerProviderStat
                             MultiSelectFormField(
                               fillColor: kColorWhite,
                               title: Text(
-                                'businesses'.tr(),
-                                style: TextStyle(fontSize: 13, fontWeight: FontWeight.bold, color: Colors.black),
+                                'businesses'.tr().toUpperCase(),
+                                style: TextStyle(fontSize: 12, fontWeight: FontWeight.bold, color: Colors.black),
                               ),
+                              chipLabelStyle: TextStyle(fontSize: 12, fontWeight: FontWeight.w400, color: kColorPrimary),
+                              chipBackGroundColor: kColorPrimary.withOpacity(0.25),
+                              dialogTextStyle: TextStyle(fontSize: 14, fontWeight: FontWeight.w400, color: Colors.black),
                               validator: (value) {
                                 if (value == null || value.length == 0) {
                                   return 'select_one_or_more'.tr();
@@ -446,7 +462,10 @@ class _DiscoverTabState extends State<DiscoverTab> with SingleTickerProviderStat
                               okButtonLabel: 'ok'.tr(),
                               cancelButtonLabel: 'cancel'.tr(),
                               // required: true,
-                              hintWidget: Text('select_one_or_more'.tr()),
+                              hintWidget: Text(
+                                'select_one_or_more'.tr(),
+                                style: TextStyle(fontSize: 12, color: kColorPrimary),
+                              ),
                               initialValue: _businesses,
                               onSaved: (value) {
                                 if (value == null) return;
@@ -458,9 +477,12 @@ class _DiscoverTabState extends State<DiscoverTab> with SingleTickerProviderStat
                             MultiSelectFormField(
                               fillColor: kColorWhite,
                               title: Text(
-                                'schedules'.tr(),
-                                style: TextStyle(fontSize: 13, fontWeight: FontWeight.bold, color: Colors.black),
+                                'schedules'.tr().toUpperCase(),
+                                style: TextStyle(fontSize: 12, fontWeight: FontWeight.bold, color: Colors.black),
                               ),
+                              chipLabelStyle: TextStyle(fontSize: 12, fontWeight: FontWeight.w400, color: kColorPrimary),
+                              chipBackGroundColor: kColorPrimary.withOpacity(0.25),
+                              dialogTextStyle: TextStyle(fontSize: 14, fontWeight: FontWeight.w400, color: Colors.black),
                               validator: (value) {
                                 if (value == null || value.length == 0) {
                                   return 'select_one_or_more'.tr();
@@ -473,7 +495,10 @@ class _DiscoverTabState extends State<DiscoverTab> with SingleTickerProviderStat
                               okButtonLabel: 'ok'.tr(),
                               cancelButtonLabel: 'cancel'.tr(),
                               // required: true,
-                              hintWidget: Text('select_one_or_more'.tr()),
+                              hintWidget: Text(
+                                'select_one_or_more'.tr(),
+                                style: TextStyle(fontSize: 12, color: kColorPrimary),
+                              ),
                               initialValue: _schedules,
                               onSaved: (value) {
                                 if (value == null) return;
@@ -515,6 +540,7 @@ class _DiscoverTabState extends State<DiscoverTab> with SingleTickerProviderStat
                                             _vacancyTypes = [];
                                             _businesses = [];
                                             _schedules = [];
+                                            metroList = [];
                                             _metros = [];
                                           });
 
