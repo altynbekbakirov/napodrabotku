@@ -1,3 +1,5 @@
+import 'dart:io';
+
 import 'package:ishtapp/constants/configs.dart';
 import 'package:http/http.dart' as http;
 import 'dart:convert';
@@ -34,6 +36,7 @@ class Vacancy {
   String status;
   String statusText;
   String responseType;
+  bool responseRead;
 
   Vacancy({
     this.id,
@@ -64,6 +67,7 @@ class Vacancy {
     this.status,
     this.statusText,
     this.responseType,
+    this.responseRead,
   });
 
   static void deactivateVacancyWithOverDeadline() async {
@@ -204,7 +208,8 @@ class Vacancy {
         payPeriod: json['pay_period'],
         status: json['status'],
         statusText: json['status_text'],
-        responseType: json['response_type']
+        responseType: json['response_type'],
+        responseRead: json['response_read'] == 0 ? false : true
       );
 
   static Map<String, dynamic> vacancyToJsonMap(Vacancy vacancy) => {
@@ -461,6 +466,29 @@ class Vacancy {
       throw error;
     }
   }
+
+  Future<void> userCompanyRead(int userId, int userVacancyId) async {
+    var uri = Uri.parse(API_IP + API_USER_COMPANY_READ);
+
+    try {
+      Map<String, String> headers = {"Content-type": "application/json", "token": Prefs.getString(Prefs.TOKEN)};
+      final response = await http.post(
+        uri,
+        headers: headers,
+        body: json.encode({
+          'user_id': userId,
+          'vacancy_id': userVacancyId,
+          'read': true,
+        }),
+      );
+      final responseData = json.decode(response.body);
+      if (responseData['status'] == 400) {
+        throw HttpException(responseData['status'].toString());
+      }
+    } catch (error) {
+      throw error;
+    }
+  }
 }
 
 class JobType {
@@ -488,7 +516,9 @@ class VacancyState {
   List opportunity_duration_ids;
   List internship_language_ids;
   ListVacancysState list;
+  ListVacancysState listMap;
   ListVacancysState active_list;
+  ListVacancysState active_list_user;
   ListVacancysState inactive_list;
   LikedVacancyListState liked_list;
   ListVacancysState all_list;
@@ -498,7 +528,9 @@ class VacancyState {
 
   factory VacancyState.initial() => VacancyState(
       list: ListVacancysState.initial(),
+      listMap: ListVacancysState.initial(),
       active_list: ListVacancysState.initial(),
+      active_list_user: ListVacancysState.initial(),
       inactive_list: ListVacancysState.initial(),
       liked_list: LikedVacancyListState.initial(),
       all_list: ListVacancysState.initial(),
@@ -528,6 +560,7 @@ class VacancyState {
       this.opportunity_duration_ids,
       this.internship_language_ids,
       this.list,
+      this.listMap,
       this.liked_list,
       this.type,
       this.all_list,
@@ -537,6 +570,7 @@ class VacancyState {
       this.number_of_submiteds,
       this.number_of_likeds,
       this.active_list,
+      this.active_list_user,
       this.inactive_list,
       });
 }

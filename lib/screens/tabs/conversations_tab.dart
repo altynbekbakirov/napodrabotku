@@ -115,18 +115,17 @@ class _ConversationsTabState extends State<ConversationsTab> {
                                   ? Badge(text: data[index].num_of_unreads.toString())
                                   : null,
                               onTap: () {
-                                if(Prefs.getInt(Prefs.NEW_MESSAGES_COUNT) > 0){
-                                  if(data[index].num_of_unreads < Prefs.getInt(Prefs.NEW_MESSAGES_COUNT)){
-                                    Prefs.setInt(Prefs.NEW_MESSAGES_COUNT, 0 );
-                                  } else {
-                                    Prefs.setInt(Prefs.NEW_MESSAGES_COUNT, Prefs.getInt(Prefs.NEW_MESSAGES_COUNT) - data[index].num_of_unreads);
-                                  }
-                                }
+                                // if(Prefs.getInt(Prefs.NEW_MESSAGES_COUNT) > 0){
+                                //   if(data[index].num_of_unreads < Prefs.getInt(Prefs.NEW_MESSAGES_COUNT)){
+                                //     Prefs.setInt(Prefs.NEW_MESSAGES_COUNT, 0 );
+                                //   } else {
+                                //     Prefs.setInt(Prefs.NEW_MESSAGES_COUNT, Prefs.getInt(Prefs.NEW_MESSAGES_COUNT) - data[index].num_of_unreads);
+                                //   }
+                                // }
                                 // Prefs.setInt(Prefs.NEW_MESSAGES_COUNT, 0);
 
                                 StoreProvider.of<AppState>(context).dispatch(getChatList());
                                 StoreProvider.of<AppState>(context).dispatch(getNumberOfUnreadMessages());
-                                // StoreProvider.of<AppState>(context).dispatch(getNumberOfUnreadMessages());
 
                                 /// Go to chat screen
                                 Navigator.of(context).push(MaterialPageRoute(

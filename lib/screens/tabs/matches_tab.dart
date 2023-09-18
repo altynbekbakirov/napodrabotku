@@ -7,21 +7,18 @@ import 'package:ishtapp/constants/configs.dart';
 import 'package:ishtapp/datas/RSAA.dart';
 import 'package:ishtapp/datas/app_state.dart';
 import 'package:ishtapp/widgets/default_card_border.dart';
-import 'package:ishtapp/widgets/profile_card_user.dart';
 import 'package:ishtapp/widgets/user_view.dart';
 
 import 'package:ishtapp/widgets/vacancy_view.dart';
-import 'package:ishtapp/screens/profile_full_info_screen.dart';
 import 'package:ishtapp/datas/pref_manager.dart';
 import 'package:ishtapp/datas/vacancy.dart';
 import 'package:ishtapp/datas/user.dart';
 import 'package:ishtapp/routes/routes.dart';
 import 'package:ishtapp/utils/constants.dart';
 import 'package:ishtapp/widgets/profile_card.dart';
-import 'package:ishtapp/widgets/submitted_user_card.dart';
 import 'package:ishtapp/widgets/users_grid.dart';
 import 'package:redux/redux.dart';
-import 'package:ishtapp/datas/Skill.dart';
+import 'package:ishtapp/widgets/Dialogs/Dialogs.dart';
 
 import 'package:flutter_redux/flutter_redux.dart';
 
@@ -41,6 +38,148 @@ class _MatchesTabState extends State<MatchesTab> {
 
   void handleInitialBuildOfLikedUsers(LikedUsersProps props) {
     props.getLikedUsers();
+    props.getCompanyActiveVacancies();
+  }
+
+  int vacancyId;
+  List<dynamic> _vacancyList = [];
+
+  final _vacancyAddFormKey = GlobalKey<FormState>();
+
+  Future<void> openInviteDialog(context, Users user) async {
+
+    _vacancyList = _vacancyList.map<DropdownMenuItem<int>>((dynamic value) {
+      var jj = new Vacancy(id: value.id, name: value.name);
+      return DropdownMenuItem<int>(
+        value: jj.id,
+        child: Text(jj.name.toString()),
+      );
+    }).toList();
+
+    return showDialog(
+        context: context,
+        builder: (context) {
+          return Dialog(
+            insetPadding: EdgeInsets.zero,
+            shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(20.0)),
+            child: Container(
+              constraints: BoxConstraints(maxHeight: MediaQuery.of(context).size.height * 0.9, maxWidth: MediaQuery.of(context).size.width * 0.9),
+              child: Padding(
+                padding: const EdgeInsets.symmetric(horizontal: 20.0, vertical: 30.0),
+                child: ListView(
+                  shrinkWrap: true,
+                  children: [
+                    Container(
+                      child: Align(
+                          alignment: Alignment.center,
+                          child: Text(
+                            'choose_vacancy'.tr(),
+                            style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold, color: Colors.black),
+                          )
+                      ),
+                    ),
+
+                    /// Form
+                    Form(
+                      key: _vacancyAddFormKey,
+                      child: Column(
+                        children: <Widget>[
+                          Container(
+                            margin: EdgeInsets.symmetric(vertical: 40),
+                            child: Column(
+
+                              children: [
+                                DropdownButtonFormField<int>(
+                                  isExpanded: true,
+                                  hint: Text("select".tr()),
+                                  value: vacancyId,
+                                  onChanged: (int newValue) {
+                                    setState(() {
+                                      vacancyId = newValue;
+                                    });
+                                  },
+                                  focusNode: FocusNode(canRequestFocus: false),
+                                  validator: (value) => value == null ? "please_fill_this_field".tr() : null,
+                                  decoration: InputDecoration(
+                                    contentPadding: EdgeInsets.symmetric(vertical: 0, horizontal: 20),
+                                    border: OutlineInputBorder(),
+                                    enabledBorder: OutlineInputBorder(borderSide: BorderSide(color: Colors.grey[200], width: 2.0)),
+                                    errorBorder: OutlineInputBorder(borderSide: BorderSide(color: kColorPrimary, width: 2.0)),
+                                    errorStyle: TextStyle(color: kColorPrimary, fontWeight: FontWeight.w500),
+                                    floatingLabelBehavior: FloatingLabelBehavior.always,
+                                    filled: true,
+                                    fillColor: kColorWhite,
+                                  ),
+                                  items: _vacancyList,
+                                ),
+                              ],
+                            ),
+                          ),
+
+                          Container(
+                            width: double.maxFinite,
+                            child: Flex(
+                              direction: Axis.horizontal,
+                              mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                              children: [
+
+                                CustomButton(
+                                  borderSide: BorderSide(
+                                      color: kColorPrimary,
+                                      width: 2.0
+                                  ),
+                                  color: Colors.transparent,
+                                  textColor: kColorPrimary,
+                                  onPressed: () {
+                                    setState(() {
+                                      vacancyId = null;
+                                    });
+                                    Navigator.of(context).pop();
+                                  },
+                                  text: 'cancel'.tr(),
+                                ),
+                                CustomButton(
+                                  color: kColorPrimary,
+                                  textColor: Colors.white,
+                                  onPressed: () {
+                                    if (_vacancyAddFormKey.currentState.validate()) {
+
+                                      Vacancy.saveVacancyUserInvite(
+                                          vacancy_id: vacancyId,
+                                          type: "INVITED",
+                                          user_id: user.id
+                                      ).then((value) {
+                                        if (value == "OK") {
+                                          // Dialogs.showDialogBox(context,"successfully_submitted".tr());
+                                          StoreProvider.of<AppState>(context).state.user.liked_user_list.data.remove(user);
+                                          StoreProvider.of<AppState>(context).dispatch(getUsers());
+                                          Navigator.of(context).pop();
+                                        } else {
+                                          Dialogs.showDialogBox(context,"some_error_occurred_try_again".tr());
+                                        }
+                                      });
+
+                                      setState(() {
+                                        vacancyId = null;
+                                      });
+                                    } else {
+                                      print('invalid');
+                                    }
+                                  },
+                                  text: 'send'.tr(),
+                                ),
+                              ],
+                            ),
+                          ),
+                        ],
+                      ),
+                    ),
+                  ],
+                ),
+              ),
+            ),
+          );
+        });
   }
 
   @override
@@ -76,7 +215,8 @@ class _MatchesTabState extends State<MatchesTab> {
           onInitialBuild: (props) => this.handleInitialBuildOfLikedUsers(props),
           builder: (context, props) {
             List<Users> data = props.listResponse.data;
-            bool loading = props.listResponse.loading;
+            bool loading = props.listResponse.loading && props.activeList.loading;
+            _vacancyList = props.activeList.data;
 
             Widget body;
 
@@ -173,7 +313,8 @@ class _MatchesTabState extends State<MatchesTab> {
                                                               borderRadius: BorderRadius.circular(4),
                                                               child: user.image != null ?
                                                               CachedNetworkImage(
-                                                                imageUrl: SERVER_IP + user.image + "?token=${Guid.newGuid}",
+                                                                // imageUrl: SERVER_IP + user.image + "?token=${Guid.newGuid}",
+                                                                imageUrl: SERVER_IP + user.image,
                                                                 imageBuilder: (context, imageProvider) => Container(
                                                                   width: 60,
                                                                   height: 60,
@@ -408,6 +549,7 @@ class _MatchesTabState extends State<MatchesTab> {
                                                               color: kColorPrimary,
                                                               textColor: Colors.white,
                                                               onPressed: () async {
+                                                                await openInviteDialog(context, user);
                                                               },
                                                               text: 'invite'.tr(),
                                                             ),
@@ -609,10 +751,14 @@ SubmittedUsersProps mapStateToSubmittedUsersProps(Store<AppState> store) {
 class LikedUsersProps {
   final Function getLikedUsers;
   final LikedUserState listResponse;
+  final Function getCompanyActiveVacancies;
+  final ListVacancysState activeList;
 
   LikedUsersProps({
     this.getLikedUsers,
     this.listResponse,
+    this.getCompanyActiveVacancies,
+    this.activeList,
   });
 }
 
@@ -620,5 +766,7 @@ LikedUsersProps mapStateToLikedUsersProps(Store<AppState> store) {
   return LikedUsersProps(
     listResponse: store.state.user.liked_user_list,
     getLikedUsers: () => store.dispatch(getLikedUsers()),
+    getCompanyActiveVacancies: () => store.dispatch(getCompanyActiveVacancies()),
+    activeList: store.state.vacancy.active_list,
   );
 }

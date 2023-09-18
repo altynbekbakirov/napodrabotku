@@ -136,6 +136,40 @@ ThunkAction<AppState> getVacancies() =>
       type: store.state.vacancy.type,
     ));
 
+const LIST_MAP_VACANCIES_REQUEST = 'LIST_MAP_VACANCIES_REQUEST';
+const LIST_MAP_VACANCIES_SUCCESS = 'LIST_MAP_VACANCIES_SUCCESS';
+const LIST_MAP_VACANCIES_FAILURE = 'LIST_MAP_VACANCIES_FAILURE';
+
+RSAA getMapVacanciesRequest(
+    {
+      List region_ids,
+    }) {
+  return RSAA(
+    method: 'POST',
+    endpoint: API_IP + API_VACANCY_LIST + "?lang=" + Prefs.getString(Prefs.LANGUAGE) + "&route=" + Prefs.getString(Prefs.ROUTE),
+    body: json.encode({
+      'limit': 99,
+      'lang': Prefs.getString(Prefs.LANGUAGE),
+      'offset': 0,
+      'region_ids': region_ids,
+    }),
+    types: [
+      LIST_MAP_VACANCIES_REQUEST,
+      LIST_MAP_VACANCIES_SUCCESS,
+      LIST_MAP_VACANCIES_FAILURE,
+    ],
+    headers: {
+      'Content-Type': 'application/json',
+      'Authorization': Prefs.getString(Prefs.TOKEN) != null ? Prefs.getString(Prefs.TOKEN) : 'null',
+    },
+  );
+}
+
+ThunkAction<AppState> getMapVacancies() =>
+        (Store<AppState> store) => store.dispatch(getMapVacanciesRequest(
+      region_ids: store.state.vacancy.region_ids,
+    ));
+
 ThunkAction<AppState> deleteItem() =>
         (Store<AppState> store) => store.state.vacancy.list.data.removeLast();
 
@@ -316,6 +350,29 @@ ThunkAction<AppState> getNumberOfSubmittedVacancies() =>
         (Store<AppState> store) =>
         store.dispatch(getNumOfSubmittedVacancyRequest());
 
+
+const GET_UNREAD_USER_VACANCY_NUMBER_REQUEST = 'GET_UNREAD_USER_VACANCY_NUMBER_REQUEST';
+const GET_UNREAD_USER_VACANCY_NUMBER_SUCCESS = 'GET_UNREAD_USER_VACANCY_NUMBER_SUCCESS';
+const GET_UNREAD_USER_VACANCY_NUMBER_FAILURE = 'GET_UNREAD_USER_VACANCY_NUMBER_FAILURE';
+RSAA getNumOfUnreadResponsesRequest() {
+  return RSAA(
+    method: 'GET',
+    endpoint: API_IP + API_GET_UNREAD_RESPONSES,
+    types: [
+      GET_UNREAD_USER_VACANCY_NUMBER_REQUEST,
+      GET_UNREAD_USER_VACANCY_NUMBER_SUCCESS,
+      GET_UNREAD_USER_VACANCY_NUMBER_FAILURE,
+    ],
+    headers: {
+      'Content-Type': 'application/json',
+      'Authorization': Prefs.getString(Prefs.TOKEN),
+    },
+  );
+}
+
+ThunkAction<AppState> getNumberOfUnreadResponses() =>
+        (Store<AppState> store) => store.dispatch(getNumOfUnreadResponsesRequest());
+
 const GET_USER_REQUEST = 'GET_USER_REQUEST';
 const GET_USER_SUCCESS = 'GET_USER_SUCCESS';
 const GET_USER_FAILURE = 'GET_USER_FAILURE';
@@ -414,6 +471,37 @@ RSAA getCompanyActiveVacanciesRequest() {
 ThunkAction<AppState> getCompanyActiveVacancies() =>
         (Store<AppState> store) =>
         store.dispatch(getCompanyActiveVacanciesRequest());
+
+
+
+const GET_COMPANY_ACTIVE_VACANCIES_FOR_USER_REQUEST =
+    'GET_COMPANY_ACTIVE_VACANCIES_FOR_USER_REQUEST';
+const GET_COMPANY_ACTIVE_VACANCIES_FOR_USER_SUCCESS =
+    'GET_COMPANY_ACTIVE_VACANCIES_FOR_USER_SUCCESS';
+const GET_COMPANY_ACTIVE_VACANCIES_FOR_USER_FAILURE =
+    'GET_COMPANY_ACTIVE_VACANCIES_FOR_USER_FAILURE';
+RSAA getCompanyActiveVacanciesForUserRequest(int userId) {
+  return RSAA(
+    method: 'GET',
+    endpoint: API_IP +
+        API_COMPANY_ACTIVE_VACANCIES +
+        '?lang=$Prefs.getString(Prefs.LANGUAGE)'
+        + '&user_id=$userId',
+    types: [
+      GET_COMPANY_ACTIVE_VACANCIES_FOR_USER_REQUEST,
+      GET_COMPANY_ACTIVE_VACANCIES_FOR_USER_SUCCESS,
+      GET_COMPANY_ACTIVE_VACANCIES_FOR_USER_FAILURE,
+    ],
+    headers: {
+      'Content-Type': 'application/json',
+      'Authorization': Prefs.getString(Prefs.TOKEN),
+    },
+  );
+}
+
+ThunkAction<AppState> getCompanyActiveVacanciesForUser(int userId) =>
+        (Store<AppState> store) =>
+        store.dispatch(getCompanyActiveVacanciesForUserRequest(userId));
 
 const GET_COMPANY_INACTIVE_VACANCIES_REQUEST =
     'GET_COMPANY_INACTIVE_VACANCIES_REQUEST';

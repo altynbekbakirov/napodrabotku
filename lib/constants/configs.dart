@@ -74,18 +74,22 @@ String API_SAVE_JOB_SPHERE = 'user/save/job_sphere';
 String API_USER_COMPANY_SAVE = 'user_company';
 String API_USER_COMPANY_DELETE = 'user_company/delete';
 String API_USER_COMPANY_NUMBER_LIKED = 'user_company/num_of/LIKED';
+String API_USER_COMPANY_READ = 'user_company/read';
+
 String API_LIKED_USERS = 'user_company/liked_users/';
 String API_ALL_USERS = 'user_company/ALL';
 String API_SUBMIT_USERS = 'user_company/SUBMITTED';
 String API_INVITE_USERS = 'user_company/INVITED';
 
 String API_USER_VACANCY_LIST = 'user_vacancy/ALL';
+String API_USER_VACANCY_READ = 'user_vacancy/read';
 
 String API_CHANGE_STATUS = 'change_status';
 String API_CHANGE_SCHEDULES = 'change_schedules';
 String API_CHANGE_VACANCY_TYPES = 'change_vacancy_types';
 String API_GET_SCHEDULES = 'users/schedules';
 String API_GET_VACANCY_TYPES = 'users/vacancy_types';
+String API_GET_UNREAD_RESPONSES = 'unread_responses';
 
 
 //chat

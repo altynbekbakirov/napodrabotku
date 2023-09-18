@@ -1,7 +1,7 @@
-import 'package:dropdown_search/dropdown_search.dart';
 import 'package:flutter/material.dart';
 import 'package:easy_localization/easy_localization.dart';
 import 'package:flutter_boxicons/flutter_boxicons.dart';
+import 'package:flutter_multiselect/flutter_multiselect.dart';
 import 'package:ishtapp/components/custom_button.dart';
 import 'package:ishtapp/routes/routes.dart';
 import 'package:ishtapp/screens/company_vacancies_screen.dart';
@@ -213,11 +213,11 @@ class _ProfileTabState extends State<ProfileTab> {
                         child: CircleAvatar(
                           backgroundColor: kColorPrimary,
                           radius: 60,
-                          backgroundImage: Prefs.getString(Prefs.PROFILEIMAGE) != null
-                              ? NetworkImage(
+                          backgroundImage: Prefs.getString(Prefs.PROFILEIMAGE) != null ?
+                          NetworkImage(
                               SERVER_IP + Prefs.getString(Prefs.PROFILEIMAGE) + "?token=${Guid.newGuid}",
-                              headers: {"Authorization": Prefs.getString(Prefs.TOKEN)})
-                              : null,
+                              headers: {"Authorization": Prefs.getString(Prefs.TOKEN)}
+                          ) : null,
                         ),
                       ),
 
@@ -347,74 +347,186 @@ class _ProfileTabState extends State<ProfileTab> {
                                 ),
                               ),
                             ),
-                            vacancyTypeList.length > 0 ? MultiSelectFormField(
-                              fillColor: kColorWhite,
-                              autovalidate: true,
-                              title: Text(
-                                'vacancy_types'.tr(),
-                                style: TextStyle(fontSize: 13, fontWeight: FontWeight.bold, color: Colors.black),
-                              ),
-                              validator: (value) {
-                                if (value == null || value.length == 0) {
-                                  return 'select_one_or_more'.tr();
+
+                            vacancyTypeList.length > 0 ? MultiSelect(
+                                autovalidate: true,
+                                titleText: 'vacancy_types'.tr(),
+                                titleTextColor: Colors.black,
+                                validator: (value) {
+                                  if (value == null || value.length == 0) {
+                                    return 'select_one_or_more'.tr();
+                                  }
+                                  if(value.length > 3) {
+                                    return 'max_allowed_3_options'.tr();
+                                  }
+                                  return null;
+                                },
+                                maxLength: 3,
+                                maxLengthText: ' * максимум 3 варианта',
+                                maxLengthIndicatorColor: kColorPrimary,
+                                hintText: 'select_one_or_more'.tr(),
+                                errorText: 'select_one_or_more'.tr(),
+                                dataSource: vacancyTypeList,
+                                textField: 'name',
+                                valueField: 'id',
+                                initialValue: _vacancyTypes,
+                                filterable: false,
+                                required: false,
+                                value: null,
+                                selectIcon: Icons.arrow_drop_down,
+                                selectIconColor: Colors.black,
+                                enabledBorderColor: kColorGray,
+                                selectedOptionsInfoText: '',
+                                selectedOptionsBoxColor: Colors.transparent,
+                                selectedOptionsInfoTextColor: Colors.transparent,
+                                saveButtonIcon: Icons.check,
+                                saveButtonColor: kColorPrimary,
+                                saveButtonText: 'ok'.tr(),
+                                cancelButtonText: 'cancel'.tr(),
+                                cancelButtonColor: kColorWhite,
+                                buttonBarColor: kColorGray,
+                                checkBoxColor: kColorPrimary,
+                                change: (value) async {
+                                  if(value == null) return null;
+                                  if(value.length > 3) return null;
+                                  setState(() {
+                                    _vacancyTypes = value;
+                                  });
+                                  await Users.changeVacancyTypes(vacancyTypes: _vacancyTypes);
+                                },
+                                onSaved: (value) async {
+                                  if(value == null) return null;
+                                  if(value.length > 3) return null;
+                                  setState(() {
+                                    _vacancyTypes = value;
+                                  });
+                                  await Users.changeVacancyTypes(vacancyTypes: _vacancyTypes);
                                 }
-                                if(value.length > 3) {
-                                  return 'max_allowed_3_options'.tr();
-                                }
-                                return null;
-                              },
-                              change: (value) {
-                                print(value);
-                              },
-                              dataSource: vacancyTypeList,
-                              textField: 'name',
-                              valueField: 'id',
-                              okButtonLabel: 'ok'.tr(),
-                              cancelButtonLabel: 'cancel'.tr(),
-                              hintWidget: Text('select_one_or_more'.tr()),
-                              initialValue: _vacancyTypes,
-                              onSaved: (value) async {
-                                if(value == null) return null;
-                                if(value.length > 3) return null;
-                                setState(() {
-                                  _vacancyTypes = value;
-                                });
-                                await Users.changeVacancyTypes(vacancyTypes: _vacancyTypes);
-                              },
                             ) : Container(),
-                            SizedBox(height: 10),
-                            scheduleList.length > 0 ? MultiSelectFormField(
-                              autovalidate: true,
-                              fillColor: kColorWhite,
-                              title: Text(
-                                'schedules'.tr(),
-                                style: TextStyle(fontSize: 13, fontWeight: FontWeight.bold, color: Colors.black),
-                              ),
-                              validator: (value) {
-                                if (value == null || value.length == 0) {
-                                  return 'select_one_or_more'.tr();
+
+                            // vacancyTypeList.length > 0 ? MultiSelectFormField(
+                            //   fillColor: kColorWhite,
+                            //   autovalidate: true,
+                            //   title: Text(
+                            //     'vacancy_types'.tr(),
+                            //     style: TextStyle(fontSize: 13, fontWeight: FontWeight.bold, color: Colors.black),
+                            //   ),
+                            //   validator: (value) {
+                            //     if (value == null || value.length == 0) {
+                            //       return 'select_one_or_more'.tr();
+                            //     }
+                            //     if(value.length > 3) {
+                            //       return 'max_allowed_3_options'.tr();
+                            //     }
+                            //     return null;
+                            //   },
+                            //   dataSource: vacancyTypeList,
+                            //   textField: 'name',
+                            //   valueField: 'id',
+                            //   okButtonLabel: 'ok'.tr(),
+                            //   cancelButtonLabel: 'cancel'.tr(),
+                            //   hintWidget: Text('select_one_or_more'.tr()),
+                            //   initialValue: _vacancyTypes,
+                            //   onSaved: (value) async {
+                            //     if(value == null) return null;
+                            //     if(value.length > 3) return null;
+                            //     setState(() {
+                            //       _vacancyTypes = value;
+                            //     });
+                            //     await Users.changeVacancyTypes(vacancyTypes: _vacancyTypes);
+                            //   },
+                            // ) : Container(),
+
+                            SizedBox(height: 20),
+
+                            scheduleList.length > 0 ? MultiSelect(
+                                autovalidate: true,
+                                titleText: 'schedules'.tr(),
+                                titleTextColor: Colors.black,
+                                validator: (value) {
+                                  if (value == null || value.length == 0) {
+                                    return 'select_one_or_more'.tr();
+                                  }
+                                  if(value.length > 3) {
+                                    return 'max_allowed_3_options'.tr();
+                                  }
+                                  return null;
+                                },
+                                maxLength: 3,
+                                maxLengthText: ' * максимум 3 варианта',
+                                maxLengthIndicatorColor: kColorPrimary,
+                                hintText: 'select_one_or_more'.tr(),
+                                errorText: 'select_one_or_more'.tr(),
+                                dataSource: scheduleList,
+                                textField: 'name',
+                                valueField: 'id',
+                                initialValue: _vacancyTypes,
+                                filterable: false,
+                                required: false,
+                                value: null,
+                                selectIcon: Icons.arrow_drop_down,
+                                selectIconColor: Colors.black,
+                                enabledBorderColor: kColorGray,
+                                selectedOptionsInfoText: '',
+                                selectedOptionsBoxColor: Colors.transparent,
+                                selectedOptionsInfoTextColor: Colors.transparent,
+                                saveButtonIcon: Icons.check,
+                                saveButtonColor: kColorPrimary,
+                                saveButtonText: 'ok'.tr(),
+                                cancelButtonText: 'cancel'.tr(),
+                                cancelButtonColor: kColorWhite,
+                                buttonBarColor: kColorGray,
+                                checkBoxColor: kColorPrimary,
+                                change: (value) async {
+                                  if(value == null) return null;
+                                  if(value.length > 3) return null;
+                                  setState(() {
+                                    _schedules = value;
+                                  });
+                                  await Users.changeSchedule(schedules: _schedules);
+                                },
+                                onSaved: (value) async {
+                                  if(value == null) return null;
+                                  if(value.length > 3) return null;
+                                  setState(() {
+                                    _schedules = value;
+                                  });
+                                  await Users.changeSchedule(schedules: _schedules);
                                 }
-                                if(value.length > 3) {
-                                  return 'max_allowed_3_options'.tr();
-                                }
-                                return null;
-                              },
-                              dataSource: scheduleList,
-                              textField: 'name',
-                              valueField: 'id',
-                              okButtonLabel: 'ok'.tr(),
-                              cancelButtonLabel: 'cancel'.tr(),
-                              hintWidget: Text('select_one_or_more'.tr()),
-                              initialValue: _schedules,
-                              onSaved: (value) async {
-                                if(value == null) return null;
-                                if(value.length > 3) return null;
-                                setState(() {
-                                  _schedules = value;
-                                });
-                                await Users.changeSchedule(schedules: _schedules);
-                              },
                             ) : Container(),
+
+                            // scheduleList.length > 0 ? MultiSelectFormField(
+                            //   autovalidate: true,
+                            //   fillColor: kColorWhite,
+                            //   title: Text(
+                            //     'schedules'.tr(),
+                            //     style: TextStyle(fontSize: 13, fontWeight: FontWeight.bold, color: Colors.black),
+                            //   ),
+                            //   validator: (value) {
+                            //     if (value == null || value.length == 0) {
+                            //       return 'select_one_or_more'.tr();
+                            //     }
+                            //     if(value.length > 3) {
+                            //       return 'max_allowed_3_options'.tr();
+                            //     }
+                            //     return null;
+                            //   },
+                            //   dataSource: scheduleList,
+                            //   textField: 'name',
+                            //   valueField: 'id',
+                            //   okButtonLabel: 'ok'.tr(),
+                            //   cancelButtonLabel: 'cancel'.tr(),
+                            //   hintWidget: Text('select_one_or_more'.tr()),
+                            //   initialValue: _schedules,
+                            //   onSaved: (value) async {
+                            //     if(value == null) return null;
+                            //     if(value.length > 3) return null;
+                            //     setState(() {
+                            //       _schedules = value;
+                            //     });
+                            //     await Users.changeSchedule(schedules: _schedules);
+                            //   },
+                            // ) : Container(),
                           ],
                         ),
                       ) : Container(),

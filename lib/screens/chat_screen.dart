@@ -173,7 +173,7 @@ class _ChatScreenState extends State<ChatScreen> {
                   icon: new Icon(Icons.arrow_back),
                   onPressed: (){
                     StoreProvider.of<AppState>(context).dispatch(getChatList());
-                    // StoreProvider.of<AppState>(context).dispatch(getNumberOfUnreadMessages());
+                    StoreProvider.of<AppState>(context).dispatch(getNumberOfUnreadMessages());
                     Navigator.pop(context,true);
                   }
               ),

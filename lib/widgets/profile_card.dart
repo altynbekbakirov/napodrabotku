@@ -135,7 +135,8 @@ class _ProfileCardState extends State<ProfileCard> {
                                   borderRadius: BorderRadius.circular(4),
                                   child: widget.vacancy.company_logo != null ?
                                   CachedNetworkImage(
-                                    imageUrl: SERVER_IP + widget.vacancy.company_logo + "?token=${Guid.newGuid}",
+                                    // imageUrl: SERVER_IP + widget.vacancy.company_logo + "?token=${Guid.newGuid}",
+                                    imageUrl: SERVER_IP + widget.vacancy.company_logo,
                                     imageBuilder: (context, imageProvider) => Container(
                                       width: 60,
                                       height: 60,
@@ -169,6 +170,38 @@ class _ProfileCardState extends State<ProfileCard> {
                         ),
                       ),
                     ),
+
+                    widget.page == 'user_responses' ? Flexible(
+                      flex: 1,
+                      child: Container(
+                        color: widget.vacancy.responseType == 'SUBMITTED' ? kColorGray : kColorYellow,
+                        height: double.infinity,
+                        padding: const EdgeInsets.symmetric(vertical: 10, horizontal: 20),
+                        child: Flex(
+                          direction: Axis.horizontal,
+                          mainAxisSize: MainAxisSize.max,
+                          mainAxisAlignment: MainAxisAlignment.center,
+                          crossAxisAlignment: CrossAxisAlignment.center,
+                          children: [
+                            Text(
+                              widget.vacancy.responseType == 'SUBMITTED' ? widget.vacancy.responseRead ?
+                              'работодатель просмотрел отклик' :
+                              'отклик отправлен работодателю' :
+                              widget.vacancy.responseType == 'INVITED' ? widget.vacancy.responseRead ?
+                              'приглашение прочитано' :
+                              'получено новое приглашение' :
+                              widget.vacancy.responseType == 'DECLINED' ?
+                              'отклик отклонен работодателем' : '',
+                              style: TextStyle(
+                                fontSize: 12,
+                                fontWeight: FontWeight.bold,
+                                color: kColorDark,
+                              ),
+                            ),
+                          ],
+                        ),
+                      ),
+                    ) : Container(),
 
                     Flexible(
                       flex: 3,
@@ -359,7 +392,7 @@ class _ProfileCardState extends State<ProfileCard> {
                           direction: Axis.horizontal,
                           mainAxisAlignment: MainAxisAlignment.center,
                           children: [
-                            widget.page == 'submit'
+                            widget.page == 'submit' || widget.page == 'user_responses'
                                 ? Container()
                                 : Flexible(
                               flex: 1,
@@ -451,7 +484,7 @@ class _ProfileCardState extends State<ProfileCard> {
                                       Dialogs.showOnDeactivateDialog(context, 'deactivate_are_you_sure'.tr(), false, widget.vacancy);
                                     } else if (widget.page == 'company_inactive') {
                                       Dialogs.showOnDeactivateDialog(context, 'activate_are_you_sure'.tr(), true, widget.vacancy);
-                                    } else if (widget.page == 'submit') {
+                                    } else if (widget.page == 'submit' || widget.page == 'user_responses') {
                                       Navigator.of(context).push(
                                           MaterialPageRoute(builder:
                                               (BuildContext context) {
@@ -473,7 +506,7 @@ class _ProfileCardState extends State<ProfileCard> {
                                       : widget.page ==
                                       'company_inactive'
                                       ? 'activate'.tr()
-                                      : widget.page == 'submit'
+                                      : widget.page == 'submit' || widget.page == 'user_responses'
                                       ? 'write_to'.tr()
                                       : 'submit'.tr()),
                                 ),

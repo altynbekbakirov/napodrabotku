@@ -29,6 +29,24 @@ VacancyState vacancyReducer(VacancyState state, FSA action) {
       newState.list.data = null;
       return newState;
 
+    case LIST_MAP_VACANCIES_REQUEST:
+      newState.listMap.error = null;
+      newState.listMap.loading = true;
+      newState.listMap.data = null;
+      return newState;
+
+    case LIST_MAP_VACANCIES_SUCCESS:
+      newState.listMap.error = null;
+      newState.listMap.loading = false;
+      newState.listMap.data = vacanciesFromJsonStr(action.payload);
+      return newState;
+
+    case LIST_MAP_VACANCIES_FAILURE:
+      newState.listMap.error = action.payload;
+      newState.listMap.loading = false;
+      newState.listMap.data = null;
+      return newState;
+
     case GET_LIKED_VACANCY_REQUEST:
       newState.liked_list.error = null;
       newState.liked_list.loading = true;
@@ -137,7 +155,25 @@ VacancyState vacancyReducer(VacancyState state, FSA action) {
       newState.active_list.data = null;
       return newState;
 
-    case GET_COMPANY_ACTIVE_VACANCIES_REQUEST:
+    case GET_COMPANY_ACTIVE_VACANCIES_FOR_USER_REQUEST:
+      newState.active_list_user.error = null;
+      newState.active_list_user.loading = true;
+      newState.active_list_user.data = null;
+      return newState;
+
+    case GET_COMPANY_ACTIVE_VACANCIES_FOR_USER_SUCCESS:
+      newState.active_list_user.error = null;
+      newState.active_list_user.loading = false;
+      newState.active_list_user.data = vacanciesFromJsonStr(action.payload);
+      return newState;
+
+    case GET_COMPANY_ACTIVE_VACANCIES_FOR_USER_FAILURE:
+      newState.active_list_user.error = action.payload;
+      newState.active_list_user.loading = false;
+      newState.active_list_user.data = null;
+      return newState;
+
+    case GET_COMPANY_INACTIVE_VACANCIES_REQUEST:
       newState.inactive_list.error = null;
       newState.inactive_list.loading = true;
       newState.inactive_list.data = null;

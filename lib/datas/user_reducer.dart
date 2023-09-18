@@ -173,6 +173,18 @@ UserState userReducer(UserState state, FSA action) {
       newState.invited_users.data = null;
       return newState;
 
+    case GET_UNREAD_USER_VACANCY_NUMBER_REQUEST:
+      newState.numberOfUnreadResponses = 0;
+      return newState;
+
+    case GET_UNREAD_USER_VACANCY_NUMBER_SUCCESS:
+      newState.numberOfUnreadResponses = int.parse(action.payload);
+      return newState;
+
+    case GET_UNREAD_USER_VACANCY_NUMBER_FAILURE:
+      newState.numberOfUnreadResponses = 0;
+      return newState;
+
     default:
       return newState;
   }

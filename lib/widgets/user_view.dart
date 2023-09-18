@@ -6,6 +6,7 @@ import 'package:ishtapp/datas/RSAA.dart';
 import 'package:ishtapp/datas/app_state.dart';
 import 'package:ishtapp/datas/user.dart';
 import 'package:ishtapp/datas/vacancy.dart';
+import 'package:ishtapp/widgets/Dialogs/Dialogs.dart';
 import 'package:swipe_stack/swipe_stack.dart';
 import 'package:easy_localization/easy_localization.dart';
 
@@ -28,8 +29,9 @@ class UserView extends StatefulWidget {
 
   /// Swiper position
   final SwiperPosition position;
+  final List<Vacancy> vacancyList;
 
-  UserView({this.page, this.position, @required this.user});
+  UserView({this.page, this.position, @required this.user, this.vacancyList,});
 
   @override
   _UserViewState createState() => _UserViewState();
@@ -41,55 +43,142 @@ class _UserViewState extends State<UserView> {
 
   var data = [];
 
-  void _showDialog(context, String message) {
-    showDialog(
-      context: context,
-      builder: (ctx) => Center(
-        child: AlertDialog(
-          title: Text(''),
-          content: Text(message),
-          actions: <Widget>[
-            FlatButton(
-              child: Text('ok'.tr()),
-              onPressed: () {
-                Navigator.of(ctx).pop();
-              },
-            ),
-          ],
-        ),
-      ),
-    );
-  }
+  int vacancyId;
+  List<dynamic> _vacancyList = [];
 
-  void _showDialog1(context, String message) {
-    showDialog(
-      context: context,
-      builder: (ctx) => Center(
-        child: AlertDialog(
-          title: Text(''),
-          content: Text(
-              message,
-            textAlign: TextAlign.center,
-            style: TextStyle(),
-          ),
-          actions: <Widget>[
-            Container(
-              child: CustomButton(
-                height: 40.0,
-                padding: EdgeInsets.symmetric(vertical: 4, horizontal: 20),
-                text: 'okay'.tr(),
-                onPressed: () {
-                  StoreProvider.of<AppState>(context).dispatch(getSubmittedVacancies());
-                  StoreProvider.of<AppState>(context).dispatch(getNumberOfSubmittedVacancies());
-                  Navigator.of(ctx).pop();
-                  Navigator.of(ctx).pop();
-                },
+  final _vacancyAddFormKey = GlobalKey<FormState>();
+
+  Future<void> openInviteDialog(context) async {
+
+    _vacancyList = widget.vacancyList.map<DropdownMenuItem<int>>((dynamic value) {
+      var jj = new Vacancy(id: value.id, name: value.name);
+      return DropdownMenuItem<int>(
+        value: jj.id,
+        child: Text(jj.name.toString()),
+      );
+    }).toList();
+
+    return showDialog(
+        context: context,
+        builder: (context) {
+          return Dialog(
+            insetPadding: EdgeInsets.zero,
+            shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(20.0)),
+            child: Container(
+              constraints: BoxConstraints(maxHeight: MediaQuery.of(context).size.height * 0.9, maxWidth: MediaQuery.of(context).size.width * 0.9),
+              child: Padding(
+                padding: const EdgeInsets.symmetric(horizontal: 20.0, vertical: 30.0),
+                child: ListView(
+                  shrinkWrap: true,
+                  children: [
+                    Container(
+                      child: Align(
+                          alignment: Alignment.center,
+                          child: Text(
+                            'choose_vacancy'.tr(),
+                            style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold, color: Colors.black),
+                          )
+                      ),
+                    ),
+
+                    /// Form
+                    Form(
+                      key: _vacancyAddFormKey,
+                      child: Column(
+                        children: <Widget>[
+                          Container(
+                            margin: EdgeInsets.symmetric(vertical: 40),
+                            child: Column(
+
+                              children: [
+                                DropdownButtonFormField<int>(
+                                  isExpanded: true,
+                                  hint: Text("select".tr()),
+                                  value: vacancyId,
+                                  onChanged: (int newValue) {
+                                    setState(() {
+                                      vacancyId = newValue;
+                                    });
+                                  },
+                                  focusNode: FocusNode(canRequestFocus: false),
+                                  validator: (value) => value == null ? "please_fill_this_field".tr() : null,
+                                  decoration: InputDecoration(
+                                    contentPadding: EdgeInsets.symmetric(vertical: 0, horizontal: 20),
+                                    border: OutlineInputBorder(),
+                                    enabledBorder: OutlineInputBorder(borderSide: BorderSide(color: Colors.grey[200], width: 2.0)),
+                                    errorBorder: OutlineInputBorder(borderSide: BorderSide(color: kColorPrimary, width: 2.0)),
+                                    errorStyle: TextStyle(color: kColorPrimary, fontWeight: FontWeight.w500),
+                                    floatingLabelBehavior: FloatingLabelBehavior.always,
+                                    filled: true,
+                                    fillColor: kColorWhite,
+                                  ),
+                                  items: _vacancyList,
+                                ),
+                              ],
+                            ),
+                          ),
+
+                          Container(
+                            width: double.maxFinite,
+                            child: Flex(
+                              direction: Axis.horizontal,
+                              mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                              children: [
+
+                                CustomButton(
+                                  borderSide: BorderSide(
+                                      color: kColorPrimary,
+                                      width: 2.0
+                                  ),
+                                  color: Colors.transparent,
+                                  textColor: kColorPrimary,
+                                  onPressed: () {
+                                    setState(() {
+                                      vacancyId = null;
+                                    });
+                                    Navigator.of(context).pop();
+                                  },
+                                  text: 'cancel'.tr(),
+                                ),
+                                CustomButton(
+                                  color: kColorPrimary,
+                                  textColor: Colors.white,
+                                  onPressed: () {
+                                    if (_vacancyAddFormKey.currentState.validate()) {
+
+                                      Vacancy.saveVacancyUserInvite(vacancy_id: vacancyId, type: "INVITED", user_id: widget.user.id).then((value) {
+                                        if (value == "OK") {
+                                          // Dialogs.showDialogBox(context,"successfully_submitted".tr());
+                                          StoreProvider.of<AppState>(context).state.user.list.data.remove(widget.user);
+                                          StoreProvider.of<AppState>(context).dispatch(getUsers());
+                                          Navigator.of(context).pop();
+                                          Navigator.of(context).pop();
+                                        } else {
+                                          Dialogs.showDialogBox(context,"some_error_occurred_try_again".tr());
+                                        }
+                                      });
+
+                                      setState(() {
+                                        vacancyId = null;
+                                      });
+                                    } else {
+                                      print('invalid');
+                                    }
+                                  },
+                                  text: 'send'.tr(),
+                                ),
+                              ],
+                            ),
+                          ),
+                        ],
+                      ),
+                    ),
+                  ],
+                ),
               ),
-            )
-          ],
-        ),
-      ),
-    );
+            ),
+          );
+        });
   }
 
   @override
@@ -122,7 +211,7 @@ class _UserViewState extends State<UserView> {
                   Container(
                     color: kColorWhite,
                     child: Container(
-                      color: kColorGray,
+                      color: widget.user.response_type == 'SUBMITTED' ? kColorYellow : kColorGray,
                       padding: const EdgeInsets.symmetric(vertical: 15, horizontal: 20),
                       child: Row(
                         mainAxisAlignment: MainAxisAlignment.spaceBetween,
@@ -161,7 +250,8 @@ class _UserViewState extends State<UserView> {
                               borderRadius: BorderRadius.circular(4),
                               child: widget.user.image != null ?
                               CachedNetworkImage(
-                                imageUrl: SERVER_IP + widget.user.image + "?token=${Guid.newGuid}",
+                                // imageUrl: SERVER_IP + widget.user.image + "?token=${Guid.newGuid}",
+                                imageUrl: SERVER_IP + widget.user.image,
                                 imageBuilder: (context, imageProvider) => Container(
                                   width: 60,
                                   height: 60,
@@ -195,78 +285,114 @@ class _UserViewState extends State<UserView> {
                     ),
                   ),
 
+                  widget.page == 'submitted' ? Container(
+                    child: Container(
+                      color: widget.user.response_type == 'SUBMITTED' ? kColorGray : kColorYellow,
+                      padding: const EdgeInsets.symmetric(vertical: 10, horizontal: 20),
+                      child: Flex(
+                        direction: Axis.horizontal,
+                        mainAxisSize: MainAxisSize.max,
+                        mainAxisAlignment: MainAxisAlignment.center,
+                        crossAxisAlignment: CrossAxisAlignment.center,
+                        children: [
+                          Text(
+                            widget.user.response_type == 'SUBMITTED' ? widget.user.response_read ?
+                            'просмотрен отклик на вакансию \n"${widget.user.vacancy_name}"' :
+                            'новый отклик на вакансию \n"${widget.user.vacancy_name}"' :
+                            'приглашен на вакансию \n"${widget.user.vacancy_name}"',
+                            textAlign: TextAlign.center,
+                            style: TextStyle(
+                              fontSize: 12,
+                              height: 1,
+                              fontWeight: FontWeight.bold,
+                              color: kColorDark,
+                            ),
+                          ),
+                        ],
+                      ),
+                    ),
+                  ) : Container(),
+
                   Container(
                     child: Container(
-                      padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 20),
+                      padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 10),
                       child: Row(
                         mainAxisAlignment: MainAxisAlignment.spaceBetween,
                         crossAxisAlignment: CrossAxisAlignment.center,
                         children: [
 
                           /// Labels
-                          Container(
-                            child: Column(
-                              mainAxisAlignment: MainAxisAlignment.center,
-                              crossAxisAlignment: CrossAxisAlignment.start,
-                              children: [
-                                // Интересуемые вакансии
-                                widget.user.vacancy_type != 'null' ? Container(
-                                  padding: EdgeInsets.symmetric(horizontal: 10, vertical: 5),
-                                  decoration: BoxDecoration(
-                                      color: kColorGray,
-                                      borderRadius: BorderRadius.circular(4)
-                                  ),
-                                  child: Text(
-                                    widget.user.vacancy_type != 'null' ? widget.user.vacancy_type.toString() : '',
-                                    style: TextStyle(
-                                      fontSize: 12,
-                                      fontWeight: FontWeight.w700,
-                                      color: kColorDark,
+                          Expanded(
+                            flex: 3,
+                            child: Container(
+                              child: Wrap(
+                                direction: Axis.horizontal,
+                                // mainAxisAlignment: MainAxisAlignment.start,
+                                // crossAxisAlignment: CrossAxisAlignment.start,
+                                clipBehavior: Clip.antiAlias,
+                                children: [
+                                  // Статус
+
+                                  Container(
+                                    padding: EdgeInsets.symmetric(horizontal: 10, vertical: 5),
+                                    margin: EdgeInsets.only(right: 5, top: 5),
+                                    decoration: BoxDecoration(
+                                        color: widget.user.status == 0 ? kColorBlue :
+                                        widget.user.status == 1  ? kColorGreen : kColorGray,
+                                        borderRadius: BorderRadius.circular(4)
+                                    ),
+                                    child: Text(
+                                      widget.user.statusText != null ? widget.user.statusText : '',
+                                      style: TextStyle(
+                                          fontSize: 12,
+                                          fontWeight: FontWeight.bold,
+                                          fontFamily: 'Manrope',
+                                          color: kColorDark
+                                      ),
                                     ),
                                   ),
-                                ) : Container(),
 
-                                // Вид занятости
-                                widget.user.business != 'null' ?
-                                Container(
-                                  padding: EdgeInsets.symmetric(horizontal: 10, vertical: 5),
-                                  margin: EdgeInsets.only(top: 5),
-                                  decoration: BoxDecoration(
-                                      color: kColorGray,
-                                      borderRadius: BorderRadius.circular(4)
-                                  ),
-                                  child: Text(
-                                    widget.user.business != 'null' ? widget.user.business.toString() : '',
-                                    style: TextStyle(
+
+                                  // Интересуемые вакансии
+
+                                  for ( var vacancy_type in widget.user.vacancy_types) Container(
+                                    padding: EdgeInsets.symmetric(horizontal: 10, vertical: 5),
+                                    margin: EdgeInsets.only(right: 5, top: 5),
+                                    decoration: BoxDecoration(
+                                        color: kColorGray,
+                                        borderRadius: BorderRadius.circular(4)
+                                    ),
+                                    child: Text(
+                                      vacancy_type.toString(),
+                                      style: TextStyle(
                                         fontSize: 12,
-                                        fontWeight: FontWeight.bold,
-                                        fontFamily: 'Manrope',
-                                        color: kColorDark
+                                        fontWeight: FontWeight.w700,
+                                        color: kColorDark,
+                                      ),
                                     ),
                                   ),
-                                )  : Container(),
 
-                                // Статус
-                                Container(
-                                  padding: EdgeInsets.symmetric(horizontal: 10, vertical: 5),
-                                  margin: EdgeInsets.only(top: 5),
-                                  decoration: BoxDecoration(
-                                      color: widget.user.status == 1 ? kColorBlue :
-                                      widget.user.status == 2  ? kColorGreen : kColorGray,
-                                      borderRadius: BorderRadius.circular(4)
-                                  ),
-                                  child: Text(
-                                    widget.user.statusText != null ? widget.user.statusText : '',
-                                    style: TextStyle(
+                                  // Графики работы
+
+                                  for ( var schedule in widget.user.schedules) Container(
+                                    padding: EdgeInsets.symmetric(horizontal: 10, vertical: 5),
+                                    margin: EdgeInsets.only(right: 5, top: 5),
+                                    decoration: BoxDecoration(
+                                        color: kColorGray,
+                                        borderRadius: BorderRadius.circular(4)
+                                    ),
+                                    child: Text(
+                                      schedule.toString(),
+                                      style: TextStyle(
                                         fontSize: 12,
-                                        fontWeight: FontWeight.bold,
-                                        fontFamily: 'Manrope',
-                                        color: kColorDark
+                                        fontWeight: FontWeight.w700,
+                                        color: kColorDark,
+                                      ),
                                     ),
                                   ),
-                                ),
 
-                              ],
+                                ],
+                              ),
                             ),
                           ),
 
@@ -349,7 +475,7 @@ class _UserViewState extends State<UserView> {
                           direction: Axis.horizontal,
                           mainAxisAlignment: MainAxisAlignment.center,
                           children: [
-                            widget.page == 'company_home' || widget.page == 'company_liked' ?
+                            widget.page == 'company_home' || widget.page == 'company_liked' || widget.page == 'submitted' ?
                             Flexible(
                               flex: 1,
                               child: Container(
@@ -357,7 +483,7 @@ class _UserViewState extends State<UserView> {
                                 child: CustomButton(
                                   onPressed: () {
                                     if (Prefs.getString(Prefs.TOKEN) != null) {
-                                      if(widget.page == 'company_home'){
+                                      if(widget.page == 'company_home' || widget.page == 'submitted'){
                                         Users.saveUserCompany(userId: widget.user.id, type: 'LIKED').then((value) {
                                           StoreProvider.of<AppState>(context).state.user.liked_user_list.data.remove(widget.user);
                                           StoreProvider.of<AppState>(context).dispatch(getUsers());
@@ -387,31 +513,31 @@ class _UserViewState extends State<UserView> {
                                   padding: EdgeInsets.all(0),
                                   color: Colors.transparent,
                                   textColor: kColorPrimary,
-                                  text: widget.page == 'company_home'
-                                      ? 'select_user'.tr()
-                                      : widget.page == 'company_liked'
-                                      ? 'delete'.tr()
-                                      : 'skip'.tr(),
+                                  text: widget.page == 'company_home' ? 'select_user'.tr() :
+                                  widget.page == 'company_liked' || widget.page == 'submitted' ?
+                                  'delete'.tr() :
+                                  'skip'.tr(),
                                 ),
                               ),
                             ) : Container(),
                             Prefs.getString(Prefs.TOKEN) != null
-                                ? Flexible(
+                                ? widget.user.response_type == 'SUBMITTED' ?  Container() : Flexible(
                               child: Container(
                                 margin:
                                 EdgeInsets.symmetric(horizontal: 5),
                                 child: CustomButton(
                                   padding: EdgeInsets.all(0),
-                                  color: kColorPrimary,
-                                  textColor: Colors.white,
+                                  color: widget.user.response_type == 'INVITED' ? kColorGray : kColorPrimary,
+                                  textColor: widget.user.response_type == 'INVITED' ? kColorDarkBlue : Colors.white,
                                   onPressed: () async {
-                                    if (widget.page == 'company_home') {
-
+                                    if(widget.page == 'company_home'){
+                                      await openInviteDialog(context);
                                     }
                                   },
-                                  text: widget.page == 'company_home' || widget.page == 'company_liked'
-                                      ? 'invite'.tr()
-                                      : 'submit'.tr(),
+                                  text: widget.page == 'company_home' || widget.page == 'company_liked' ? 'invite'.tr() :
+                                  widget.page == 'submitted' && widget.user.response_type == 'INVITED' ?
+                                  'Отправлено'.tr() :
+                                  'submit'.tr(),
                                 ),
                               ),
                             ) : Container(),
@@ -420,6 +546,36 @@ class _UserViewState extends State<UserView> {
                       ),
                     ),
                   ),
+
+                  widget.page == 'submitted' ? Container(
+                    padding: const EdgeInsets.symmetric(horizontal: 15, vertical: 10),
+                    child: Container(
+                      child: SizedBox(
+                        width: double.maxFinite,
+                        child: Flex (
+                          direction: Axis.horizontal,
+                          mainAxisAlignment: MainAxisAlignment.center,
+                          children: [
+                            Flexible(
+                              child: Container(
+                                margin:
+                                EdgeInsets.symmetric(horizontal: 5),
+                                child: CustomButton(
+                                  padding: EdgeInsets.all(0),
+                                  color: kColorPrimary,
+                                  textColor: Colors.white,
+                                  onPressed: () async {
+                                    _makePhoneCall("tel://"+widget.user.phone_number);
+                                  },
+                                  text: widget.user.phone_number,
+                                ),
+                              ),
+                            )
+                          ],
+                        ),
+                      ),
+                    ),
+                  ) : Container(),
                 ],
               ),
             ),
@@ -427,5 +583,13 @@ class _UserViewState extends State<UserView> {
         );
       },
     );
+  }
+
+  Future<void> _makePhoneCall(String url) async {
+    if (await canLaunch(url)) {
+      await launch(url);
+    } else {
+      throw 'Could not launch $url';
+    }
   }
 }

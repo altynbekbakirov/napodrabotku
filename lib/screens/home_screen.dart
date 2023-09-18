@@ -21,7 +21,6 @@ import 'package:ishtapp/widgets/badge.dart';
 import 'package:ishtapp/datas/pref_manager.dart';
 import 'package:intl_phone_number_input/intl_phone_number_input.dart';
 import 'dart:async';
-import 'package:http/http.dart' as http;
 import 'dart:convert';
 import 'dart:math';
 
@@ -36,33 +35,8 @@ class HomeScreen extends StatefulWidget {
 
 class _HomeScreenState extends State<HomeScreen> {
 
-  Intro introStart = Intro(
-    stepCount: 7,
-
-    /// use defaultTheme, or you can implement widgetBuilder function yourself
-    widgetBuilder: StepWidgetBuilder.useDefaultTheme(
-      texts: [
-        'Настрой поиск под себя',
-        'Заполни полностью свой профиль',
-        'Выбери нужный период актуальности вакансии и способ отображения предложений',
-        'Главная страница поиска',
-        'Отобранные Вами предложения',
-        'Все Ваши отклики',
-        'Вся Ваша переписка с работодателями',
-      ],
-      buttonTextBuilder: (currPage, totalPage) {
-        return currPage < totalPage - 1 ? 'Дальше' : 'Завершить';
-      },
-      maskClosable: true,
-    ),
-  );
-
   Intro intro;
   Intro intro2;
-
-  //region Variables
-  final _formKey = GlobalKey<FormState>();
-  final _vacancyAddFormKey = GlobalKey<FormState>();
 
   List<dynamic> jobTypeList = [];
   List<dynamic> vacancyTypeList = [];
@@ -116,6 +90,7 @@ class _HomeScreenState extends State<HomeScreen> {
   }
 
   getLists() async {
+
     regionList = await Vacancy.getLists('region', null);
     jobTypeList = await Vacancy.getLists('job_type', null);
     vacancyTypeList = await Vacancy.getLists('vacancy_type', null);
@@ -127,7 +102,11 @@ class _HomeScreenState extends State<HomeScreen> {
         regions.add(region["name"]);
       });
     });
-    currencyList = await Vacancy.getLists('currencies', null);
+
+    if (Prefs.getString(Prefs.USER_TYPE) == 'COMPANY') {
+      currencyList = await Vacancy.getLists('currencies', null);
+    }
+
   }
 
   getDistrictsByRegionName(region) async {
@@ -138,10 +117,6 @@ class _HomeScreenState extends State<HomeScreen> {
         districts.add(district['name']);
       });
     });
-  }
-
-  void _deactivateVacancyWithOverDeadline() async {
-    Vacancy.deactivateVacancyWithOverDeadline();
   }
 
   void _nextTab(int tabIndex, {isProfile = false}) {
@@ -668,28 +643,52 @@ class _HomeScreenState extends State<HomeScreen> {
     );
   }
 
-  int _newMessagesCounter = 0;
-
-  void loadCounter() async {
-    setState(() {
-      _newMessagesCounter = (Prefs.getInt(Prefs.NEW_MESSAGES_COUNT) ?? 0);
-    });
-  }
-
   void bindEventPusher() async {
     channel.bind('new-message-sent', (PusherEvent event) {
       var data = json.decode(event.data);
       print("New message sent event " + event.data.toString());
 
-      if(data['user_id'] - Prefs.getInt(Prefs.USER_ID) == 0){
-        setState(() {
-          // _newMessagesCounter = ((Prefs.getInt(Prefs.NEW_MESSAGES_COUNT) ?? 0) + 1);
-          // Prefs.setInt(Prefs.NEW_MESSAGES_COUNT, _newMessagesCounter);
-          StoreProvider.of<AppState>(context).dispatch(getChatList());
-          StoreProvider.of<AppState>(context).dispatch(getNumberOfUnreadMessages());
-          // StoreProvider.of<AppState>(context).dispatch(getMessageList(data['sender_id'], data['vacancy_id']));
-        });
+      if(Prefs.getString(Prefs.USER_TYPE) == 'COMPANY'){
+        if(data['sender_id'] - Prefs.getInt(Prefs.USER_ID) == 0){
+          setState(() {
+            StoreProvider.of<AppState>(context).dispatch(getChatList());
+            StoreProvider.of<AppState>(context).dispatch(getNumberOfUnreadMessages());
+          });
+        }
+      } else {
+        if(data['user_id'] - Prefs.getInt(Prefs.USER_ID) == 0){
+          setState(() {
+            StoreProvider.of<AppState>(context).dispatch(getChatList());
+            StoreProvider.of<AppState>(context).dispatch(getNumberOfUnreadMessages());
+          });
+        }
       }
+    });
+
+    channel.bind('new-invitation-sent', (PusherEvent event) {
+      var data = json.decode(event.data);
+      print("New invitation sent event " + event.data.toString());
+
+      if(Prefs.getString(Prefs.USER_TYPE) == 'COMPANY'){
+        if(data['company_id'] - Prefs.getInt(Prefs.USER_ID) == 0){
+          setState(() {
+            StoreProvider.of<AppState>(context).dispatch(getAllUsers());
+            StoreProvider.of<AppState>(context).dispatch(getInviteUsers());
+            StoreProvider.of<AppState>(context).dispatch(getSubmitUsers());
+            StoreProvider.of<AppState>(context).dispatch(getNumberOfUnreadResponses());
+          });
+        }
+      } else {
+        if(data['user_id'] - Prefs.getInt(Prefs.USER_ID) == 0){
+          setState(() {
+            StoreProvider.of<AppState>(context).dispatch(getUserVacancies());
+            StoreProvider.of<AppState>(context).dispatch(getInvitedVacancies());
+            StoreProvider.of<AppState>(context).dispatch(getSubmittedVacancies());
+            StoreProvider.of<AppState>(context).dispatch(getNumberOfUnreadResponses());
+          });
+        }
+      }
+
     });
   }
 
@@ -746,9 +745,6 @@ class _HomeScreenState extends State<HomeScreen> {
       ),
     );
 
-    if (Prefs.getString(Prefs.USER_TYPE) == 'COMPANY') {
-      _deactivateVacancyWithOverDeadline();
-    }
     getLists();
     buildSome(context);
 
@@ -763,8 +759,6 @@ class _HomeScreenState extends State<HomeScreen> {
         });
       }
     }
-
-    loadCounter();
 
     PusherClient pusher = PusherClient(
       '73e14d3cf78debd02655',
@@ -798,6 +792,7 @@ class _HomeScreenState extends State<HomeScreen> {
     props.getLikedNumOfVacancies();
     props.getSubmittedNumOfVacancies();
     props.getNumberOfUnreadMessages();
+    props.getNumberOfUnreadResponses();
   }
 
   @override
@@ -921,20 +916,20 @@ class _HomeScreenState extends State<HomeScreen> {
                             Positioned(
                               top: 0,
                               left: 0,
-                              right: StoreProvider.of<AppState>(context).state.vacancy.number_of_submiteds > 0 ? null : 0,
+                              right: StoreProvider.of<AppState>(context).state.user.numberOfUnreadResponses > 0 ? null : 0,
                               child: Icon(
                                 Boxicons.bx_file,
                                 color: _tabCurrentIndex == 2 ? kColorPrimary : Colors.grey,
                               ),
                             ),
 
-                            StoreProvider.of<AppState>(context).state.vacancy.number_of_submiteds > 0 ?
+                            StoreProvider.of<AppState>(context).state.user.numberOfUnreadResponses > 0 ?
                             Positioned(
                               top: 0,
                               right: 0,
-                              child: StoreProvider.of<AppState>(context).state.vacancy.number_of_submiteds > 0 ?
+                              child: StoreProvider.of<AppState>(context).state.user.numberOfUnreadResponses > 0 ?
                               Badge(
-                                  text: StoreProvider.of<AppState>(context).state.vacancy.number_of_submiteds.toString()
+                                  text: StoreProvider.of<AppState>(context).state.user.numberOfUnreadResponses.toString()
                               ) : Container(),
                             ) :
                             Container(),
@@ -1025,15 +1020,19 @@ class VacanciesScreenProps {
   final Function getLikedNumOfVacancies;
   final Function getSubmittedNumOfVacancies;
   final Function getNumberOfUnreadMessages;
+  final Function getNumberOfUnreadResponses;
   final int response;
   final int numberOfUnreadMessages;
+  final int numberOfUnreadResponses;
 
   VacanciesScreenProps({
     this.getLikedNumOfVacancies,
     this.getSubmittedNumOfVacancies,
     this.getNumberOfUnreadMessages,
+    this.getNumberOfUnreadResponses,
     this.response,
     this.numberOfUnreadMessages,
+    this.numberOfUnreadResponses,
   });
 }
 
@@ -1041,8 +1040,10 @@ VacanciesScreenProps mapStateToProps(Store<AppState> store) {
   return VacanciesScreenProps(
     response: store.state.vacancy.number_of_likeds,
     numberOfUnreadMessages: store.state.chat.number_of_unread,
+    numberOfUnreadResponses: store.state.user.numberOfUnreadResponses,
     getLikedNumOfVacancies: () => store.dispatch(getNumberOfLikedVacancies()),
     getSubmittedNumOfVacancies: () => store.dispatch(getNumberOfSubmittedVacancies()),
     getNumberOfUnreadMessages: () => store.dispatch(getNumberOfUnreadMessages()),
+    getNumberOfUnreadResponses: () => store.dispatch(getNumberOfUnreadResponses()),
   );
 }

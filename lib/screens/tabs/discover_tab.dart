@@ -276,6 +276,9 @@ class _DiscoverTabState extends State<DiscoverTab> with SingleTickerProviderStat
                                       print(pattern);
                                       if(pattern.length > 3) {
                                         _suggestions = await _fetchAddressSuggestions(pattern);
+                                      } else {
+                                        _suggestions = [];
+                                        metroList = [];
                                       }
                                       return _suggestions;
                                     },
@@ -330,6 +333,7 @@ class _DiscoverTabState extends State<DiscoverTab> with SingleTickerProviderStat
                                     },
                                     validator: (value) {
                                       if (value.isEmpty) {
+                                        metroList = [];
                                         return 'Введите адрес';
                                       }
                                       return null;
@@ -355,9 +359,18 @@ class _DiscoverTabState extends State<DiscoverTab> with SingleTickerProviderStat
                                 }
                                 return null;
                               },
-                              dataSource: metroList,
+                              dataSource: metroList.length > 0 ? metroList
+                                  .map((item) => ({
+                                    'name': item['name'],
+                                    'line': item['line'],
+                                    'name_line': item['name'] + '\n' + item['line'],
+                                    'color': item['color'].toString()
+                                  }))
+                                  .toList() : metroList,
                               textField: 'name',
+                              text2Field: 'line',
                               valueField: 'name',
+                              colorField: 'color',
                               okButtonLabel: 'ok'.tr(),
                               cancelButtonLabel: 'cancel'.tr(),
                               // required: true,
@@ -559,6 +572,7 @@ class _DiscoverTabState extends State<DiscoverTab> with SingleTickerProviderStat
                                           );
 
                                           StoreProvider.of<AppState>(context).dispatch(getVacancies());
+                                          StoreProvider.of<AppState>(context).dispatch(getMapVacancies());
 
                                           Navigator.of(context).pop();
                                           // _nextTab(0);
@@ -591,12 +605,13 @@ class _DiscoverTabState extends State<DiscoverTab> with SingleTickerProviderStat
                                               job_type_ids: _jobTypes)
                                           );
                                           StoreProvider.of<AppState>(context).dispatch(getVacancies());
-                                          Navigator.of(context).pop();
-                                          (await _controller.future).move(
-                                            point: _point,
-                                            animation: const MapAnimation(smooth: true, duration: 1),
-                                            zoom: 8,
+                                          StoreProvider.of<AppState>(context).dispatch(getMapVacancies());
+                                          await _yandexMapController.move(
+                                              point: _point,
+                                              animation: const MapAnimation(smooth: true, duration: 2.0),
+                                              zoom: 8
                                           );
+                                          Navigator.of(context).pop();
                                           // _nextTab(0);
                                         },
                                         text: 'save'.tr(),
@@ -1350,6 +1365,7 @@ class _DiscoverTabState extends State<DiscoverTab> with SingleTickerProviderStat
                         padding: EdgeInsets.symmetric(horizontal: 20, vertical: 20),
                         child: UsersGrid(
                             children: data.map((user) {
+
                               return GestureDetector(
                                 child: ProfileCardUser(
                                   user: user,
@@ -1366,7 +1382,8 @@ class _DiscoverTabState extends State<DiscoverTab> with SingleTickerProviderStat
                                       ),
                                       body: UserView(
                                         page: 'company_home',
-                                        user: user
+                                        user: user,
+                                        vacancyList: _vacancyList,
                                       ),
                                     );
                                   }));
@@ -1379,7 +1396,7 @@ class _DiscoverTabState extends State<DiscoverTab> with SingleTickerProviderStat
                         padding: EdgeInsets.fromLTRB(40, 0, 40, 0),
                         child: Center(
                           child: Text(
-                            'company_vacancies_empty'.tr(),
+                            'empty'.tr(),
                             textAlign: TextAlign.center,
                             style: TextStyle(
                               color: Colors.white,
@@ -1402,6 +1419,7 @@ class _DiscoverTabState extends State<DiscoverTab> with SingleTickerProviderStat
       onInitialBuild: (props) => this.handleInitialBuild(props),
       builder: (context, props)  {
         List<Vacancy> data = props.listResponse.data;
+        List<Vacancy> dataMap = props.listMapResponse.data;
         bool loading = props.listResponse.loading;
 
         Widget body;
@@ -1550,22 +1568,24 @@ class _DiscoverTabState extends State<DiscoverTab> with SingleTickerProviderStat
                         children: [
                           YandexMap(
                             onMapCreated: (YandexMapController controller) async {
-                              _yandexMapController = controller;
+                              setState(() {
+                                _yandexMapController = controller;
+                              });
 
-                              for (var i = 0; i < data.length; i++) {
-                                if(data[i].latitude != null && data[i].longitude != null){
+                              for (var i = 0; i < dataMap.length; i++) {
+                                if(dataMap[i].latitude != null && dataMap[i].longitude != null){
                                   await _yandexMapController.addPlacemark(
                                       Placemark(
                                           point: Point(
-                                              latitude: double.parse(data[i].latitude),
-                                              longitude: double.parse(data[i].longitude)
+                                              latitude: double.parse(dataMap[i].latitude),
+                                              longitude: double.parse(dataMap[i].longitude)
                                           ),
                                           style: PlacemarkStyle(
                                               iconName: 'assets/marker.png',
                                               opacity: 1.0
                                           ),
                                           onTap: (Point point) {
-                                            openVacancyDialog(context, props, data[i]);
+                                            openVacancyDialog(context, props, dataMap[i]);
                                           }
                                       )
                                   );
@@ -1954,7 +1974,7 @@ class _DiscoverTabState extends State<DiscoverTab> with SingleTickerProviderStat
 
   void handleInitialBuild(VacanciesScreenProps props) {
     props.getVacancies();
-    props.getVacancies();
+    props.getMapVacancies();
   }
 
   void handleInitialBuildOfUsers(UsersScreenProps props) {
@@ -1973,18 +1993,21 @@ class UsersScreenProps {
   final Function getCompanyActiveVacancies;
   final ListUsersState listResponse;
   final ListVacancysState activeList;
+  final ListVacancysState activeListUser;
 
   UsersScreenProps({
     this.getUsers,
     this.getCompanyActiveVacancies,
     this.listResponse,
     this.activeList,
+    this.activeListUser,
   });
 }
 
 UsersScreenProps mapStateToUsersProps(Store<AppState> store) {
   return UsersScreenProps(
     listResponse: store.state.user.list,
+    activeListUser: store.state.vacancy.active_list_user,
     activeList: store.state.vacancy.active_list,
     getUsers: () => store.dispatch(getUsers()),
     getCompanyActiveVacancies: () => store.dispatch(getCompanyActiveVacancies()),
@@ -2016,18 +2039,29 @@ CompanyVacanciesScreenProps mapStateToVacancyProps(Store<AppState> store) {
 
 class VacanciesScreenProps {
   final Function getVacancies;
+  final Function getMapVacancies;
   final Function deleteItem;
   final Function addOneToMatches;
   final ListVacancysState listResponse;
+  final ListVacancysState listMapResponse;
 
-  VacanciesScreenProps({this.getVacancies, this.listResponse, this.deleteItem, this.addOneToMatches});
+  VacanciesScreenProps({
+    this.getVacancies,
+    this.getMapVacancies,
+    this.listResponse,
+    this.listMapResponse,
+    this.deleteItem,
+    this.addOneToMatches
+  });
 }
 
 VacanciesScreenProps mapStateToProps(Store<AppState> store) {
   return VacanciesScreenProps(
     listResponse: store.state.vacancy.list,
+    listMapResponse: store.state.vacancy.listMap,
     addOneToMatches: () => store.dispatch(getNumberOfLikedVacancies()),
     getVacancies: () => store.dispatch(getVacancies()),
+    getMapVacancies: () => store.dispatch(getMapVacancies()),
     deleteItem: () => store.dispatch(deleteItem1()),
   );
 }

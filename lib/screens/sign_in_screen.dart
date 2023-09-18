@@ -67,27 +67,6 @@ class _SignInScreenState extends State<SignInScreen> {
     );
   }
 
-  void _openLoadingDialog(BuildContext context) {
-    showDialog(
-      barrierDismissible: false,
-      context: context,
-      builder: (BuildContext context) {
-        return Center(
-          child: AlertDialog(
-            content: Container(
-                color: Colors.transparent,
-                height: 50,
-                width: 50,
-                child: Center(
-                    child: CircularProgressIndicator(
-                  valueColor: new AlwaysStoppedAnimation<Color>(kColorPrimary),
-                ))),
-          ),
-        );
-      },
-    );
-  }
-
   setMode() {
     setState(() {
       company = Prefs.getString(Prefs.ROUTE) == "COMPANY" ? is_company.Company : is_company.User;
@@ -160,12 +139,14 @@ class _SignInScreenState extends State<SignInScreen> {
                       onInputChanged: (PhoneNumber number) async {
                         phoneNumber = number.phoneNumber;
                         initialCountry = number.isoCode;
-                        await Users.checkPhone(phoneNumber.trim()).then((value) {
-                          print(phoneNumber);
-                          setState(() {
-                            isPhoneExists = !value;
+                        if(number.phoneNumber.length > 10){
+                          await Users.checkPhone(phoneNumber.trim()).then((value) {
+                            print(phoneNumber);
+                            setState(() {
+                              isPhoneExists = !value;
+                            });
                           });
-                        });
+                        }
                       },
                       onInputValidated: (bool value) {
                         _isPhoneCorrect = value;
@@ -293,6 +274,7 @@ class _SignInScreenState extends State<SignInScreen> {
                       color: kColorPrimary,
                       textColor: Colors.white,
                       onPressed: () async {
+
                         if (_formKey.currentState.validate()) {
 
                           /// Remove previous screens
@@ -316,11 +298,12 @@ class _SignInScreenState extends State<SignInScreen> {
                             var randomizer = new Random();
                             var rNum = min + randomizer.nextInt(max - min);
 
-                            smscRuMessage = 'Код подтверждения - $rNum';
+                            smscRuMessage = 'Ваш код подтверждения: $rNum';
 
                             final response = await http.get(Uri.parse('https://smsc.ru/sys/send.php?login=$smscRuLogin&psw=$smscRuPassword&phones=$phoneNumber&mes=$smscRuMessage'));
 
                             if (response.statusCode == 200) {
+
                               Navigator.of(context).push(MaterialPageRoute(
                                   builder: (context) => OtpSmsScreen(
                                     verificationId: rNum.toString(),

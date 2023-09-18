@@ -59,15 +59,30 @@ class _ProfileCardUserState extends State<ProfileCardUser> {
 
   Future<void> openInviteDialog(context) async {
 
-    _vacancyList = widget.vacancyList.map<DropdownMenuItem<int>>((dynamic value) {
-      var jj = new Vacancy(id: value.id, name: value.name);
-      return DropdownMenuItem<int>(
-        value: jj.id,
-        child: Text(jj.name.toString()),
-      );
-    }).toList();
+    if(StoreProvider.of<AppState>(context).state.vacancy.active_list_user.data != null && StoreProvider.of<AppState>(context).state.vacancy.active_list_user.data.length > 0){
+      setState(() {
+        _vacancyList = StoreProvider.of<AppState>(context).state.vacancy.active_list_user.data.map<DropdownMenuItem<int>>((dynamic value) {
+          var jj = new Vacancy(id: value.id, name: value.name);
+          return DropdownMenuItem<int>(
+            value: jj.id,
+            child: Text(jj.name.toString()),
+          );
+        }).toList();
+      });
+    } else {
+      setState(() {
+        _vacancyList = widget.vacancyList.map<DropdownMenuItem<int>>((dynamic value) {
+          var jj = new Vacancy(id: value.id, name: value.name);
+          return DropdownMenuItem<int>(
+            value: jj.id,
+            child: Text(jj.name.toString()),
+          );
+        }).toList();
+      });
+    }
 
     return showDialog(
+      barrierDismissible: false,
         context: context,
         builder: (context) {
           return Dialog(
@@ -144,6 +159,7 @@ class _ProfileCardUserState extends State<ProfileCardUser> {
                                   onPressed: () {
                                     setState(() {
                                       vacancyId = null;
+                                      _vacancyList = [];
                                     });
                                     Navigator.of(context).pop();
                                   },
@@ -275,7 +291,8 @@ class _ProfileCardUserState extends State<ProfileCardUser> {
                                   borderRadius: BorderRadius.circular(4),
                                   child: widget.user.image != null ?
                                   CachedNetworkImage(
-                                    imageUrl: SERVER_IP + widget.user.image + "?token=${Guid.newGuid}",
+                                    imageUrl: SERVER_IP + widget.user.image,
+                                    // imageUrl: SERVER_IP + widget.user.image + "?token=${Guid.newGuid}",
                                     imageBuilder: (context, imageProvider) => Container(
                                       width: 60,
                                       height: 60,
@@ -316,7 +333,7 @@ class _ProfileCardUserState extends State<ProfileCardUser> {
                       child: Container(
                         color: widget.user.response_type == 'SUBMITTED' ? kColorGray : kColorYellow,
                         height: double.infinity,
-                        padding: const EdgeInsets.symmetric(vertical: 10, horizontal: 20),
+                        padding: const EdgeInsets.symmetric(vertical: 5, horizontal: 20),
                         child: Flex(
                           direction: Axis.horizontal,
                           mainAxisSize: MainAxisSize.max,
@@ -324,9 +341,17 @@ class _ProfileCardUserState extends State<ProfileCardUser> {
                           crossAxisAlignment: CrossAxisAlignment.center,
                           children: [
                             Text(
-                              'отклик на вакансию "${widget.user.vacancy_name}"',
+                              widget.user.response_type == 'SUBMITTED' ? widget.user.response_read ?
+                              'просмотрен отклик на вакансию \n"${widget.user.vacancy_name}"' :
+                              'новый отклик на вакансию \n"${widget.user.vacancy_name}"' :
+                              widget.user.response_type == 'DECLINED' ?
+                              'отклонено приглашение на вакансию \n"${widget.user.vacancy_name}"' :
+                              widget.user.response_type == 'INVITED' ?
+                              'приглашен на вакансию \n"${widget.user.vacancy_name}"' : '',
+                              textAlign: TextAlign.center,
                               style: TextStyle(
                                 fontSize: 12,
+                                height: 1,
                                 fontWeight: FontWeight.bold,
                                 color: kColorDark,
                               ),
@@ -464,7 +489,7 @@ class _ProfileCardUserState extends State<ProfileCardUser> {
                                   color: Colors.transparent,
                                   textColor: kColorPrimary,
                                   onPressed: () async {
-                                    if (Prefs.getString(Prefs.TOKEN) == null) {
+                                    if (Prefs.getString(Prefs.TOKEN) != null) {
                                       if (widget.page == 'company_home') {
                                         removeCard(
                                             props: widget.props,
@@ -473,16 +498,26 @@ class _ProfileCardUserState extends State<ProfileCardUser> {
                                             user: widget.user,
                                             context: context
                                         );
-                                      }
-                                    } else {
-                                      if (widget.page == 'company_responses') {
-                                        removeCard(
-                                            props: widget.props1,
-                                            type: "LIKED_THEN_DELETED",
-                                            userId: widget.user.id,
-                                            user: widget.user,
-                                            context: context
-                                        );
+                                      } else {
+                                        if (widget.page == 'company_responses') {
+                                          if(widget.user.response_type == 'SUBMITTED') {
+                                            removeCard(
+                                                props: widget.props1,
+                                                type: "SUBMITTED",
+                                                userId: widget.user.id,
+                                                user: widget.user,
+                                                context: context
+                                            );
+                                          } else {
+                                            removeCard(
+                                                props: widget.props1,
+                                                type: "LIKED_THEN_DELETED",
+                                                userId: widget.user.id,
+                                                user: widget.user,
+                                                context: context
+                                            );
+                                          }
+                                        }
                                       }
                                     }
                                   },
@@ -493,26 +528,30 @@ class _ProfileCardUserState extends State<ProfileCardUser> {
                               ),
                             ),
                             Prefs.getString(Prefs.TOKEN) != null
-                                ? Flexible(
+                                ?  widget.page == 'company_home' || widget.user.response_type == 'INVITED' ? Flexible(
                               child: Container(
                                 margin: EdgeInsets.symmetric(horizontal: 5),
                                 child: CustomButton(
                                   padding: EdgeInsets.all(0),
-                                  color: kColorPrimary,
-                                  textColor: Colors.white,
+                                  color: widget.user.response_type == 'INVITED' ? kColorGray : kColorPrimary,
+                                  textColor: widget.user.response_type == 'INVITED' ? kColorDarkBlue : Colors.white,
                                   onPressed: () async {
                                     // StoreProvider.of<AppState>(context).dispatch(getCompanyActiveVacancies());
                                     // setState(() {
                                     //   _vacancyList = StoreProvider.of<AppState>(context).state.vacancy.active_list.data;
                                     // });
                                     // print(widget.vacancyList);
+                                    if(widget.page == 'company_home'){
+                                      StoreProvider.of<AppState>(context).dispatch(getCompanyActiveVacanciesForUser(widget.user.id));
 
-                                    await openInviteDialog(context);
+                                      await openInviteDialog(context);
+                                    }
                                   },
-                                  text: widget.page == 'company_home' ? 'invite'.tr() : 'submit'.tr(),
+                                  text: widget.page == 'company_home' ? 'invite'.tr() :
+                                  widget.user.response_type == 'INVITED' ? 'Отправлено'.tr() : 'submit'.tr(),
                                 ),
                               ),
-                            ) : Container(),
+                            ) : Container() : Container(),
                           ],
                         ),
                       ),
@@ -530,7 +569,13 @@ class _ProfileCardUserState extends State<ProfileCardUser> {
   void removeCard({String type, int userId, props, context, Users user}) {
 
     if (Prefs.getString(Prefs.TOKEN) != null) {
-      if (type == "LIKED_THEN_DELETED") {
+      if(type == 'SUBMITTED'){
+        Users.saveUserCompany(userId: userId, type: type, vacancyId: user.userVacancyId).then((value) {
+          StoreProvider.of<AppState>(context).dispatch(getAllUsers());
+          StoreProvider.of<AppState>(context).dispatch(getSubmitUsers());
+          StoreProvider.of<AppState>(context).dispatch(getInviteUsers());
+        });
+      } else if (type == "LIKED_THEN_DELETED") {
         Users.saveUserCompany(userId: userId, type: type, vacancyId: user.userVacancyId).then((value) {
           props.allUsers.data.remove(user);
           StoreProvider.of<AppState>(context).dispatch(getAllUsers());

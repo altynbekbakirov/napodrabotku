@@ -51,6 +51,7 @@ class Users {
   String description;
   String age;
   String response_type;
+  bool response_read;
   List vacancy_types;
   List schedules;
 
@@ -93,6 +94,7 @@ class Users {
     this.description,
     this.age,
     this.response_type,
+    this.response_read,
     this.vacancy_types,
     this.schedules,
   });
@@ -134,6 +136,7 @@ class Users {
       description: json['description'],
       age: json['age'],
       response_type: json['response_type'],
+      response_read: json['response_read'] == 0 ? false : true,
       vacancy_types: json['vacancy_types'] != null ? json['vacancy_types'] : [],
       schedules: json['schedules'] !=  null ? json['schedules'] : [],
   );
@@ -910,6 +913,29 @@ class Users {
       throw error;
     }
   }
+
+  Future<void> userCompanyRead(int userId, int userVacancyId) async {
+    var uri = Uri.parse(API_IP + API_USER_VACANCY_READ);
+
+    try {
+      Map<String, String> headers = {"Content-type": "application/json", "token": Prefs.getString(Prefs.TOKEN)};
+      final response = await http.post(
+        uri,
+        headers: headers,
+        body: json.encode({
+          'user_id': userId,
+          'user_vacancy_id': userVacancyId,
+          'read': true,
+        }),
+      );
+      final responseData = json.decode(response.body);
+      if (responseData['status'] == 400) {
+        throw HttpException(responseData['status'].toString());
+      }
+    } catch (error) {
+      throw error;
+    }
+  }
 }
 
 class UserState {
@@ -933,6 +959,8 @@ class UserState {
   List gender_ids;
   List country_ids;
 
+  int numberOfUnreadResponses;
+
   UserState({
     this.user,
     this.user_cv,
@@ -950,6 +978,7 @@ class UserState {
     this.vacancy_type_ids,
     this.gender_ids,
     this.country_ids,
+    this.numberOfUnreadResponses,
   });
 
   factory UserState.initial() => UserState(
@@ -969,6 +998,7 @@ class UserState {
     vacancy_type_ids: [],
     gender_ids: [],
     country_ids: [],
+    numberOfUnreadResponses: 0,
   );
 }
 

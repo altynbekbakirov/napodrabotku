@@ -157,7 +157,8 @@ class _ProfileCardMapState extends State<ProfileCardMap> {
                                   borderRadius: BorderRadius.circular(4),
                                   child: widget.vacancy.company_logo != null
                                       ? CachedNetworkImage(
-                                    imageUrl: SERVER_IP + widget.vacancy.company_logo + "?token=${Guid.newGuid}",
+                                    // imageUrl: SERVER_IP + widget.vacancy.company_logo + "?token=${Guid.newGuid}",
+                                    imageUrl: SERVER_IP + widget.vacancy.company_logo,
                                     imageBuilder: (context, imageProvider) => Container(
                                       width: 60,
                                       height: 60,

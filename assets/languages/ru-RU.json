@@ -316,5 +316,6 @@
     "about_myself": "О себе",
     "metro": "Станции метро",
     "max_allowed_3_options": "Максимально допустимо 3 варианта",
-    "send_code_again": "Отправить код снова"
+    "send_code_again": "Отправить код снова",
+    "candidate_responses": "Отклики кандидиатов"
 }

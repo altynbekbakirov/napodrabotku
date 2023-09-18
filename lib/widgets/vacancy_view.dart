@@ -6,6 +6,7 @@ import 'package:ishtapp/datas/RSAA.dart';
 import 'package:ishtapp/datas/app_state.dart';
 import 'package:ishtapp/datas/user.dart';
 import 'package:ishtapp/datas/vacancy.dart';
+import 'package:ishtapp/screens/chat_screen.dart';
 import 'package:swipe_stack/swipe_stack.dart';
 import 'package:easy_localization/easy_localization.dart';
 
@@ -167,9 +168,9 @@ class _VacancyViewState extends State<VacancyView> {
 
   @override
   void initState() {
-    if (widget.page == 'submitted') {
-      getRecruit();
-    }
+    // if (widget.page == 'submitted') {
+    //   getRecruit();
+    // }
     initData();
     vacancySkills();
     super.initState();
@@ -247,7 +248,8 @@ class _VacancyViewState extends State<VacancyView> {
                               borderRadius: BorderRadius.circular(4),
                               child: widget.vacancy.company_logo != null ?
                               CachedNetworkImage(
-                                imageUrl: SERVER_IP + widget.vacancy.company_logo + "?token=${Guid.newGuid}",
+                                // imageUrl: SERVER_IP + widget.vacancy.company_logo + "?token=${Guid.newGuid}",
+                                imageUrl: SERVER_IP + widget.vacancy.company_logo,
                                 imageBuilder: (context, imageProvider) => Container(
                                   width: 60,
                                   height: 60,
@@ -421,21 +423,29 @@ class _VacancyViewState extends State<VacancyView> {
                           direction: Axis.horizontal,
                           mainAxisAlignment: MainAxisAlignment.center,
                           children: [
-                            widget.page == 'user_match' ?
+                            widget.page == 'user_match' || widget.page == 'submitted' ?
                             Flexible(
                               flex: 1,
                               child: Container(
                                 margin: EdgeInsets.only(right: 10),
                                 child: CustomButton(
                                   onPressed: () {
-                                    Vacancy.saveVacancyUser(
-                                        vacancy_id: widget.vacancy.id,
-                                        type: "LIKED_THEN_DELETED")
-                                        .then((value) {
-                                          StoreProvider.of<AppState>(context).state.vacancy.liked_list.data.remove(widget.vacancy);
-                                          StoreProvider.of<AppState>(context).dispatch(getNumberOfLikedVacancies());
-                                        });
-                                    Navigator.of(context).pop();
+                                    if(widget.page == 'submitted') {
+                                      Vacancy.saveVacancyUser(vacancy_id: widget.vacancy.id,type: "INVITED").then((value) {
+                                        StoreProvider.of<AppState>(context).state.vacancy.invited_list.data.remove(widget.vacancy);
+                                        StoreProvider.of<AppState>(context).dispatch(getNumberOfLikedVacancies());
+                                        Navigator.of(context).pop();
+                                      });
+                                    } else {
+                                      Vacancy.saveVacancyUser(
+                                          vacancy_id: widget.vacancy.id,
+                                          type: "LIKED_THEN_DELETED")
+                                          .then((value) {
+                                        StoreProvider.of<AppState>(context).state.vacancy.liked_list.data.remove(widget.vacancy);
+                                        StoreProvider.of<AppState>(context).dispatch(getNumberOfLikedVacancies());
+                                        Navigator.of(context).pop();
+                                      });
+                                    }
                                   },
                                   borderSide: BorderSide(
                                       color: kColorPrimary, width: 2.0
@@ -467,9 +477,23 @@ class _VacancyViewState extends State<VacancyView> {
                             ) :
                             widget.page == 'submitted' ?
                             CustomButton(
-                              onPressed: () {},
-                              color: kColorDarkBlue,
-                              text: recruited == 0 ? "На рассмотрении" : recruited == 1 ? "Одобрено" : "Попробуйте в следующий раз",
+                              onPressed: () {
+                                Navigator.of(context).push(
+                                    MaterialPageRoute(builder:
+                                        (BuildContext context) {
+                                      return ChatScreen(
+                                        user_id: widget.vacancy.company,
+                                        name: widget.vacancy.company_name,
+                                        vacancy_id: widget.vacancy.id,
+                                        vacancy: widget.vacancy.name,
+                                        avatar: widget.vacancy.company_logo,
+                                      );
+                                    })
+                                );
+                              },
+                              color: kColorPrimary,
+                              textColor: Colors.white,
+                              text: 'write'.tr(),
                             ) :
                             widget.page == 'inactive' ? Container() :
                             Center(

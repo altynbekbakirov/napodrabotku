@@ -205,7 +205,7 @@ class _EditProfileScreenState extends State<EditProfileScreen> {
 
   getDistricts(region) async {
     districts = [];
-    districtList = await Vacancy.getLists('districts', region);
+    districtList = await Vacancy.getLists('districts_by_name', region);
     districtList.forEach((district) {
       setState(() {
         districts.add(district['name']);
@@ -238,7 +238,9 @@ class _EditProfileScreenState extends State<EditProfileScreen> {
       is_migrant = user.is_migrant == 1;
       gender = user.gender == 1 ? user_gender.Female : user_gender.Male;
       selectedRegion = user.region;
-      getDistricts(user.region);
+      if(user.region != ''){
+        getDistricts(user.region);
+      }
       selectedDistrict = user.district;
 
       _fullname_of_contact_person.text = user.contact_person_fullname;
@@ -818,31 +820,35 @@ class _EditProfileScreenState extends State<EditProfileScreen> {
                             user.address = _address_of_company.text;
                             user.description = _description_controller.text;
 
-                            if (_imageFile != null && _imageFile.path != null)
+                            if (_imageFile != null && _imageFile.path != null) {
                               user.uploadImage2(File(_imageFile.path)).then((value) {
                                 StoreProvider.of<AppState>(context).dispatch(getUser());
                                 setState(() {
                                   Prefs.setString(
-                                      Prefs.PROFILEIMAGE, StoreProvider.of<AppState>(context).state.user.user.data.image);
+                                      Prefs.PROFILEIMAGE,
+                                      StoreProvider.of<AppState>(context).state.user.user.data.image
+                                  );
                                 });
-                                // Navigator.pop(context);
+
+                                if (Prefs.getString(Prefs.USER_TYPE) == 'USER') {
+                                  // user_cv.experience_year = int.parse(experience_year_controller.text);
+                                  // user_cv.job_title = title_controller.text;
+
+                                  if (attachment != null){
+                                    user_cv.save(attachment: attachment);
+                                  } else {
+                                    user_cv.save();
+                                  }
+                                  Navigator.pop(context);
+                                }
                               });
-                            else
+                            } else {
                               user.uploadImage2(null);
-
-                            if (Prefs.getString(Prefs.USER_TYPE) == 'USER') {
-                              // user_cv.experience_year = int.parse(experience_year_controller.text);
-                              // user_cv.job_title = title_controller.text;
-
-                              if (attachment != null)
-                                user_cv.save(attachment: attachment);
-                              else
-                                user_cv.save();
+                              Navigator.pop(context);
                             }
 
-                            Navigator.pop(context);
-
                           } else {
+                            Navigator.pop(context);
                             return;
                           }
                         },

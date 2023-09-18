@@ -91,7 +91,7 @@ class _VacanciesTabState extends State<VacanciesTab> {
                             color: type == 0 ? Colors.white : Colors.transparent,
                             textColor: type == 0 ? kColorPrimary : Colors.white,
                             textSize: 14,
-                            padding: EdgeInsets.all(0),
+                            padding: EdgeInsets.symmetric(vertical: 8, horizontal: 0),
                             height: 40.0,
                             onPressed: () {
                               Prefs.setInt(Prefs.OFFSET, 0);
@@ -116,7 +116,7 @@ class _VacanciesTabState extends State<VacanciesTab> {
                             color: type == 1 ? Colors.white : Colors.transparent,
                             textColor: type == 1 ? kColorPrimary : Colors.white,
                             textSize: 14,
-                            padding: EdgeInsets.all(0),
+                            padding: EdgeInsets.symmetric(vertical: 8, horizontal: 0),
                             height: 40.0,
                             onPressed: () {
                               Prefs.setInt(Prefs.OFFSET, 0);
@@ -130,7 +130,7 @@ class _VacanciesTabState extends State<VacanciesTab> {
                         ),
                       ),
                       Flexible(
-                        flex: 2,
+                        flex: 3,
                         child: Container(
                           margin: EdgeInsets.symmetric(horizontal: 5),
                           child: CustomButton(
@@ -141,7 +141,7 @@ class _VacanciesTabState extends State<VacanciesTab> {
                             color: type == 2 ? Colors.white : Colors.transparent,
                             textColor: type == 2 ? kColorPrimary : Colors.white,
                             textSize: 14,
-                            padding: EdgeInsets.all(0),
+                            padding: EdgeInsets.symmetric(vertical: 8, horizontal: 8),
                             height: 40.0,
                             onPressed: () {
                               Prefs.setInt(Prefs.OFFSET, 0);
@@ -153,7 +153,7 @@ class _VacanciesTabState extends State<VacanciesTab> {
                               //   button == 3 ? button = 0 : button = 3;
                               // });
                             },
-                            text: 'my_responses'.tr(),
+                            text: 'candidate_responses'.tr(),
                           ),
                         ),
                       ),
@@ -184,6 +184,16 @@ class _VacanciesTabState extends State<VacanciesTab> {
                                     )
                                 ),
                                 onTap: () {
+
+                                  if(user.response_type == 'SUBMITTED' && !user.response_read){
+                                    user.userCompanyRead(user.id, user.userVacancyId).then((value) {
+                                      StoreProvider.of<AppState>(context).dispatch(getAllUsers());
+                                      StoreProvider.of<AppState>(context).dispatch(getSubmitUsers());
+                                      StoreProvider.of<AppState>(context).dispatch(getInviteUsers());
+                                      StoreProvider.of<AppState>(context).dispatch(getNumberOfUnreadResponses());
+                                    });
+                                  }
+
                                   Navigator.of(context).push(
                                       MaterialPageRoute(
                                           builder: (BuildContext context) {
@@ -278,24 +288,40 @@ class _VacanciesTabState extends State<VacanciesTab> {
                         flex: 2,
                         child: Container(
                           margin: EdgeInsets.symmetric(horizontal: 5),
-                          child: CustomButton(
-                            borderSide: BorderSide(
-                                color: kColorWhite,
-                                width: 2.0
-                            ),
-                            color: type == 1 ? Colors.white : Colors.transparent,
-                            textColor: type == 1 ? kColorPrimary : Colors.white,
-                            textSize: 14,
-                            padding: EdgeInsets.all(0),
-                            height: 40.0,
-                            onPressed: () {
-                              Prefs.setInt(Prefs.OFFSET, 0);
-                              StoreProvider.of<AppState>(context).dispatch(getInvitedVacancies());
-                              setState(() {
-                                type = 1;
-                              });
-                            },
-                            text: 'invites'.tr(),
+                          child: Stack(
+                            children: [
+                              CustomButton(
+                                borderSide: BorderSide(
+                                    color: kColorWhite,
+                                    width: 2.0
+                                ),
+                                color: type == 1 ? Colors.white : Colors.transparent,
+                                textColor: type == 1 ? kColorPrimary : Colors.white,
+                                textSize: 14,
+                                padding: EdgeInsets.all(0),
+                                height: 40.0,
+                                onPressed: () {
+                                  Prefs.setInt(Prefs.OFFSET, 0);
+                                  StoreProvider.of<AppState>(context).dispatch(getInvitedVacancies());
+                                  setState(() {
+                                    type = 1;
+                                  });
+                                },
+                                text: 'invites'.tr(),
+                              ),
+                              props.invitedList.data != null && props.invitedList.data.length > 0 ? Positioned(
+                                right: 4,
+                                top: 4,
+                                child: Container(
+                                  width: 8,
+                                  height: 8,
+                                  decoration: BoxDecoration(
+                                      color: Colors.green,
+                                      shape: BoxShape.circle
+                                  ),
+                                ),
+                              ) : Container(),
+                            ],
                           ),
                         ),
                       ),
@@ -349,10 +375,20 @@ class _VacanciesTabState extends State<VacanciesTab> {
                                 child: Container(
                                     child: ProfileCard(
                                         vacancy: vacancy,
-                                        page: "submit"
+                                        page: "user_responses"
                                     )
                                 ),
                                 onTap: () {
+
+                                  if(vacancy.responseType == 'INVITED' && !vacancy.responseRead){
+                                    vacancy.userCompanyRead(Prefs.getInt(Prefs.USER_ID), vacancy.id).then((value) {
+                                      StoreProvider.of<AppState>(context).dispatch(getUserVacancies());
+                                      StoreProvider.of<AppState>(context).dispatch(getSubmittedVacancies());
+                                      StoreProvider.of<AppState>(context).dispatch(getInvitedVacancies());
+                                      StoreProvider.of<AppState>(context).dispatch(getNumberOfUnreadResponses());
+                                    });
+                                  }
+
                                   Navigator.of(context).push(
                                       MaterialPageRoute(
                                           builder: (BuildContext context) {
