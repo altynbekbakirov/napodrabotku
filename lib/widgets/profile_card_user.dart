@@ -341,19 +341,18 @@ class _ProfileCardUserState extends State<ProfileCardUser> {
                           crossAxisAlignment: CrossAxisAlignment.center,
                           children: [
                             Text(
-                              widget.user.response_type == 'SUBMITTED' ? widget.user.response_read ?
-                              'просмотрен отклик на вакансию \n"${widget.user.vacancy_name}"' :
-                              'новый отклик на вакансию \n"${widget.user.vacancy_name}"' :
-                              widget.user.response_type == 'DECLINED' ?
-                              'отклонено приглашение на вакансию \n"${widget.user.vacancy_name}"' :
-                              widget.user.response_type == 'INVITED' ?
-                              'приглашен на вакансию \n"${widget.user.vacancy_name}"' : '',
+                              widget.user.response_type == 'SUBMITTED' ? widget.user.response_read ? 'отклик прочитан на вакансию \n"${widget.user.vacancy_name.length >=30 ? widget.user.vacancy_name.replaceRange(30, widget.user.vacancy_name.length, '...') : widget.user.vacancy_name}"' : 'новый отклик на вакансию \n"${widget.user.vacancy_name.length >=30 ? widget.user.vacancy_name.replaceRange(30, widget.user.vacancy_name.length, '...') : widget.user.vacancy_name}"' :
+                              widget.user.response_type == 'DECLINED' ? 'приглашение отклонено на вакансию \n"${widget.user.vacancy_name.length >=30 ? widget.user.vacancy_name.replaceRange(30, widget.user.vacancy_name.length, '...') : widget.user.vacancy_name}"' :
+                              widget.user.response_type == 'INVITED' ? widget.user.response_read ? 'приглашение просмотрено на вакансию \n"${widget.user.vacancy_name.length >=30 ? widget.user.vacancy_name.replaceRange(30, widget.user.vacancy_name.length, '...') : widget.user.vacancy_name}"' :  'приглашение отправлено на вакансию \n"${widget.user.vacancy_name.length >=30 ? widget.user.vacancy_name.replaceRange(30, widget.user.vacancy_name.length, '...') : widget.user.vacancy_name}"' : '',
                               textAlign: TextAlign.center,
                               style: TextStyle(
                                 fontSize: 12,
                                 height: 1,
                                 fontWeight: FontWeight.bold,
-                                color: kColorDark,
+                                color:
+                                widget.user.response_type == 'SUBMITTED' ? widget.user.response_read ? kColorDark : kColorGreen :
+                                widget.user.response_type == 'INVITED' ? widget.user.response_read ? kColorDark : kColorBlue :
+                                widget.user.response_type == 'DECLINED' ? kColorRed : kColorDark,
                               ),
                             ),
                           ],

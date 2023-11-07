@@ -318,9 +318,11 @@ class _ProfileTabState extends State<ProfileTab> {
                                   onPressed: () async {
                                     Navigator.push(
                                       context,
-                                      MaterialPageRoute(builder: (context) => EditProfileScreen()),
+                                      MaterialPageRoute(
+                                        builder: (context) => EditProfileScreen(),
+                                        maintainState: false
+                                      ),
                                     );
-                                    setState(() {});
                                   },
                                   text: 'settings'.tr(),
                                 ),

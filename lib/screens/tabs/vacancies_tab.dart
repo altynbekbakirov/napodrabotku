@@ -113,9 +113,9 @@ class _VacanciesTabState extends State<VacanciesTab> {
                                 color: kColorWhite,
                                 width: 2.0
                             ),
-                            color: type == 1 ? Colors.white : Colors.transparent,
+                            color: type == 1 ? kColorGray : Colors.transparent,
                             textColor: type == 1 ? kColorPrimary : Colors.white,
-                            textSize: 14,
+                            textSize: 13,
                             padding: EdgeInsets.symmetric(vertical: 8, horizontal: 0),
                             height: 40.0,
                             onPressed: () {
@@ -135,12 +135,12 @@ class _VacanciesTabState extends State<VacanciesTab> {
                           margin: EdgeInsets.symmetric(horizontal: 5),
                           child: CustomButton(
                             borderSide: BorderSide(
-                                color: kColorWhite,
+                                color: type == 2 ? kColorYellow : kColorWhite,
                                 width: 2.0
                             ),
-                            color: type == 2 ? Colors.white : Colors.transparent,
+                            color: type == 2 ? kColorYellow : Colors.transparent,
                             textColor: type == 2 ? kColorPrimary : Colors.white,
-                            textSize: 14,
+                            textSize: 13,
                             padding: EdgeInsets.symmetric(vertical: 8, horizontal: 8),
                             height: 40.0,
                             onPressed: () {
@@ -178,22 +178,23 @@ class _VacanciesTabState extends State<VacanciesTab> {
                               return GestureDetector(
                                 child: Container(
                                     child: ProfileCardUser(
-                                        user: user,
-                                        page: "company_responses",
+                                      user: user,
+                                      page: "company_responses",
                                       props1: props,
                                     )
                                 ),
                                 onTap: () {
-
                                   if(user.response_type == 'SUBMITTED' && !user.response_read){
                                     user.userCompanyRead(user.id, user.userVacancyId).then((value) {
                                       StoreProvider.of<AppState>(context).dispatch(getAllUsers());
                                       StoreProvider.of<AppState>(context).dispatch(getSubmitUsers());
                                       StoreProvider.of<AppState>(context).dispatch(getInviteUsers());
                                       StoreProvider.of<AppState>(context).dispatch(getNumberOfUnreadResponses());
+                                      setState(() {
+                                        user.response_read = true;
+                                      });
                                     });
                                   }
-
                                   Navigator.of(context).push(
                                       MaterialPageRoute(
                                           builder: (BuildContext context) {
@@ -309,7 +310,8 @@ class _VacanciesTabState extends State<VacanciesTab> {
                                 },
                                 text: 'invites'.tr(),
                               ),
-                              props.invitedList.data != null && props.invitedList.data.length > 0 ? Positioned(
+                              props.invitedList.data != null &&
+                                  props.invitedList.data.where((e) => !e.responseRead).length > 0 ? Positioned(
                                 right: 4,
                                 top: 4,
                                 child: Container(
@@ -379,7 +381,6 @@ class _VacanciesTabState extends State<VacanciesTab> {
                                     )
                                 ),
                                 onTap: () {
-
                                   if(vacancy.responseType == 'INVITED' && !vacancy.responseRead){
                                     vacancy.userCompanyRead(Prefs.getInt(Prefs.USER_ID), vacancy.id).then((value) {
                                       StoreProvider.of<AppState>(context).dispatch(getUserVacancies());
@@ -388,7 +389,6 @@ class _VacanciesTabState extends State<VacanciesTab> {
                                       StoreProvider.of<AppState>(context).dispatch(getNumberOfUnreadResponses());
                                     });
                                   }
-
                                   Navigator.of(context).push(
                                       MaterialPageRoute(
                                           builder: (BuildContext context) {

@@ -50,23 +50,20 @@ class _DiscoverTabState extends State<DiscoverTab> with SingleTickerProviderStat
   CardController cardController = CardController();
 
   // yandex maps
-  Completer<YandexMapController> _controller = Completer();
   YandexMapController _yandexMapController;
   Point _point;
-  AppLatLong _appLatLong;
-  Placemark _placemark;
+  Point _pointFilter;
 
   int button = 0;
   int offset = 5;
 
   Users user;
-  int user_id;
+  int userId;
 
   List<dynamic> jobTypeList = [];
   List<dynamic> vacancyTypeList = [];
   List<dynamic> busynessList = [];
   List<dynamic> scheduleList = [];
-  List<dynamic> regionList = [];
   List<dynamic> districtList = [];
   List<dynamic> currencyList = [];
   List<dynamic> genderList = [];
@@ -87,16 +84,13 @@ class _DiscoverTabState extends State<DiscoverTab> with SingleTickerProviderStat
   List _metros = [];
 
   int _regionId;
-  int _salaryPeriodId;
 
   TextEditingController _typeAheadController = TextEditingController();
 
-  TextEditingController _salary_from_controller = TextEditingController();
-  TextEditingController _salary_to_controller = TextEditingController();
-  TextEditingController _experience_from_controller = TextEditingController();
-  TextEditingController _experience_to_controller = TextEditingController();
-  TextEditingController _age_from_controller = TextEditingController();
-  TextEditingController _age_to_controller = TextEditingController();
+  TextEditingController _experienceFromController = TextEditingController();
+  TextEditingController _experienceToController = TextEditingController();
+  TextEditingController _ageFromController = TextEditingController();
+  TextEditingController _ageToController = TextEditingController();
 
   List<dynamic> _suggestions = [];
   String _selectedCity;
@@ -113,8 +107,6 @@ class _DiscoverTabState extends State<DiscoverTab> with SingleTickerProviderStat
     vacancyTypeList = await Vacancy.getLists('vacancy_type', null);
     busynessList = await Vacancy.getLists('busyness', null);
     scheduleList = await Vacancy.getLists('schedule', null);
-    regionList = await Vacancy.getLists('region', null);
-    // districtList = await Vacancy.getLists('districts', null);
     await Vacancy.getLists('region', null).then((value) {
       value.forEach((region) {
         regions.add(region["name"]);
@@ -210,8 +202,8 @@ class _DiscoverTabState extends State<DiscoverTab> with SingleTickerProviderStat
   }
 
   Future<void> openFilterDialog(context) async {
-    user_id = Prefs.getInt(Prefs.USER_ID);
-    if (user_id != null) {
+    userId = Prefs.getInt(Prefs.USER_ID);
+    if (userId != null) {
       getFilters(Prefs.getInt(Prefs.USER_ID));
     }
 
@@ -306,29 +298,23 @@ class _DiscoverTabState extends State<DiscoverTab> with SingleTickerProviderStat
                                     onSuggestionSelected: (suggestion) async {
                                       _regions = [];
                                       _typeAheadController.text = suggestion['value'];
-
                                       String region = suggestion['data']['region_with_type'];
-
                                       if(suggestion['data']['geo_lat'] != null && suggestion['data']['geo_lon'] != null){
                                         double latitude = double.parse(suggestion['data']['geo_lat']);
                                         double longitude = double.parse(suggestion['data']['geo_lon']);
-
                                         if(region != '' && region != null){
                                           districtList = await Vacancy.getLists('districts', region);
                                           metroList = await Vacancy.getMetros(districtList);
-
                                           int regionId = await Vacancy.getRegionByName(region);
                                           setState(() {
-                                            this._point = Point(
+                                            this._pointFilter = Point(
                                                 latitude: latitude,
                                                 longitude: longitude
                                             );
                                             this._regions.add(regionId);
-
                                           });
                                         }
                                       }
-
                                       print(_regions);
                                     },
                                     validator: (value) {
@@ -361,11 +347,11 @@ class _DiscoverTabState extends State<DiscoverTab> with SingleTickerProviderStat
                               },
                               dataSource: metroList.length > 0 ? metroList
                                   .map((item) => ({
-                                    'name': item['name'],
-                                    'line': item['line'],
-                                    'name_line': item['name'] + '\n' + item['line'],
-                                    'color': item['color'].toString()
-                                  }))
+                                'name': item['name'],
+                                'line': item['line'],
+                                'name_line': item['name'] + '\n' + item['line'],
+                                'color': item['color'].toString()
+                              }))
                                   .toList() : metroList,
                               textField: 'name',
                               text2Field: 'line',
@@ -555,6 +541,11 @@ class _DiscoverTabState extends State<DiscoverTab> with SingleTickerProviderStat
                                             _schedules = [];
                                             metroList = [];
                                             _metros = [];
+
+                                            this._pointFilter = Point(
+                                                latitude: null,
+                                                longitude: null
+                                            );
                                           });
 
                                           if (user != null) {
@@ -606,11 +597,11 @@ class _DiscoverTabState extends State<DiscoverTab> with SingleTickerProviderStat
                                           );
                                           StoreProvider.of<AppState>(context).dispatch(getVacancies());
                                           StoreProvider.of<AppState>(context).dispatch(getMapVacancies());
-                                          await _yandexMapController.move(
-                                              point: _point,
-                                              animation: const MapAnimation(smooth: true, duration: 2.0),
-                                              zoom: 8
-                                          );
+                                          // await _yandexMapController.move(
+                                          //     point: _point,
+                                          //     animation: const MapAnimation(smooth: true, duration: 2.0),
+                                          //     zoom: 8
+                                          // );
                                           Navigator.of(context).pop();
                                           // _nextTab(0);
                                         },
@@ -634,8 +625,8 @@ class _DiscoverTabState extends State<DiscoverTab> with SingleTickerProviderStat
   }
 
   Future<void> openFilterUsersDialog(context) async {
-    user_id = Prefs.getInt(Prefs.USER_ID);
-    if (user_id != null) {
+    userId = Prefs.getInt(Prefs.USER_ID);
+    if (userId != null) {
       getCompanyFilters(Prefs.getInt(Prefs.USER_ID));
     }
 
@@ -924,7 +915,7 @@ class _DiscoverTabState extends State<DiscoverTab> with SingleTickerProviderStat
                                                 // optional flex property if flex is 1 because the default flex is 1
                                                 flex: 3,
                                                 child: TextFormField(
-                                                  controller: _age_from_controller,
+                                                  controller: _ageFromController,
                                                   focusNode: FocusNode(canRequestFocus: false),
                                                   decoration: InputDecoration(
                                                     contentPadding: EdgeInsets.symmetric(vertical: 10, horizontal: 20),
@@ -956,7 +947,7 @@ class _DiscoverTabState extends State<DiscoverTab> with SingleTickerProviderStat
                                                 // optional flex property if flex is 1 because the default flex is 1
                                                 flex: 3,
                                                 child: TextFormField(
-                                                  controller: _age_to_controller,
+                                                  controller: _ageToController,
                                                   focusNode: FocusNode(canRequestFocus: false),
                                                   decoration: InputDecoration(
                                                     contentPadding: EdgeInsets.symmetric(vertical: 10, horizontal: 20),
@@ -1016,7 +1007,7 @@ class _DiscoverTabState extends State<DiscoverTab> with SingleTickerProviderStat
                                                 // optional flex property if flex is 1 because the default flex is 1
                                                 flex: 3,
                                                 child: TextFormField(
-                                                  controller: _experience_from_controller,
+                                                  controller: _experienceFromController,
                                                   focusNode: FocusNode(canRequestFocus: false),
                                                   decoration: InputDecoration(
                                                     contentPadding: EdgeInsets.symmetric(vertical: 10, horizontal: 20),
@@ -1048,7 +1039,7 @@ class _DiscoverTabState extends State<DiscoverTab> with SingleTickerProviderStat
                                                 // optional flex property if flex is 1 because the default flex is 1
                                                 flex: 3,
                                                 child: TextFormField(
-                                                  controller: _experience_to_controller,
+                                                  controller: _experienceToController,
                                                   focusNode: FocusNode(canRequestFocus: false),
                                                   decoration: InputDecoration(
                                                     contentPadding: EdgeInsets.symmetric(vertical: 10, horizontal: 20),
@@ -1101,10 +1092,10 @@ class _DiscoverTabState extends State<DiscoverTab> with SingleTickerProviderStat
 
                                           setState(() {
                                             _typeAheadController.text = '';
-                                            _age_from_controller.text = '';
-                                            _age_to_controller.text = '';
-                                            _experience_from_controller.text = '';
-                                            _experience_to_controller.text = '';
+                                            _ageFromController.text = '';
+                                            _ageToController.text = '';
+                                            _experienceFromController.text = '';
+                                            _experienceToController.text = '';
                                             _suggestions = [];
                                             _regionId = null;
                                             _regions = [];
@@ -1196,6 +1187,9 @@ class _DiscoverTabState extends State<DiscoverTab> with SingleTickerProviderStat
 
     super.initState();
     Prefs.setInt(Prefs.OFFSET, 0);
+
+    print('VACANCIES ---------- ');
+    print(Prefs.getString('vacancies'));
 
     if (Prefs.getString(Prefs.ROUTE) != 'COMPANY') {
       _currentLocation();
@@ -1421,9 +1415,10 @@ class _DiscoverTabState extends State<DiscoverTab> with SingleTickerProviderStat
         List<Vacancy> data = props.listResponse.data;
         List<Vacancy> dataMap = props.listMapResponse.data;
         bool loading = props.listResponse.loading;
+        bool loadingMap = props.listMapResponse.loading;
 
         Widget body;
-        if (loading) {
+        if (loading && loadingMap) {
           body = Center(
             child: CircularProgressIndicator(
               valueColor: new AlwaysStoppedAnimation<Color>(Colors.white),
@@ -1566,12 +1561,34 @@ class _DiscoverTabState extends State<DiscoverTab> with SingleTickerProviderStat
                       color: kColorGray,
                       child: Stack(
                         children: [
+                          // dataMap != null && dataMap.isNotEmpty ?
                           YandexMap(
                             onMapCreated: (YandexMapController controller) async {
                               setState(() {
                                 _yandexMapController = controller;
                               });
 
+                              // for (var i = 0; i < dataMap.length; i++) {
+                              //   if(dataMap[i].latitude != null && dataMap[i].longitude != null){
+                              //     await _yandexMapController.addPlacemark(
+                              //         Placemark(
+                              //             point: Point(
+                              //                 latitude: double.parse(dataMap[i].latitude),
+                              //                 longitude: double.parse(dataMap[i].longitude)
+                              //             ),
+                              //             style: PlacemarkStyle(
+                              //                 iconName: 'assets/marker.png',
+                              //                 opacity: 1.0
+                              //             ),
+                              //             onTap: (Point point) {
+                              //               openVacancyDialog(context, props, dataMap[i]);
+                              //             }
+                              //         )
+                              //     );
+                              //   }
+                              // }
+                            },
+                            onMapRendered: () async {
                               for (var i = 0; i < dataMap.length; i++) {
                                 if(dataMap[i].latitude != null && dataMap[i].longitude != null){
                                   await _yandexMapController.addPlacemark(
@@ -1592,11 +1609,13 @@ class _DiscoverTabState extends State<DiscoverTab> with SingleTickerProviderStat
                                 }
                               }
 
-                              // await _yandexMapController.move(
-                              //     point: _point,
-                              //     animation: const MapAnimation(smooth: true, duration: 2.0),
-                              //     zoom: 8
-                              // );
+                              if(_pointFilter != null && _pointFilter.latitude != null && _pointFilter.longitude != null){
+                                await _yandexMapController.move(
+                                    point: _pointFilter,
+                                    animation: const MapAnimation(smooth: true, duration: 2.0),
+                                    zoom: 8
+                                );
+                              }
                             },
                           ),
                           Positioned(
@@ -1973,7 +1992,9 @@ class _DiscoverTabState extends State<DiscoverTab> with SingleTickerProviderStat
   }
 
   void handleInitialBuild(VacanciesScreenProps props) {
-    props.getVacancies();
+    // if(Prefs.getString('vacancies') != null) {
+      props.getVacancies();
+    // }
     props.getMapVacancies();
   }
 

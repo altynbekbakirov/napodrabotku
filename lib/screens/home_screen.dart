@@ -782,11 +782,11 @@ class _HomeScreenState extends State<HomeScreen> {
     bindEventPusher();
   }
 
-  @override
-  void dispose() {
-    // pusherService.unbindEvent('new-message-sent');
-    super.dispose();
-  }
+  // @override
+  // void dispose() {
+  //   // pusherService.unbindEvent('new-message-sent');
+  //   super.dispose();
+  // }
 
   void handleInitialBuild(VacanciesScreenProps props) {
     props.getLikedNumOfVacancies();

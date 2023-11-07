@@ -1,5 +1,6 @@
 import 'dart:io';
 import 'package:dropdown_search/dropdown_search.dart';
+import 'package:file_picker/file_picker.dart';
 import 'package:flutter/material.dart';
 import 'package:easy_localization/easy_localization.dart';
 import 'package:image_picker/image_picker.dart';
@@ -7,6 +8,8 @@ import 'package:intl_phone_number_input/intl_phone_number_input.dart';
 import 'package:ishtapp/components/custom_button.dart';
 import 'package:flutter_datetime_picker/flutter_datetime_picker.dart';
 import 'package:flutter_redux/flutter_redux.dart';
+import 'package:ishtapp/main.dart';
+import 'package:ishtapp/screens/tabs/profile_tab.dart';
 import 'package:ishtapp/widgets/svg_icon.dart';
 import 'package:path/path.dart';
 import 'package:ishtapp/constants/configs.dart';
@@ -91,23 +94,49 @@ class _EditProfileScreenState extends State<EditProfileScreen> {
 //  List<UserExperienceForm> user_experience_forms = [];
 
   void _onImageButtonPressed(ImageSource source, {BuildContext context}) async {
+
+    // PermissionStatus status = await Permission.storage.request();
+    //
+    // if (status.isGranted) {
+    //   // You have permission to access photos; you can now perform the operation.
+    // } else {
+    //   // The user denied permission or didn't respond; you should handle this gracefully.
+    //   if (status.isPermanentlyDenied) {
+    //     openAppSettings();
+    //   }
+    // }
+
+
     try {
       final pickedFile = await _picker.getImage(
         source: source,
       );
 
-      File rotatedImage = await FlutterExifRotation.rotateAndSaveImage(path: pickedFile.path);
+      // File imageFile = File(pickedFile.path);
+      //
+      // if (imageFile.existsSync()) {
+      //   // The file exists, proceed with displaying it.
+      // } else {
+      //   // The file does not exist; there might be an issue with the file path.
+      // }
+
+      // File rotatedImage = await FlutterExifRotation.rotateAndSaveImage(path: pickedFile.path);
 
       if (pickedFile != null && pickedFile.path != null) {
-        File rotatedImage = await FlutterExifRotation.rotateImage(path: pickedFile.path);
+        // File rotatedImage = await FlutterExifRotation.rotateImage(path: pickedFile.path);
 
-        setState(() {
-          _imageFile = rotatedImage;
-        });
+        File imageFile = File(pickedFile.path);
+
+        if (imageFile.existsSync()) {
+          setState(() {
+            _imageFile = imageFile;
+          });
+        }
+
       }
 
       // setState(() {
-      //   _imageFile = pickedFile;
+      //   _imageFile = rotatedImage;
       // });
 
     } catch (e) {
@@ -152,20 +181,27 @@ class _EditProfileScreenState extends State<EditProfileScreen> {
   int count = 1;
   int counter = 0;
 
-  // void _pickAttachment() async {
-  //   File file = await FilePicker.getFile(
-  //     type: FileType.custom,
-  //     allowedExtensions: ['pdf', 'doc', 'docx'],
-  //   );
-  //
-  //   if (file != null) {
-  //     setState(() {
-  //       attachment = file;
-  //     });
-  //   } else {
-  //     // User canceled the picker
-  //   }
-  // }
+  void _pickAttachment() async {
+    FilePickerResult result = await FilePicker.platform.pickFiles(
+      type: FileType.custom,
+      allowedExtensions: ['pdf', 'doc', 'docx', 'jpeg'],
+    );
+
+    if(result != null) {
+      File file = File(result.files.single.path);
+
+      if (file != null) {
+        setState(() {
+          attachment = file;
+        });
+      } else {
+        // User canceled the picker
+      }
+    } else {
+      // User canceled the picker
+    }
+
+  }
 
   final _textStyle = TextStyle(
     color: Colors.black,
@@ -254,6 +290,74 @@ class _EditProfileScreenState extends State<EditProfileScreen> {
       key: _scaffoldKey,
       appBar: AppBar(
         title: Text("edit_profile".tr()),
+        leading: new IconButton(
+            icon: new Icon(Icons.arrow_back),
+            onPressed: (){
+              if (_formKey.currentState.validate()) {
+                final DateFormat formatter = DateFormat('yyyy-MM-dd');
+                user.email = _email_controller.text;
+                user.phone_number = _phone_number_controller.text;
+                user.birth_date = formatter.parse(_birth_date_controller.text);
+                user.linkedin = _linkedin_controller.text;
+
+                user.name = _name_controller.text;
+                user.surname = _surname_controller.text;
+                user.is_migrant = is_migrant ? 1 : 0;
+                user.gender = gender == user_gender.Male ? "male" : "female";
+                user.region = selectedRegion;
+                user.district = selectedDistrict;
+                user.contact_person_fullname = _fullname_of_contact_person.text;
+                user.contact_person_position = _position_of_contact_person.text;
+                user.job_sphere = selectedJobSphere;
+                user.department = selectedDepartment;
+                user.social_orientation = selectedSocialOrientation;
+                user.address = _address_of_company.text;
+                user.description = _description_controller.text;
+
+                if (_imageFile != null && _imageFile.path != null) {
+                  user.uploadImage2(File(_imageFile.path)).then((value) {
+                    StoreProvider.of<AppState>(context).dispatch(getUser());
+                    setState(() {
+                      Prefs.setString(
+                          Prefs.PROFILEIMAGE,
+                          StoreProvider.of<AppState>(context).state.user.user.data.image
+                      );
+                    });
+
+                    if (Prefs.getString(Prefs.USER_TYPE) == 'USER') {
+                      // user_cv.experience_year = int.parse(experience_year_controller.text);
+                      // user_cv.job_title = title_controller.text;
+
+                      if (attachment != null){
+                        user_cv.save(attachment: attachment);
+                      } else {
+                        user_cv.save();
+                      }
+                      Navigator.pop(context);
+                    }
+                  });
+                } else {
+                  user.uploadImage2(null).then((value) {
+                    if (Prefs.getString(Prefs.USER_TYPE) == 'USER') {
+                      // user_cv.experience_year = int.parse(experience_year_controller.text);
+                      // user_cv.job_title = title_controller.text;
+
+                      if (attachment != null){
+                        user_cv.save(attachment: attachment);
+                      } else {
+                        user_cv.save();
+                      }
+                      Navigator.pop(context);
+                    }
+                  });
+                }
+
+              } else {
+                Navigator.pop(context);
+                return;
+              }
+            }
+        ),
       ),
       body: SingleChildScrollView(
         padding: const EdgeInsets.all(20),
@@ -772,9 +876,9 @@ class _EditProfileScreenState extends State<EditProfileScreen> {
                             padding: EdgeInsets.all(0),
                             color: Colors.transparent,
                             textColor: kColorPrimary,
-                            text: attachment != null ? basename(attachment.path) : 'upload_new_file'.tr(),
+                            text: attachment != null ? basename(attachment.path).length >=30 ? basename(attachment.path).replaceRange(30, basename(attachment.path).length, '...') : basename(attachment.path) : 'upload_new_file'.tr(),
                             onPressed: () {
-                              // _pickAttachment();
+                              _pickAttachment();
                             }
                         ),
                         user_cv == null ? Container() : SizedBox(height: 30),
@@ -792,69 +896,69 @@ class _EditProfileScreenState extends State<EditProfileScreen> {
                         text: 'change_password'.tr(),
                       ),
                     ),
-                    SizedBox(height: 20),
-                    SizedBox(
-                      width: double.maxFinite,
-                      child: CustomButton(
-                        color: kColorPrimary,
-                        textColor: Colors.white,
-                        onPressed: () {
-                          if (_formKey.currentState.validate()) {
-                            final DateFormat formatter = DateFormat('yyyy-MM-dd');
-                            user.email = _email_controller.text;
-                            user.phone_number = _phone_number_controller.text;
-                            user.birth_date = formatter.parse(_birth_date_controller.text);
-                            user.linkedin = _linkedin_controller.text;
-
-                            user.name = _name_controller.text;
-                            user.surname = _surname_controller.text;
-                            user.is_migrant = is_migrant ? 1 : 0;
-                            user.gender = gender == user_gender.Male ? "male" : "female";
-                            user.region = selectedRegion;
-                            user.district = selectedDistrict;
-                            user.contact_person_fullname = _fullname_of_contact_person.text;
-                            user.contact_person_position = _position_of_contact_person.text;
-                            user.job_sphere = selectedJobSphere;
-                            user.department = selectedDepartment;
-                            user.social_orientation = selectedSocialOrientation;
-                            user.address = _address_of_company.text;
-                            user.description = _description_controller.text;
-
-                            if (_imageFile != null && _imageFile.path != null) {
-                              user.uploadImage2(File(_imageFile.path)).then((value) {
-                                StoreProvider.of<AppState>(context).dispatch(getUser());
-                                setState(() {
-                                  Prefs.setString(
-                                      Prefs.PROFILEIMAGE,
-                                      StoreProvider.of<AppState>(context).state.user.user.data.image
-                                  );
-                                });
-
-                                if (Prefs.getString(Prefs.USER_TYPE) == 'USER') {
-                                  // user_cv.experience_year = int.parse(experience_year_controller.text);
-                                  // user_cv.job_title = title_controller.text;
-
-                                  if (attachment != null){
-                                    user_cv.save(attachment: attachment);
-                                  } else {
-                                    user_cv.save();
-                                  }
-                                  Navigator.pop(context);
-                                }
-                              });
-                            } else {
-                              user.uploadImage2(null);
-                              Navigator.pop(context);
-                            }
-
-                          } else {
-                            Navigator.pop(context);
-                            return;
-                          }
-                        },
-                        text: 'save'.tr(),
-                      ),
-                    ),
+                    // SizedBox(height: 20),
+                    // SizedBox(
+                    //   width: double.maxFinite,
+                    //   child: CustomButton(
+                    //     color: kColorPrimary,
+                    //     textColor: Colors.white,
+                    //     onPressed: () {
+                    //       if (_formKey.currentState.validate()) {
+                    //         final DateFormat formatter = DateFormat('yyyy-MM-dd');
+                    //         user.email = _email_controller.text;
+                    //         user.phone_number = _phone_number_controller.text;
+                    //         user.birth_date = formatter.parse(_birth_date_controller.text);
+                    //         user.linkedin = _linkedin_controller.text;
+                    //
+                    //         user.name = _name_controller.text;
+                    //         user.surname = _surname_controller.text;
+                    //         user.is_migrant = is_migrant ? 1 : 0;
+                    //         user.gender = gender == user_gender.Male ? "male" : "female";
+                    //         user.region = selectedRegion;
+                    //         user.district = selectedDistrict;
+                    //         user.contact_person_fullname = _fullname_of_contact_person.text;
+                    //         user.contact_person_position = _position_of_contact_person.text;
+                    //         user.job_sphere = selectedJobSphere;
+                    //         user.department = selectedDepartment;
+                    //         user.social_orientation = selectedSocialOrientation;
+                    //         user.address = _address_of_company.text;
+                    //         user.description = _description_controller.text;
+                    //
+                    //         if (_imageFile != null && _imageFile.path != null) {
+                    //           user.uploadImage2(File(_imageFile.path)).then((value) {
+                    //             StoreProvider.of<AppState>(context).dispatch(getUser());
+                    //             setState(() {
+                    //               Prefs.setString(
+                    //                   Prefs.PROFILEIMAGE,
+                    //                   StoreProvider.of<AppState>(context).state.user.user.data.image
+                    //               );
+                    //             });
+                    //
+                    //             if (Prefs.getString(Prefs.USER_TYPE) == 'USER') {
+                    //               // user_cv.experience_year = int.parse(experience_year_controller.text);
+                    //               // user_cv.job_title = title_controller.text;
+                    //
+                    //               if (attachment != null){
+                    //                 user_cv.save(attachment: attachment);
+                    //               } else {
+                    //                 user_cv.save();
+                    //               }
+                    //               Navigator.pop(context);
+                    //             }
+                    //           });
+                    //         } else {
+                    //           user.uploadImage2(null);
+                    //           Navigator.pop(context);
+                    //         }
+                    //
+                    //       } else {
+                    //         Navigator.pop(context);
+                    //         return;
+                    //       }
+                    //     },
+                    //     text: 'save'.tr(),
+                    //   ),
+                    // ),
                   ],
                 ),
               ),

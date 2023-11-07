@@ -62,463 +62,478 @@ class _ProfileCardState extends State<ProfileCard> {
               color: Colors.white,
               margin: EdgeInsets.all(0),
               shape: defaultCardBorder(),
-              child: Container(
-                alignment: Alignment.center,
-                padding: const EdgeInsets.all(0),
-                height: double.maxFinite,
-                child: Flex(
-                  direction: Axis.vertical,
-                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  mainAxisSize: MainAxisSize.max,
-                  children: [
-                    Flexible(
-                      flex: 2,
-                      child: Container(
-                        color: widget.vacancy.responseType == 'SUBMITTED' ? kColorYellow : kColorGray,
-                        height: double.infinity,
-                        padding: const EdgeInsets.symmetric(
-                            vertical: 10, horizontal: 20),
-                        child: Flex(
-                          direction: Axis.horizontal,
-                          mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                          crossAxisAlignment: CrossAxisAlignment.center,
-                          children: [
-                            Expanded(
-                              flex: 3,
-                              child: Container(
-                                child: Flex(
-                                  direction: Axis.horizontal,
-                                  children: [
-                                    Flexible(
-                                      child: Container(
-                                        // color: kColorDark,
-                                        child: RichText(
-                                          maxLines: 3,
-                                          text: TextSpan(
-                                            text: (widget.vacancy.name != null ? widget.vacancy.name.length >=60 ?   widget.vacancy.name.replaceRange(60, widget.vacancy.name.length, '...') : widget.vacancy.name  : '') + '\n',
-                                            style: TextStyle(
-                                              fontSize:
-                                              widget.vacancy.name.length >
-                                                  20
-                                                  ? 14
-                                                  : 20,
-                                              fontWeight: FontWeight.w900,
-                                              fontFamily: 'Manrope',
-                                              color: kColorDark,
+              child: Stack(
+                children: [
+                  Container(
+                    alignment: Alignment.center,
+                    padding: const EdgeInsets.all(0),
+                    height: double.maxFinite,
+                    child: Flex(
+                      direction: Axis.vertical,
+                      mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      mainAxisSize: MainAxisSize.max,
+                      children: [
+                        Flexible(
+                          flex: 2,
+                          child: Container(
+                            color: widget.vacancy.responseType == 'SUBMITTED' ? kColorYellow : kColorGray,
+                            height: double.infinity,
+                            padding: const EdgeInsets.symmetric(vertical: 10, horizontal: 20),
+                            child: Flex(
+                              direction: Axis.horizontal,
+                              mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                              crossAxisAlignment: CrossAxisAlignment.center,
+                              children: [
+                                Expanded(
+                                  flex: 3,
+                                  child: Container(
+                                    child: Flex(
+                                      direction: Axis.horizontal,
+                                      children: [
+                                        Flexible(
+                                          child: Container(
+                                            // color: kColorDark,
+                                            child: RichText(
+                                              maxLines: 3,
+                                              text: TextSpan(
+                                                text: (widget.vacancy.name != null ? widget.vacancy.name.length >=60 ?   widget.vacancy.name.replaceRange(60, widget.vacancy.name.length, '...') : widget.vacancy.name  : '') + '\n',
+                                                style: TextStyle(
+                                                  fontSize:
+                                                  widget.vacancy.name.length > 20 ? 14 : 20,
+                                                  fontWeight: FontWeight.w900,
+                                                  fontFamily: 'Manrope',
+                                                  color: kColorDark,
+                                                ),
+                                                children: <TextSpan>[
+                                                  TextSpan(
+                                                      text: widget.vacancy.district !=
+                                                          null
+                                                          ? widget.vacancy.district
+                                                          : '',
+                                                      style: TextStyle(
+                                                          fontFamily: 'Manrope',
+                                                          fontSize: 12,
+                                                          fontWeight:
+                                                          FontWeight.w500,
+                                                          color: kColorSecondary)),
+                                                ],
+                                              ),
                                             ),
-                                            children: <TextSpan>[
-                                              TextSpan(
-                                                  text: widget.vacancy.district !=
-                                                      null
-                                                      ? widget.vacancy.district
-                                                      : '',
-                                                  style: TextStyle(
-                                                      fontFamily: 'Manrope',
-                                                      fontSize: 12,
-                                                      fontWeight:
-                                                      FontWeight.w500,
-                                                      color: kColorSecondary)),
-                                            ],
                                           ),
                                         ),
-                                      ),
+                                      ],
                                     ),
-                                  ],
-                                ),
-                              ),
-                            ),
-                            Flexible(
-                              flex: 1,
-                              child: Container(
-                                child: ClipRRect(
-                                  borderRadius: BorderRadius.circular(4),
-                                  child: widget.vacancy.company_logo != null ?
-                                  CachedNetworkImage(
-                                    // imageUrl: SERVER_IP + widget.vacancy.company_logo + "?token=${Guid.newGuid}",
-                                    imageUrl: SERVER_IP + widget.vacancy.company_logo,
-                                    imageBuilder: (context, imageProvider) => Container(
-                                      width: 60,
-                                      height: 60,
-                                      decoration: BoxDecoration(
-                                        image: DecorationImage(
-                                          image: imageProvider,
-                                          fit: BoxFit.cover,
-                                        ),
-                                      ),
-                                    ),
-                                    httpHeaders: {
-                                      "Authorization": Prefs.getString(Prefs.TOKEN)
-                                    },
-                                    placeholder: (context, url) => Container(
-                                      padding: EdgeInsets.all(10),
-                                      width: 60,
-                                      height: 60,
-                                      child: CircularProgressIndicator(),
-                                    ),
-                                    errorWidget: (context, url, error) => Image.asset("assets/images/default-user.jpg"),
-                                  ) : Image.asset(
-                                    'assets/images/default-user.jpg',
-                                    fit: BoxFit.cover,
-                                    width: 60,
-                                    height: 60,
                                   ),
                                 ),
-                              ),
-                            ),
-                          ],
-                        ),
-                      ),
-                    ),
-
-                    widget.page == 'user_responses' ? Flexible(
-                      flex: 1,
-                      child: Container(
-                        color: widget.vacancy.responseType == 'SUBMITTED' ? kColorGray : kColorYellow,
-                        height: double.infinity,
-                        padding: const EdgeInsets.symmetric(vertical: 10, horizontal: 20),
-                        child: Flex(
-                          direction: Axis.horizontal,
-                          mainAxisSize: MainAxisSize.max,
-                          mainAxisAlignment: MainAxisAlignment.center,
-                          crossAxisAlignment: CrossAxisAlignment.center,
-                          children: [
-                            Text(
-                              widget.vacancy.responseType == 'SUBMITTED' ? widget.vacancy.responseRead ?
-                              'работодатель просмотрел отклик' :
-                              'отклик отправлен работодателю' :
-                              widget.vacancy.responseType == 'INVITED' ? widget.vacancy.responseRead ?
-                              'приглашение прочитано' :
-                              'получено новое приглашение' :
-                              widget.vacancy.responseType == 'DECLINED' ?
-                              'отклик отклонен работодателем' : '',
-                              style: TextStyle(
-                                fontSize: 12,
-                                fontWeight: FontWeight.bold,
-                                color: kColorDark,
-                              ),
-                            ),
-                          ],
-                        ),
-                      ),
-                    ) : Container(),
-
-                    Flexible(
-                      flex: 3,
-                      child: Container(
-                        padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 10),
-                        child: Flex(
-                          direction: Axis.horizontal,
-                          mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                          crossAxisAlignment: CrossAxisAlignment.center,
-                          children: [
-                            /// Labels
-                            Flexible(
-                              child: Container(
-                                child: Flex(
-                                  direction: Axis.vertical,
-                                  mainAxisAlignment: MainAxisAlignment.center,
-                                  crossAxisAlignment: CrossAxisAlignment.start,
-                                  children: [
-                                    widget.vacancy.type != null ? Container(
-                                      padding: EdgeInsets.symmetric(
-                                          horizontal: 10, vertical: 5),
-                                      decoration: BoxDecoration(
-                                          color: kColorGray,
-                                          borderRadius:
-                                          BorderRadius.circular(4)),
-                                      child: Text(
-                                        widget.vacancy.type != null
-                                            ? widget.vacancy.type
-                                            .toString()
-                                            : "",
-                                        style: TextStyle(
-                                          fontSize: 12,
-                                          fontWeight: FontWeight.w700,
-                                          color: kColorDark,
+                                Flexible(
+                                  flex: 1,
+                                  child: Container(
+                                    child: ClipRRect(
+                                      borderRadius: BorderRadius.circular(4),
+                                      child: widget.vacancy.company_logo != null ?
+                                      CachedNetworkImage(
+                                        // imageUrl: SERVER_IP + widget.vacancy.company_logo + "?token=${Guid.newGuid}",
+                                        imageUrl: SERVER_IP + widget.vacancy.company_logo,
+                                        imageBuilder: (context, imageProvider) => Container(
+                                          width: 60,
+                                          height: 60,
+                                          decoration: BoxDecoration(
+                                            image: DecorationImage(
+                                              image: imageProvider,
+                                              fit: BoxFit.cover,
+                                            ),
+                                          ),
                                         ),
-                                      ),
-                                    ) : Container(),
-
-                                    Container(
-                                      padding: EdgeInsets.symmetric(
-                                          horizontal: 10, vertical: 5),
-                                      margin: EdgeInsets.only(top: 5),
-                                      decoration: BoxDecoration(
-                                          color: kColorGray,
-                                          borderRadius:
-                                          BorderRadius.circular(4)),
-                                      child: Text(
-                                        widget.vacancy.schedule != null
-                                            ? widget.vacancy.schedule.toString()
-                                            : "",
-                                        style: TextStyle(
-                                            fontSize: 12,
-                                            fontWeight: FontWeight.bold,
-                                            fontFamily: 'Manrope',
-                                            color: kColorDark),
+                                        httpHeaders: {
+                                          "Authorization": Prefs.getString(Prefs.TOKEN)
+                                        },
+                                        placeholder: (context, url) => Container(
+                                          padding: EdgeInsets.all(10),
+                                          width: 60,
+                                          height: 60,
+                                          child: CircularProgressIndicator(),
+                                        ),
+                                        errorWidget: (context, url, error) => Image.asset("assets/images/default-user.jpg"),
+                                      ) : Image.asset(
+                                        'assets/images/default-user.jpg',
+                                        fit: BoxFit.cover,
+                                        width: 60,
+                                        height: 60,
                                       ),
                                     ),
-
-                                    (widget.page == 'company' || widget.page == 'company_inactive')
-                                        && widget.vacancy.status != '' ? Container(
-                                      padding: EdgeInsets.symmetric(
-                                          horizontal: 10, vertical: 5),
-                                      margin: EdgeInsets.only(top: 5),
-                                      decoration: BoxDecoration(
-                                          color: kColorGray,
-                                          borderRadius:
-                                          BorderRadius.circular(4)
-                                      ),
-                                      child: Text(
-                                        widget.vacancy.status != null ? widget.vacancy.status : "",
-                                        style: TextStyle(
-                                            fontSize: 12,
-                                            fontWeight: FontWeight.bold,
-                                            fontFamily: 'Manrope',
-                                            color: kColorDark
-                                        ),
-                                      ),
-                                    ) : Container(),
-                                  ],
+                                  ),
                                 ),
-                              ),
+                              ],
                             ),
-
-                            /// Salary
-                            Flexible(
-                              child: Container(
-                                child: Flex(
-                                  direction: Axis.vertical,
-                                  crossAxisAlignment: CrossAxisAlignment.end,
-                                  mainAxisAlignment: MainAxisAlignment.center,
-                                  children: [
-                                    Container(
-                                      child: Text(
-                                        (widget.vacancy.salary != null ? widget.vacancy.salary  : '') +
-                                            widget.vacancy.currency,
-                                        textAlign: TextAlign.end,
-                                        style: TextStyle(
-                                          fontSize: 20,
-                                          fontWeight: FontWeight.w900,
-                                          fontFamily: 'Manrope',
-                                          color: kColorPrimary,
-                                        ),
-                                      ),
-                                    ),
-                                    Container(
-                                      child: Text(
-                                        widget.vacancy.period != null
-                                            ? widget.vacancy.period
-                                            .toLowerCase()
-                                            : '',
-                                        textAlign: TextAlign.end,
-                                        style: TextStyle(
-                                          fontSize: 14,
-                                          fontWeight: FontWeight.w700,
-                                          fontFamily: 'Manrope',
-                                          color: kColorPrimary,
-                                        ),
-                                      ),
-                                    ),
-                                  ],
-                                ),
-                              ),
-                            ),
-                          ],
+                          ),
                         ),
-                      ),
-                    ),
 
-                    /// Company Name & Description
-                    Expanded(
-                      child: Container(
-                        width: double.maxFinite,
-                        padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 0),
-                        child: Flex(
-                          direction: Axis.vertical,
-                          mainAxisAlignment: MainAxisAlignment.start,
-                          crossAxisAlignment: CrossAxisAlignment.start,
-                          children: [
-                            Flexible(
-                              flex: 1,
-                              child: Container(
-                                child: Text(
-                                  widget.vacancy.company_name != null
-                                      ? widget.vacancy.company_name
-                                      : "",
+                        widget.page == 'user_responses' ? Flexible(
+                          flex: 1,
+                          child: Container(
+                            color: widget.vacancy.responseType == 'SUBMITTED' ? kColorGray : kColorYellow,
+                            height: double.infinity,
+                            padding: const EdgeInsets.symmetric(vertical: 10, horizontal: 20),
+                            child: Flex(
+                              direction: Axis.horizontal,
+                              mainAxisSize: MainAxisSize.max,
+                              mainAxisAlignment: MainAxisAlignment.center,
+                              crossAxisAlignment: CrossAxisAlignment.center,
+                              children: [
+                                Text(
+                                  widget.vacancy.responseType == 'SUBMITTED' ? widget.vacancy.responseRead ?
+                                  'отклик просмотрен работодателем' :
+                                  'отклик отправлен' :
+                                  widget.vacancy.responseType == 'INVITED' ? widget.vacancy.responseRead ?
+                                  'приглашение просмотрено' :
+                                  'получено новое приглашение' :
+                                  widget.vacancy.responseType == 'DECLINED' ?
+                                  'отклик отклонен работодателем' : '',
                                   style: TextStyle(
-                                      fontSize: 16,
-                                      fontWeight: FontWeight.bold,
-                                      fontFamily: 'Manrope',
-                                      color: kColorSecondary),
+                                    fontSize: 12,
+                                    fontWeight: FontWeight.bold,
+                                    color:
+                                    widget.vacancy.responseType == 'SUBMITTED' ? widget.vacancy.responseRead ? kColorDark : kColorBlue :
+                                    widget.vacancy.responseType == 'INVITED' ? widget.vacancy.responseRead ? kColorDark : kColorGreen :
+                                    widget.vacancy.responseType == 'DECLINED' ? kColorRed : kColorDark,
+                                  ),
                                 ),
-                              ),
+                              ],
                             ),
-                            widget.page == 'discover' ||
-                                widget.page == 'match' ||
-                                widget.page == 'company'
-                                ? Flexible(
-                              child: Container(
-                                margin: EdgeInsets.only(top: 5),
-                                child: RichText(
-                                  overflow: TextOverflow.ellipsis,
-                                  text: TextSpan(
-                                      text: widget.vacancy.description !=
-                                          null
-                                          ? Bidi.stripHtmlIfNeeded(
-                                          widget.vacancy.description)
+                          ),
+                        ) : Container(),
+
+                        Flexible(
+                          flex: 3,
+                          child: Container(
+                            padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 10),
+                            child: Flex(
+                              direction: Axis.horizontal,
+                              mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                              crossAxisAlignment: CrossAxisAlignment.center,
+                              children: [
+                                /// Labels
+                                Flexible(
+                                  child: Container(
+                                    child: Flex(
+                                      direction: Axis.vertical,
+                                      mainAxisAlignment: MainAxisAlignment.center,
+                                      crossAxisAlignment: CrossAxisAlignment.start,
+                                      children: [
+                                        widget.vacancy.type != null ? Container(
+                                          padding: EdgeInsets.symmetric(
+                                              horizontal: 10, vertical: 5),
+                                          decoration: BoxDecoration(
+                                              color: kColorGray,
+                                              borderRadius:
+                                              BorderRadius.circular(4)),
+                                          child: Text(
+                                            widget.vacancy.type != null
+                                                ? widget.vacancy.type
+                                                .toString()
+                                                : "",
+                                            style: TextStyle(
+                                              fontSize: 12,
+                                              fontWeight: FontWeight.w700,
+                                              color: kColorDark,
+                                            ),
+                                          ),
+                                        ) : Container(),
+
+                                        Container(
+                                          padding: EdgeInsets.symmetric(
+                                              horizontal: 10, vertical: 5),
+                                          margin: EdgeInsets.only(top: 5),
+                                          decoration: BoxDecoration(
+                                              color: kColorGray,
+                                              borderRadius:
+                                              BorderRadius.circular(4)),
+                                          child: Text(
+                                            widget.vacancy.schedule != null
+                                                ? widget.vacancy.schedule.toString()
+                                                : "",
+                                            style: TextStyle(
+                                                fontSize: 12,
+                                                fontWeight: FontWeight.bold,
+                                                fontFamily: 'Manrope',
+                                                color: kColorDark),
+                                          ),
+                                        ),
+
+                                        (widget.page == 'company' || widget.page == 'company_inactive')
+                                            && widget.vacancy.status != '' ? Container(
+                                          padding: EdgeInsets.symmetric(
+                                              horizontal: 10, vertical: 5),
+                                          margin: EdgeInsets.only(top: 5),
+                                          decoration: BoxDecoration(
+                                              color: kColorGray,
+                                              borderRadius:
+                                              BorderRadius.circular(4)
+                                          ),
+                                          child: Text(
+                                            widget.vacancy.status != null ? widget.vacancy.status : "",
+                                            style: TextStyle(
+                                                fontSize: 12,
+                                                fontWeight: FontWeight.bold,
+                                                fontFamily: 'Manrope',
+                                                color: kColorDark
+                                            ),
+                                          ),
+                                        ) : Container(),
+                                      ],
+                                    ),
+                                  ),
+                                ),
+
+                                /// Salary
+                                Flexible(
+                                  child: Container(
+                                    child: Flex(
+                                      direction: Axis.vertical,
+                                      crossAxisAlignment: CrossAxisAlignment.end,
+                                      mainAxisAlignment: MainAxisAlignment.center,
+                                      children: [
+                                        Container(
+                                          child: Text(
+                                            (widget.vacancy.salary != null ? widget.vacancy.salary  : '') +
+                                                widget.vacancy.currency,
+                                            textAlign: TextAlign.end,
+                                            style: TextStyle(
+                                              fontSize: 20,
+                                              fontWeight: FontWeight.w900,
+                                              fontFamily: 'Manrope',
+                                              color: kColorPrimary,
+                                            ),
+                                          ),
+                                        ),
+                                        Container(
+                                          child: Text(
+                                            widget.vacancy.period != null
+                                                ? widget.vacancy.period
+                                                .toLowerCase()
+                                                : '',
+                                            textAlign: TextAlign.end,
+                                            style: TextStyle(
+                                              fontSize: 14,
+                                              fontWeight: FontWeight.w700,
+                                              fontFamily: 'Manrope',
+                                              color: kColorPrimary,
+                                            ),
+                                          ),
+                                        ),
+                                      ],
+                                    ),
+                                  ),
+                                ),
+                              ],
+                            ),
+                          ),
+                        ),
+
+                        /// Company Name & Description
+                        Expanded(
+                          child: Container(
+                            width: double.maxFinite,
+                            padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 0),
+                            child: Flex(
+                              direction: Axis.vertical,
+                              mainAxisAlignment: MainAxisAlignment.start,
+                              crossAxisAlignment: CrossAxisAlignment.start,
+                              children: [
+                                Flexible(
+                                  flex: 1,
+                                  child: Container(
+                                    child: Text(
+                                      widget.vacancy.company_name != null
+                                          ? widget.vacancy.company_name
                                           : "",
                                       style: TextStyle(
-                                          fontSize: 14,
-                                          fontWeight: FontWeight.normal,
+                                          fontSize: 16,
+                                          fontWeight: FontWeight.bold,
                                           fontFamily: 'Manrope',
-                                          color: kColorSecondary)),
+                                          color: kColorSecondary),
+                                    ),
+                                  ),
                                 ),
-                              ),
-                            )
-                                : Container(),
-                          ],
-                        ),
-                      ),
-                    ),
-
-                    Expanded(
-                      flex: 2,
-                      child: Container(
-                        padding: const EdgeInsets.symmetric(
-                            horizontal: 15, vertical: 10),
-                        child: Flex(
-                          direction: Axis.horizontal,
-                          mainAxisAlignment: MainAxisAlignment.center,
-                          children: [
-                            widget.page == 'submit' || widget.page == 'user_responses'
-                                ? Container()
-                                : Flexible(
-                              flex: 1,
-                              child: Container(
-                                margin:
-                                EdgeInsets.symmetric(horizontal: 5),
-                                child: CustomButton(
-                                  borderSide: BorderSide(
-                                      color: kColorPrimary, width: 2.0),
-                                  padding: EdgeInsets.all(0),
-                                  color: Colors.transparent,
-                                  textColor: kColorPrimary,
-                                  onPressed: () async {
-                                    if (Prefs.getString(Prefs.TOKEN) ==
-                                        null) {
-                                      if (Prefs.getInt(Prefs.OFFSET) >
-                                          0 &&
-                                          Prefs.getInt(Prefs.OFFSET) !=
-                                              null) {
-                                        widget.offset =
-                                            Prefs.getInt(Prefs.OFFSET);
-                                      }
-                                      widget.cardController.triggerLeft();
-
-                                      StoreProvider.of<AppState>(context)
-                                          .dispatch(
-                                          getNumberOfActiveVacancies());
-                                    } else if (widget.page ==
-                                        'discover') {
-                                      widget.cardController.triggerLeft();
-                                    } else if (widget.page == 'match') {
-                                      Vacancy.saveVacancyUser(
-                                          vacancy_id:
-                                          widget.vacancy.id,
-                                          type: "LIKED_THEN_DELETED")
-                                          .then((value) {
-                                        StoreProvider.of<AppState>(
-                                            context)
-                                            .state
-                                            .vacancy
-                                            .liked_list
-                                            .data
-                                            .remove(widget.vacancy);
-                                        StoreProvider.of<AppState>(
-                                            context)
-                                            .dispatch(
-                                            getNumberOfLikedVacancies());
-                                      });
-                                    } else if (widget.page == 'company' ||
-                                        widget.page ==
-                                            'company_inactive') {
-                                      Dialogs.showOnDeleteDialog(
-                                          context,
-                                          'delete_are_you_sure'.tr(),
-                                          widget.vacancy);
-                                    }
-                                  },
-                                  text: widget.page == 'discover'
-                                      ? 'skip'.tr()
-                                      : 'delete'.tr(),
-                                ),
-                              ),
+                                widget.page == 'discover' ||
+                                    widget.page == 'match' ||
+                                    widget.page == 'company'
+                                    ? Flexible(
+                                  child: Container(
+                                    margin: EdgeInsets.only(top: 5),
+                                    child: RichText(
+                                      overflow: TextOverflow.ellipsis,
+                                      text: TextSpan(
+                                          text: widget.vacancy.description !=
+                                              null
+                                              ? Bidi.stripHtmlIfNeeded(
+                                              widget.vacancy.description)
+                                              : "",
+                                          style: TextStyle(
+                                              fontSize: 14,
+                                              fontWeight: FontWeight.normal,
+                                              fontFamily: 'Manrope',
+                                              color: kColorSecondary)),
+                                    ),
+                                  ),
+                                )
+                                    : Container(),
+                              ],
                             ),
-                            Prefs.getString(Prefs.TOKEN) != null ? Flexible(
-                              child: Container(
-                                margin:
-                                EdgeInsets.symmetric(horizontal: 5),
-                                child: CustomButton(
-                                  padding: EdgeInsets.all(0),
-                                  color: kColorPrimary,
-                                  textColor: Colors.white,
-                                  onPressed: () async {
-                                    if (widget.page == 'discover') {
-                                      widget.cardController.triggerRight();
-                                    } else if (widget.page == 'match') {
-                                      Dialogs.openLoadingDialog(context);
-                                      Vacancy.saveVacancyUser(vacancy_id: widget.vacancy.id, type: "SUBMITTED").then((value) {
-                                        if (value == "OK") {
-                                          Users user = new Users();
-                                          Dialogs.showDialogBox(context,"successfully_submitted".tr());
-                                          StoreProvider.of<AppState>(context).state.vacancy.liked_list.data.remove(widget.vacancy);
-                                          StoreProvider.of<AppState>(context).dispatch(getLikedVacancies());
-                                          StoreProvider.of<AppState>(context).dispatch(getNumberOfLikedVacancies());
-                                        } else {
-                                          Dialogs.showDialogBox(context,"some_error_occurred_try_again".tr());
-                                        }
-                                      });
-                                    } else if (widget.page == 'company') {
-                                      Dialogs.showOnDeactivateDialog(context, 'deactivate_are_you_sure'.tr(), false, widget.vacancy);
-                                    } else if (widget.page == 'company_inactive') {
-                                      Dialogs.showOnDeactivateDialog(context, 'activate_are_you_sure'.tr(), true, widget.vacancy);
-                                    } else if (widget.page == 'submit' || widget.page == 'user_responses') {
-                                      Navigator.of(context).push(
-                                          MaterialPageRoute(builder:
-                                              (BuildContext context) {
-                                            return ChatScreen(
-                                              user_id: widget.vacancy.company,
-                                              name: widget.vacancy.company_name,
-                                              vacancy_id: widget.vacancy.id,
-                                              vacancy: widget.vacancy.name,
-                                              avatar: widget.vacancy.company_logo,
-                                            );
-                                          })
-                                      );
-                                    }
-                                  },
-                                  text: widget.page == 'discover'
-                                      ? 'like'.tr()
-                                      : (widget.page == 'company'
-                                      ? 'deactivate'.tr()
-                                      : widget.page ==
-                                      'company_inactive'
-                                      ? 'activate'.tr()
-                                      : widget.page == 'submit' || widget.page == 'user_responses'
-                                      ? 'write_to'.tr()
-                                      : 'submit'.tr()),
-                                ),
-                              ),
-                            )
-                                : Container(),
-                          ],
+                          ),
                         ),
+
+                        Expanded(
+                          flex: 2,
+                          child: Container(
+                            padding: const EdgeInsets.symmetric(
+                                horizontal: 15, vertical: 10),
+                            child: Flex(
+                              direction: Axis.horizontal,
+                              mainAxisAlignment: MainAxisAlignment.center,
+                              children: [
+                                widget.page == 'submit' || widget.page == 'user_responses'
+                                    ? Container()
+                                    : Flexible(
+                                  flex: 1,
+                                  child: Container(
+                                    margin:
+                                    EdgeInsets.symmetric(horizontal: 5),
+                                    child: CustomButton(
+                                      borderSide: BorderSide(
+                                          color: kColorPrimary, width: 2.0),
+                                      padding: EdgeInsets.all(0),
+                                      color: Colors.transparent,
+                                      textColor: kColorPrimary,
+                                      onPressed: () async {
+                                        if (Prefs.getString(Prefs.TOKEN) ==
+                                            null) {
+                                          if (Prefs.getInt(Prefs.OFFSET) >
+                                              0 &&
+                                              Prefs.getInt(Prefs.OFFSET) !=
+                                                  null) {
+                                            widget.offset =
+                                                Prefs.getInt(Prefs.OFFSET);
+                                          }
+                                          widget.cardController.triggerLeft();
+
+                                          StoreProvider.of<AppState>(context)
+                                              .dispatch(
+                                              getNumberOfActiveVacancies());
+                                        } else if (widget.page ==
+                                            'discover') {
+                                          widget.cardController.triggerLeft();
+                                        } else if (widget.page == 'match') {
+                                          Vacancy.saveVacancyUser(
+                                              vacancy_id:
+                                              widget.vacancy.id,
+                                              type: "LIKED_THEN_DELETED")
+                                              .then((value) {
+                                            StoreProvider.of<AppState>(
+                                                context)
+                                                .state
+                                                .vacancy
+                                                .liked_list
+                                                .data
+                                                .remove(widget.vacancy);
+                                            StoreProvider.of<AppState>(
+                                                context)
+                                                .dispatch(
+                                                getNumberOfLikedVacancies());
+                                          });
+                                        } else if (widget.page == 'company' ||
+                                            widget.page ==
+                                                'company_inactive') {
+                                          Dialogs.showOnDeleteDialog(
+                                              context,
+                                              'delete_are_you_sure'.tr(),
+                                              widget.vacancy);
+                                        }
+                                      },
+                                      text: widget.page == 'discover'
+                                          ? 'skip'.tr()
+                                          : 'delete'.tr(),
+                                    ),
+                                  ),
+                                ),
+                                Prefs.getString(Prefs.TOKEN) != null ? Flexible(
+                                  child: Container(
+                                    margin:
+                                    EdgeInsets.symmetric(horizontal: 5),
+                                    child: CustomButton(
+                                      padding: EdgeInsets.all(0),
+                                      color: kColorPrimary,
+                                      textColor: Colors.white,
+                                      onPressed: () async {
+                                        if (widget.page == 'discover') {
+                                          widget.cardController.triggerRight();
+                                        } else if (widget.page == 'match') {
+                                          Dialogs.openLoadingDialog(context);
+                                          Vacancy.saveVacancyUser(vacancy_id: widget.vacancy.id, type: "SUBMITTED").then((value) {
+                                            if (value == "OK") {
+                                              Users user = new Users();
+                                              Dialogs.showDialogBox(context,"successfully_submitted".tr());
+                                              StoreProvider.of<AppState>(context).state.vacancy.liked_list.data.remove(widget.vacancy);
+                                              StoreProvider.of<AppState>(context).dispatch(getLikedVacancies());
+                                              StoreProvider.of<AppState>(context).dispatch(getNumberOfLikedVacancies());
+                                            } else {
+                                              Dialogs.showDialogBox(context,"some_error_occurred_try_again".tr());
+                                            }
+                                          });
+                                        } else if (widget.page == 'company') {
+                                          Dialogs.showOnDeactivateDialog(context, 'deactivate_are_you_sure'.tr(), false, widget.vacancy);
+                                        } else if (widget.page == 'company_inactive') {
+                                          Dialogs.showOnDeactivateDialog(context, 'activate_are_you_sure'.tr(), true, widget.vacancy);
+                                        } else if (widget.page == 'submit' || widget.page == 'user_responses') {
+                                          Navigator.of(context).push(
+                                              MaterialPageRoute(builder:
+                                                  (BuildContext context) {
+                                                return ChatScreen(
+                                                  user_id: widget.vacancy.company,
+                                                  name: widget.vacancy.company_name,
+                                                  vacancy_id: widget.vacancy.id,
+                                                  vacancy: widget.vacancy.name,
+                                                  avatar: widget.vacancy.company_logo,
+                                                );
+                                              })
+                                          );
+                                        }
+                                      },
+                                      text: widget.page == 'discover'
+                                          ? 'like'.tr()
+                                          : (widget.page == 'company'
+                                          ? 'deactivate'.tr()
+                                          : widget.page ==
+                                          'company_inactive'
+                                          ? 'activate'.tr()
+                                          : widget.page == 'submit' || widget.page == 'user_responses'
+                                          ? 'write_to'.tr()
+                                          : 'submit'.tr()),
+                                    ),
+                                  ),
+                                )
+                                    : Container(),
+                              ],
+                            ),
+                          ),
+                        ),
+                      ],
+                    ),
+                  ),
+                  widget.vacancy.responseType == 'INVITED' && !widget.vacancy.responseRead ? Positioned(
+                    left: 12,
+                    top: 12,
+                    child: Container(
+                      width: 8,
+                      height: 8,
+                      decoration: BoxDecoration(
+                          color: Colors.green,
+                          shape: BoxShape.circle
                       ),
                     ),
-                  ],
-                ),
+                  ) : Container(),
+                ],
               ),
             ),
           ],
