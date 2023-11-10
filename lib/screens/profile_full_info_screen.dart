@@ -1082,7 +1082,8 @@ class _ProfileInfoScreenState extends State<ProfileInfoScreen> {
                                                 onPressed: () {
                                                   _launchURL(SERVER_IP + data.attachment);
                                                   //            doSome1(user_cv.attachment);
-                                                }),
+                                                }
+                                                ),
                                       ],
                                     ),
                                   ),

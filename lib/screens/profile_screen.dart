@@ -21,6 +21,7 @@ import 'package:ishtapp/datas/vacancy.dart';
 import 'package:ishtapp/datas/Skill.dart';
 import 'dart:io';
 import 'package:dropdown_search/dropdown_search.dart';
+import 'package:url_launcher/url_launcher.dart';
 
 import 'package:file_picker/file_picker.dart';
 import 'package:masked_text/masked_text.dart';
@@ -1178,22 +1179,32 @@ class _ProfileScreenState extends State<ProfileScreen> {
                                                     ),
                                                   )
                                                   : CustomButton(
-                                                  text: data_cv == null || data_cv.attachment == null
-                                                      ? attachment != null
-                                                          ? basename(attachment.path)
-                                                          : 'upload_file'.tr()
-                                                      : data_cv.attachment.substring(20),
+                                                  text: data_cv.attachment != null
+                                                      ? basename(data_cv.attachment).toString()
+                                                      : 'file_doesnt_exist'.tr(),
                                                   width: MediaQuery.of(context).size.width * 1,
-                                                  borderSide: BorderSide(
-                                                      color: kColorPrimary,
-                                                      width: 2.0
-                                                  ),
-                                                  padding: EdgeInsets.all(0),
-                                                  color: Colors.transparent,
+                                                  color: Colors.grey[200],
                                                   textColor: kColorPrimary,
-                                                  onPressed: () async {
-                                                    _pickAttachment();
+                                                  onPressed: () {
+                                                    _launchURL(SERVER_IP + data_cv.attachment);
+                                                    //            doSome1(user_cv.attachment);
                                                   }
+                                                  // text: data_cv == null || data_cv.attachment == null
+                                                  //     ? attachment != null
+                                                  //         ? basename(attachment.path)
+                                                  //         : 'upload_file'.tr()
+                                                  //     : data_cv.attachment.substring(20),
+                                                  // width: MediaQuery.of(context).size.width * 1,
+                                                  // borderSide: BorderSide(
+                                                  //     color: kColorPrimary,
+                                                  //     width: 2.0
+                                                  // ),
+                                                  // padding: EdgeInsets.all(0),
+                                                  // color: Colors.transparent,
+                                                  // textColor: kColorPrimary,
+                                                  // onPressed: () async {
+                                                  //   _pickAttachment();
+                                                  // }
                                                 ),
 
                                             ],
@@ -1243,6 +1254,14 @@ class _ProfileScreenState extends State<ProfileScreen> {
         Text(title),
       ],
     );
+  }
+
+  _launchURL(url) async {
+    if (await canLaunch(url)) {
+      await launch(url);
+    } else {
+      throw 'Could not launch $url';
+    }
   }
 }
 

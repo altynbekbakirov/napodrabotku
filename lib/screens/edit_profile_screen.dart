@@ -333,8 +333,9 @@ class _EditProfileScreenState extends State<EditProfileScreen> {
                       } else {
                         user_cv.save();
                       }
-                      Navigator.pop(context);
                     }
+
+                    Navigator.pop(context);
                   });
                 } else {
                   user.uploadImage2(null).then((value) {
@@ -347,9 +348,9 @@ class _EditProfileScreenState extends State<EditProfileScreen> {
                       } else {
                         user_cv.save();
                       }
-                      Navigator.pop(context);
                     }
                   });
+                  Navigator.pop(context);
                 }
 
               } else {
