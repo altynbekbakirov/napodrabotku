@@ -1,6 +1,6 @@
-# ishtapp
+# napodrabotku
 
-Flutter app for jumush
+Flutter app for napodrabotku
 
 ## Getting Started
 
