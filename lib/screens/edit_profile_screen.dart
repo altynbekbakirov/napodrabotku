@@ -1,9 +1,11 @@
 import 'dart:io';
+import 'package:christian_picker_image/christian_picker_image.dart';
 import 'package:dropdown_search/dropdown_search.dart';
 import 'package:file_picker/file_picker.dart';
 import 'package:flutter/material.dart';
 import 'package:easy_localization/easy_localization.dart';
 import 'package:image_picker/image_picker.dart';
+import 'package:images_picker/images_picker.dart';
 import 'package:intl_phone_number_input/intl_phone_number_input.dart';
 import 'package:ishtapp/components/custom_button.dart';
 import 'package:flutter_datetime_picker/flutter_datetime_picker.dart';
@@ -23,6 +25,8 @@ import 'package:flutter_exif_rotation/flutter_exif_rotation.dart';
 import 'package:ishtapp/datas/RSAA.dart';
 import 'package:flutter_guid/flutter_guid.dart';
 import 'package:ishtapp/routes/routes.dart';
+import 'package:permission_handler/permission_handler.dart';
+import 'package:url_launcher/url_launcher.dart';
 
 enum user_gender { Male, Female }
 
@@ -95,45 +99,67 @@ class _EditProfileScreenState extends State<EditProfileScreen> {
 
   void _onImageButtonPressed(ImageSource source, {BuildContext context}) async {
 
-    // PermissionStatus status = await Permission.storage.request();
-    //
-    // if (status.isGranted) {
-    //   // You have permission to access photos; you can now perform the operation.
-    // } else {
-    //   // The user denied permission or didn't respond; you should handle this gracefully.
-    //   if (status.isPermanentlyDenied) {
-    //     openAppSettings();
-    //   }
-    // }
+    PermissionStatus status = await Permission.storage.request();
+
+    if (status.isGranted) {
+      // You have permission to access photos; you can now perform the operation.
+    } else {
+      // The user denied permission or didn't respond; you should handle this gracefully.
+      if (status.isPermanentlyDenied) {
+        openAppSettings();
+      }
+    }
 
 
     try {
-      final pickedFile = await _picker.getImage(
-        source: source,
-      );
 
-      // File imageFile = File(pickedFile.path);
-      //
-      // if (imageFile.existsSync()) {
-      //   // The file exists, proceed with displaying it.
-      // } else {
-      //   // The file does not exist; there might be an issue with the file path.
-      // }
 
-      // File rotatedImage = await FlutterExifRotation.rotateAndSaveImage(path: pickedFile.path);
+      // print(images);
 
-      if (pickedFile != null && pickedFile.path != null) {
-        // File rotatedImage = await FlutterExifRotation.rotateImage(path: pickedFile.path);
 
-        File imageFile = File(pickedFile.path);
+      if(source == ImageSource.camera){
+        final res = await _picker.getImage(
+          source: source,
+        );
+
+        File imageFile = File(res.path);
+        if (imageFile.existsSync()) {
+          setState(() {
+            _imageFile = imageFile;
+          });
+        }
+      } else {
+        List<File> images  = await ChristianPickerImage.pickImages(maxImages: 1);
+
+        File imageFile = images.first;
 
         if (imageFile.existsSync()) {
           setState(() {
             _imageFile = imageFile;
           });
         }
-
       }
+
+
+      // final res = await _picker.getImage(
+      //   source: source,
+      // );
+
+      // if (res != null && res.first != null && res.first.path != null) {
+      // if (res != null && res.path != null) {
+        // File rotatedImage = await FlutterExifRotation.rotateImage(path: pickedFile.path);
+
+        // File imageFile = File(res.first.path);
+        // File imageFile = File(res.path);
+        // File imageFile = images.first;
+        //
+        // if (imageFile.existsSync()) {
+        //   setState(() {
+        //     _imageFile = imageFile;
+        //   });
+        // }
+
+      // }
 
       // setState(() {
       //   _imageFile = rotatedImage;
@@ -328,7 +354,7 @@ class _EditProfileScreenState extends State<EditProfileScreen> {
                       // user_cv.experience_year = int.parse(experience_year_controller.text);
                       // user_cv.job_title = title_controller.text;
 
-                      if (attachment != null){
+                      if (attachment != null && attachment.path != null){
                         user_cv.save(attachment: attachment);
                       } else {
                         user_cv.save();
@@ -343,7 +369,7 @@ class _EditProfileScreenState extends State<EditProfileScreen> {
                       // user_cv.experience_year = int.parse(experience_year_controller.text);
                       // user_cv.job_title = title_controller.text;
 
-                      if (attachment != null){
+                      if (attachment != null && attachment.path != null){
                         user_cv.save(attachment: attachment);
                       } else {
                         user_cv.save();
@@ -371,7 +397,13 @@ class _EditProfileScreenState extends State<EditProfileScreen> {
                 children: [
                   GestureDetector(
                     child: _imageFile == null
-                        ? CircleAvatar(
+                        ? Prefs.getString(Prefs.PROFILEIMAGE) != null ? CircleAvatar(
+                            backgroundColor: kColorPrimary,
+                            radius: 60,
+                            backgroundImage: NetworkImage(SERVER_IP + Prefs.getString(Prefs.PROFILEIMAGE),
+                            headers: {"Authorization": Prefs.getString(Prefs.TOKEN)}
+                            ),
+                          ) : CircleAvatar(
                             backgroundColor: kColorGray,
                             radius: 60,
                             child: SvgIcon("assets/icons/camera_icon.svg", width: 40, height: 40, color: kColorSecondary),
@@ -882,6 +914,19 @@ class _EditProfileScreenState extends State<EditProfileScreen> {
                               _pickAttachment();
                             }
                         ),
+                        user_cv == null ? Container() : SizedBox(height: 10),
+                        user_cv != null ? CustomButton(
+                            text: user_cv.attachment != null
+                                ? basename(user_cv.attachment).toString()
+                                : 'file_doesnt_exist'.tr(),
+                            width: MediaQuery.of(context).size.width * 1,
+                            color: Colors.grey[200],
+                            textColor: kColorPrimary,
+                            onPressed: () {
+                              _launchURL(SERVER_IP + user_cv.attachment);
+                              //            doSome1(user_cv.attachment);
+                            }
+                          ) : Container(),
                         user_cv == null ? Container() : SizedBox(height: 30),
                       ],
                     ),
@@ -969,5 +1014,13 @@ class _EditProfileScreenState extends State<EditProfileScreen> {
         ),
       ),
     );
+  }
+
+  _launchURL(url) async {
+    if (await canLaunch(url)) {
+      await launch(url);
+    } else {
+      throw 'Could not launch $url';
+    }
   }
 }

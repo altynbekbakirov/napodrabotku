@@ -7,6 +7,8 @@ import 'package:ishtapp/datas/RSAA.dart';
 import 'package:ishtapp/datas/app_state.dart';
 import 'package:ishtapp/datas/user.dart';
 import 'package:ishtapp/screens/tabs/vacancies_tab.dart';
+// import 'package:permission_handler/permission_handler.dart';
+import 'package:notification_permissions/notification_permissions.dart';
 import 'package:pusher_client/pusher_client.dart';
 import 'package:redux/redux.dart';
 import 'package:flutter_redux/flutter_redux.dart';
@@ -23,6 +25,7 @@ import 'package:intl_phone_number_input/intl_phone_number_input.dart';
 import 'dart:async';
 import 'dart:convert';
 import 'dart:math';
+import 'package:flutter_local_notifications/flutter_local_notifications.dart';
 
 enum work_mode { isWork, isTraining }
 
@@ -644,33 +647,70 @@ class _HomeScreenState extends State<HomeScreen> {
   }
 
   void bindEventPusher() async {
-    channel.bind('new-message-sent', (PusherEvent event) {
+    channel.bind('new-message-sent', (PusherEvent event) async {
       var data = json.decode(event.data);
       print("New message sent event " + event.data.toString());
 
       if(Prefs.getString(Prefs.USER_TYPE) == 'COMPANY'){
         if(data['sender_id'] - Prefs.getInt(Prefs.USER_ID) == 0){
+
+          if(data['avatar'] != Prefs.getString(Prefs.PROFILEIMAGE)){
+            await showChatNotification(
+                int.parse(data['chat_id'].toString()),
+                'наподработку.рф',
+                'У вас есть новое сообщение'
+            );
+          }
+
           setState(() {
             StoreProvider.of<AppState>(context).dispatch(getChatList());
             StoreProvider.of<AppState>(context).dispatch(getNumberOfUnreadMessages());
           });
+
+          if(_tabCurrentIndex == 3){
+            StoreProvider.of<AppState>(context).dispatch(getMessageList(data['receiver_id'], data['vacancy_id']));
+          }
         }
       } else {
         if(data['user_id'] - Prefs.getInt(Prefs.USER_ID) == 0){
+
+          if(data['avatar'] != Prefs.getString(Prefs.PROFILEIMAGE)){
+            await showChatNotification(
+                int.parse(data['chat_id'].toString()),
+                'наподработку.рф',
+                'У вас есть новое сообщение'
+            );
+          }
+
           setState(() {
             StoreProvider.of<AppState>(context).dispatch(getChatList());
             StoreProvider.of<AppState>(context).dispatch(getNumberOfUnreadMessages());
           });
+
+          if(_tabCurrentIndex == 3){
+            setState(() {
+              StoreProvider.of<AppState>(context).dispatch(getMessageList(data['sender_id'], data['vacancy_id']));
+            });
+          }
         }
       }
     });
 
-    channel.bind('new-invitation-sent', (PusherEvent event) {
+    channel.bind('new-invitation-sent', (PusherEvent event) async {
       var data = json.decode(event.data);
       print("New invitation sent event " + event.data.toString());
 
       if(Prefs.getString(Prefs.USER_TYPE) == 'COMPANY'){
         if(data['company_id'] - Prefs.getInt(Prefs.USER_ID) == 0){
+
+          if(data['type'] == 'SUBMITTED'){
+            await showVacancyNotification(
+                int.parse(data['vacancy_id'].toString()),
+                'наподработку.рф',
+                'У вас есть новый отклик на вакансию'
+            );
+          }
+
           setState(() {
             StoreProvider.of<AppState>(context).dispatch(getAllUsers());
             StoreProvider.of<AppState>(context).dispatch(getInviteUsers());
@@ -680,6 +720,15 @@ class _HomeScreenState extends State<HomeScreen> {
         }
       } else {
         if(data['user_id'] - Prefs.getInt(Prefs.USER_ID) == 0){
+
+          if(data['type'] == 'INVITED'){
+            await showVacancyNotification(
+                int.parse(data['vacancy_id'].toString()),
+                'наподработку.рф',
+                'У вас есть новое приглашение на вакансию'
+            );
+          }
+
           setState(() {
             StoreProvider.of<AppState>(context).dispatch(getUserVacancies());
             StoreProvider.of<AppState>(context).dispatch(getInvitedVacancies());
@@ -747,6 +796,7 @@ class _HomeScreenState extends State<HomeScreen> {
 
     getLists();
     buildSome(context);
+    requestNotificationPermission();
 
     super.initState();
 
@@ -795,6 +845,81 @@ class _HomeScreenState extends State<HomeScreen> {
     props.getNumberOfUnreadResponses();
   }
 
+  Future<void> requestNotificationPermission() async {
+    NotificationPermissions
+        .requestNotificationPermissions(
+        iosSettings:
+        const NotificationSettingsIos(
+            sound: true,
+            badge: true,
+            alert: true));
+  }
+
+  Future<void> showChatNotification(int id, String title, String body) async {
+
+    FlutterLocalNotificationsPlugin flutterLocalNotificationsPlugin = FlutterLocalNotificationsPlugin();
+
+    const AndroidNotificationDetails androidPlatformChannelSpecifics = AndroidNotificationDetails(
+        '01',
+        'Chat channel',
+        'Notification for messages from chats',
+        importance: Importance.max,
+        priority: Priority.high,
+        ticker: 'ticker',
+        icon: 'app_icon'
+    );
+    const iOSDetails = IOSNotificationDetails();
+
+    const NotificationDetails platformChannelSpecifics = NotificationDetails(android: androidPlatformChannelSpecifics, iOS: iOSDetails);
+
+    // PermissionStatus status = await Permission.notification.request();
+
+    // if (status.isGranted) {
+      await flutterLocalNotificationsPlugin.show(
+          id,
+          title,
+          body,
+          platformChannelSpecifics,
+          payload: 'item x',
+      );
+    // } else {
+    //   Permission.notification.request();
+    //   // openAppSettings();
+    // }
+  }
+
+  Future<void> showVacancyNotification(int id, String title, String body) async {
+
+    FlutterLocalNotificationsPlugin flutterLocalNotificationsPlugin = FlutterLocalNotificationsPlugin();
+
+    const AndroidNotificationDetails androidPlatformChannelSpecifics = AndroidNotificationDetails(
+      '02',
+      'Vacancy channel',
+      'Notification for vacancy invitations and responses',
+      importance: Importance.max,
+      priority: Priority.high,
+      ticker: 'ticker',
+    );
+    const iOSDetails = IOSNotificationDetails();
+
+    const NotificationDetails platformChannelSpecifics = NotificationDetails(android: androidPlatformChannelSpecifics, iOS: iOSDetails);
+
+    // PermissionStatus status = await Permission.notification.request();
+
+    // if (status.isGranted) {
+    await flutterLocalNotificationsPlugin.show(
+      id,
+      title,
+      body,
+      platformChannelSpecifics,
+      payload: 'item x',
+    );
+    // } else {
+    //   Permission.notification.request();
+    //   // openAppSettings();
+    // }
+  }
+
   @override
   Widget build(BuildContext context) {
     return StoreConnector<AppState, VacanciesScreenProps>(
@@ -836,11 +961,17 @@ class _HomeScreenState extends State<HomeScreen> {
                   selectedItemColor: Colors.grey[600],
                   selectedFontSize: _tabCurrentIndex == 4 ? 13 : 14,
                   currentIndex: _tabCurrentIndex == 4 ? 0 : _tabCurrentIndex,
-                  onTap: (index) {
+                  onTap: (index) async {
                     if (index == 1) {
                       setState(() {
                         receivedMessageCount = 0;
                       });
+
+                      // await showChatNotification(
+                      //     1,
+                      //     'наподработку.рф',
+                      //     'У вас есть новое сообщение'
+                      // );
                     }
                     _nextTab(index);
                     if(Prefs.getString(Prefs.USER_TYPE) == 'COMPANY'){

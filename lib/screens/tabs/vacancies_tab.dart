@@ -296,7 +296,7 @@ class _VacanciesTabState extends State<VacanciesTab> {
                                     color: kColorWhite,
                                     width: 2.0
                                 ),
-                                color: type == 1 ? Colors.white : Colors.transparent,
+                                color: type == 1 ? kColorGray : Colors.transparent,
                                 textColor: type == 1 ? kColorPrimary : Colors.white,
                                 textSize: 14,
                                 padding: EdgeInsets.all(0),
@@ -333,10 +333,10 @@ class _VacanciesTabState extends State<VacanciesTab> {
                           margin: EdgeInsets.symmetric(horizontal: 5),
                           child: CustomButton(
                             borderSide: BorderSide(
-                                color: kColorWhite,
+                                color: type == 2 ? kColorYellow : kColorWhite,
                                 width: 2.0
                             ),
-                            color: type == 2 ? Colors.white : Colors.transparent,
+                            color: type == 2 ? kColorYellow : Colors.transparent,
                             textColor: type == 2 ? kColorPrimary : Colors.white,
                             textSize: 14,
                             padding: EdgeInsets.all(0),
@@ -376,8 +376,9 @@ class _VacanciesTabState extends State<VacanciesTab> {
                               return GestureDetector(
                                 child: Container(
                                     child: ProfileCard(
-                                        vacancy: vacancy,
-                                        page: "user_responses"
+                                      vacancy: vacancy,
+                                      page: "user_responses",
+                                      loading: false,
                                     )
                                 ),
                                 onTap: () {

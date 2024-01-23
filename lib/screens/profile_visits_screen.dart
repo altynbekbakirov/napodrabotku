@@ -50,7 +50,11 @@ class ProfileVisitsScreen extends StatelessWidget {
                       child: UsersGrid(
                           children: data.map((vacancy) {
                         return GestureDetector(
-                          child: ProfileCard(vacancy: vacancy, page: "submit"),
+                          child: ProfileCard(
+                              vacancy: vacancy,
+                              page: "submit",
+                              loading: false,
+                          ),
                           onTap: () {
                             Navigator.of(context).push(MaterialPageRoute(
                                 builder: (BuildContext context) {

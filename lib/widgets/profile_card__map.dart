@@ -125,14 +125,14 @@ class _ProfileCardMapState extends State<ProfileCardMap> {
                                                 ? widget.vacancy.name.toString() + '\n'
                                                 : "",
                                             style: TextStyle(
-                                                fontSize: 20,
+                                                fontSize: widget.vacancy.name.length > 20 ? 14 : 20,
                                                 fontWeight: FontWeight.w900,
                                                 fontFamily: 'Manrope',
                                                 color: kColorDark
                                             ),
                                             children: <TextSpan>[
                                               TextSpan(
-                                                  text: widget.vacancy.region != null ? widget.vacancy.region : '',
+                                                  text: widget.vacancy.district != null ? widget.vacancy.district : '',
                                                   style: TextStyle(
                                                       fontFamily: 'Manrope',
                                                       fontSize: 12,

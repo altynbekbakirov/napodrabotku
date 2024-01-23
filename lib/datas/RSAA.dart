@@ -100,7 +100,7 @@ RSAA getVacanciesRequest(
     method: 'POST',
     endpoint: API_IP + API_VACANCY_LIST + "?lang=" + Prefs.getString(Prefs.LANGUAGE) + "&route=" + Prefs.getString(Prefs.ROUTE),
     body: json.encode({
-      'limit': 99,
+      'limit': 4,
       'lang': Prefs.getString(Prefs.LANGUAGE),
       'offset': 0,
       'type': type,
@@ -140,13 +140,10 @@ const LIST_MAP_VACANCIES_REQUEST = 'LIST_MAP_VACANCIES_REQUEST';
 const LIST_MAP_VACANCIES_SUCCESS = 'LIST_MAP_VACANCIES_SUCCESS';
 const LIST_MAP_VACANCIES_FAILURE = 'LIST_MAP_VACANCIES_FAILURE';
 
-RSAA getMapVacanciesRequest(
-    {
-      List region_ids,
-    }) {
+RSAA getMapVacanciesRequest({ List region_ids }) {
   return RSAA(
     method: 'POST',
-    endpoint: API_IP + API_VACANCY_LIST + "?lang=" + Prefs.getString(Prefs.LANGUAGE) + "&route=" + Prefs.getString(Prefs.ROUTE),
+    endpoint: API_IP + API_MAP_VACANCY_LIST + "?lang=" + Prefs.getString(Prefs.LANGUAGE) + "&route=" + Prefs.getString(Prefs.ROUTE),
     body: json.encode({
       'limit': 99,
       'lang': Prefs.getString(Prefs.LANGUAGE),

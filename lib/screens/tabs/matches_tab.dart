@@ -644,6 +644,7 @@ class _MatchesTabState extends State<MatchesTab> {
                                     child: ProfileCard(
                                       vacancy: vacancy,
                                       page: 'match',
+                                      loading: false,
                                     ),
                                 ),
                                 onTap: () {

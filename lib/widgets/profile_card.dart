@@ -32,6 +32,8 @@ class ProfileCard extends StatefulWidget {
   /// Swiper position
   final SwiperPosition position;
 
+  final bool loading;
+
   ProfileCard({
     this.page,
     this.position,
@@ -40,6 +42,7 @@ class ProfileCard extends StatefulWidget {
     this.offset,
     this.props,
     this.cardController,
+    this.loading,
   });
 
   @override
@@ -100,7 +103,7 @@ class _ProfileCardState extends State<ProfileCard> {
                                                 text: (widget.vacancy.name != null ? widget.vacancy.name.length >=60 ?   widget.vacancy.name.replaceRange(60, widget.vacancy.name.length, '...') : widget.vacancy.name  : '') + '\n',
                                                 style: TextStyle(
                                                   fontSize:
-                                                  widget.vacancy.name.length > 20 ? 14 : 20,
+                                                  widget.vacancy.name.length > 15 ? 14 : 18,
                                                   fontWeight: FontWeight.w900,
                                                   fontFamily: 'Manrope',
                                                   color: kColorDark,
@@ -300,7 +303,7 @@ class _ProfileCardState extends State<ProfileCard> {
                                                 widget.vacancy.currency,
                                             textAlign: TextAlign.end,
                                             style: TextStyle(
-                                              fontSize: 20,
+                                              fontSize: 16,
                                               fontWeight: FontWeight.w900,
                                               fontFamily: 'Manrope',
                                               color: kColorPrimary,
@@ -315,7 +318,7 @@ class _ProfileCardState extends State<ProfileCard> {
                                                 : '',
                                             textAlign: TextAlign.end,
                                             style: TextStyle(
-                                              fontSize: 14,
+                                              fontSize: 13,
                                               fontWeight: FontWeight.w700,
                                               fontFamily: 'Manrope',
                                               color: kColorPrimary,
@@ -521,6 +524,18 @@ class _ProfileCardState extends State<ProfileCard> {
                       ],
                     ),
                   ),
+                  widget.loading ? Container(
+                    width: double.infinity,
+                    height: double.infinity,
+                    decoration: BoxDecoration(
+                        color: Colors.white30,
+                    ),
+                    child: Center(
+                      child: CircularProgressIndicator(
+                        valueColor: new AlwaysStoppedAnimation<Color>(kColorPrimary),
+                      ),
+                    ),
+                  ) : Container(),
                   widget.vacancy.responseType == 'INVITED' && !widget.vacancy.responseRead ? Positioned(
                     left: 12,
                     top: 12,

@@ -117,6 +117,7 @@ class ProfileLikesScreen extends StatelessWidget {
                                 child: ProfileCard(
                                   vacancy: vacancy,
                                   page: 'match',
+                                  loading: false,
                                 ),
                                 onTap: () {},
                               );

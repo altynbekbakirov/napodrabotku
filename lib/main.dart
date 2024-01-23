@@ -1,6 +1,7 @@
-import 'package:firebase_core/firebase_core.dart';
+// import 'package:firebase_core/firebase_core.dart';
 import 'package:flutter/services.dart';
 import 'package:ishtapp/utils/reducer.dart';
+import 'package:permission_handler/permission_handler.dart';
 import 'package:redux/redux.dart';
 import 'package:flutter_redux/flutter_redux.dart';
 import 'package:easy_localization/easy_localization.dart';
@@ -15,9 +16,11 @@ import 'datas/app_state.dart';
 import 'package:redux_thunk/redux_thunk.dart';
 import 'package:redux_api_middleware/redux_api_middleware.dart';
 import 'datas/logger.dart';
+import 'package:flutter_local_notifications/flutter_local_notifications.dart';
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
+  await initializeNotifications();
   // await Firebase.initializeApp();
 
   /// Initializing the AppMetrica SDK.
@@ -91,4 +94,26 @@ class MyBehavior extends ScrollBehavior {
   Widget buildViewportChrome(BuildContext context, Widget child, AxisDirection axisDirection) {
     return child;
   }
+}
+
+Future<void> initializeNotifications() async {
+
+  FlutterLocalNotificationsPlugin flutterLocalNotificationsPlugin = FlutterLocalNotificationsPlugin();
+
+  const AndroidInitializationSettings initializationSettingsAndroid = AndroidInitializationSettings('app_icon');
+
+  const IOSInitializationSettings initializationSettingsIOS =
+  IOSInitializationSettings(
+    requestSoundPermission: false,
+    requestBadgePermission: false,
+    requestAlertPermission: false,
+  );
+
+  final InitializationSettings initializationSettings = InitializationSettings(
+    android: initializationSettingsAndroid,
+    iOS: initializationSettingsIOS,
+  );
+
+  await flutterLocalNotificationsPlugin.initialize(initializationSettings);
+
 }

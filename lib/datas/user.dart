@@ -778,7 +778,8 @@ class Users {
           headers: headers,
           body: json.encode({'user_id': userId, 'type': type, 'vacancy_id': vacancyId})
       );
-      if(response.statusCode == 200) {
+      print(response.body);
+      if(response. statusCode == 200) {
         return "OK";
       } else {
         return "ERROR";

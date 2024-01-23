@@ -150,12 +150,15 @@ class _ChatScreenState extends State<ChatScreen> {
                         onPressed: _isComposing
                             ? () async {
                                 Message.sendMessage(_textController.text, widget.user_id, widget.vacancy_id);
-                                data.add(Message(
-                                    body: _textController.text,
-                                    date_time: DateTime.now(),
-                                    type: true,
-                                    read: true)
+                                data.add(
+                                    Message(
+                                      body: _textController.text,
+                                      date_time: DateTime.now(),
+                                      type: true,
+                                      read: true
+                                    )
                                 );
+                                // StoreProvider.of<AppState>(context).dispatch(getMessageList(widget.user_id, widget.vacancy_id));
                                 _textController.clear();
                                 setState(() => _isComposing = false);
                               }

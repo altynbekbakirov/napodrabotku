@@ -55,7 +55,8 @@ class _DiscoverTabState extends State<DiscoverTab> with SingleTickerProviderStat
   Point _pointFilter;
 
   int button = 0;
-  int offset = 5;
+  int offset = 4;
+  bool tinderCardLoading = false;
 
   Users user;
   int userId;
@@ -95,7 +96,7 @@ class _DiscoverTabState extends State<DiscoverTab> with SingleTickerProviderStat
   List<dynamic> _suggestions = [];
   String _selectedCity;
 
-  List<Vacancy> _vacancyList = [];
+  // List<Vacancy> _vacancyList = [];
 
   TabController _tabController;
   int _currentIndex = 0;
@@ -1218,7 +1219,7 @@ class _DiscoverTabState extends State<DiscoverTab> with SingleTickerProviderStat
               List<Users> data = StoreProvider.of<AppState>(context).state.user.list.data;
               // List<Users> data = props.listResponse.data;
               bool loading = props.listResponse.loading && props.activeList.loading;
-              _vacancyList = props.activeList.data;
+              List<Vacancy> _vacancyList = props.activeList.data;
 
               Widget body;
               if (loading) {
@@ -1283,7 +1284,7 @@ class _DiscoverTabState extends State<DiscoverTab> with SingleTickerProviderStat
                                   ),
                                   color: StoreProvider.of<AppState>(context).state.user.type == 'day' ? Colors.white : Colors.transparent,
                                   textColor: StoreProvider.of<AppState>(context).state.user.type == 'day' ? kColorPrimary : Colors.white,
-                                  textSize: 14,
+                                  textSize: 13,
                                   padding: EdgeInsets.all(0),
                                   height: 40.0,
                                   onPressed: () {
@@ -1307,7 +1308,7 @@ class _DiscoverTabState extends State<DiscoverTab> with SingleTickerProviderStat
                                   ),
                                   color: StoreProvider.of<AppState>(context).state.user.type == 'week' ? Colors.white : Colors.transparent,
                                   textColor: StoreProvider.of<AppState>(context).state.user.type == 'week' ? kColorPrimary : Colors.white,
-                                  textSize: 14,
+                                  textSize: 13,
                                   padding: EdgeInsets.all(0),
                                   height: 40.0,
                                   onPressed: () {
@@ -1332,7 +1333,7 @@ class _DiscoverTabState extends State<DiscoverTab> with SingleTickerProviderStat
                                   ),
                                   color: StoreProvider.of<AppState>(context).state.user.type == 'month' ? Colors.white : Colors.transparent,
                                   textColor: StoreProvider.of<AppState>(context).state.user.type == 'month' ? kColorPrimary : Colors.white,
-                                  textSize: 14,
+                                  textSize: 13,
                                   padding: EdgeInsets.all(0),
                                   height: 40.0,
                                   onPressed: () {
@@ -1466,9 +1467,10 @@ class _DiscoverTabState extends State<DiscoverTab> with SingleTickerProviderStat
                                         child: ProfileCard(
                                           props: props,
                                           page: 'discover',
-                                          vacancy: StoreProvider.of<AppState>(context).state.vacancy.list.data[index],
+                                          vacancy: data[index],
                                           index: index,
                                           cardController: cardController,
+                                          loading: tinderCardLoading
                                         ),
                                         onTap: () {
                                           Navigator.of(context).push(MaterialPageRoute(builder: (BuildContext context) {
@@ -1479,7 +1481,7 @@ class _DiscoverTabState extends State<DiscoverTab> with SingleTickerProviderStat
                                               ),
                                               body: VacancyView(
                                                 page: "view",
-                                                vacancy: StoreProvider.of<AppState>(context).state.vacancy.list.data[index],
+                                                vacancy: data[index],
                                               ),
                                             );
                                           }));
@@ -1713,7 +1715,7 @@ class _DiscoverTabState extends State<DiscoverTab> with SingleTickerProviderStat
                                                     Icon(
                                                       Boxicons.bx_filter,
                                                       color: Colors.white,
-                                                      size: 24,
+                                                      size: 20,
                                                     )
                                                   ],
                                                 ),
@@ -1734,7 +1736,7 @@ class _DiscoverTabState extends State<DiscoverTab> with SingleTickerProviderStat
                                           Flexible(
                                             flex: 2,
                                             child: Container(
-                                              margin: EdgeInsets.symmetric(horizontal: 5),
+                                              margin: EdgeInsets.symmetric(horizontal: 2),
                                               child: CustomButton(
                                                 borderSide: BorderSide(
                                                     color: kColorWhite,
@@ -1742,7 +1744,7 @@ class _DiscoverTabState extends State<DiscoverTab> with SingleTickerProviderStat
                                                 ),
                                                 color: StoreProvider.of<AppState>(context).state.vacancy.type == 'day' ? Colors.white : Colors.transparent,
                                                 textColor: StoreProvider.of<AppState>(context).state.vacancy.type == 'day' ? kColorPrimary : Colors.white,
-                                                textSize: 14,
+                                                textSize: 13,
                                                 padding: EdgeInsets.all(0),
                                                 height: 40.0,
                                                 onPressed: () {
@@ -1766,7 +1768,7 @@ class _DiscoverTabState extends State<DiscoverTab> with SingleTickerProviderStat
                                                 ),
                                                 color: StoreProvider.of<AppState>(context).state.vacancy.type == 'week' ? Colors.white : Colors.transparent,
                                                 textColor: StoreProvider.of<AppState>(context).state.vacancy.type == 'week' ? kColorPrimary : Colors.white,
-                                                textSize: 14,
+                                                textSize: 13,
                                                 padding: EdgeInsets.all(0),
                                                 height: 40.0,
                                                 onPressed: () {
@@ -1791,7 +1793,7 @@ class _DiscoverTabState extends State<DiscoverTab> with SingleTickerProviderStat
                                                 ),
                                                 color: StoreProvider.of<AppState>(context).state.vacancy.type == 'month' ? Colors.white : Colors.transparent,
                                                 textColor: StoreProvider.of<AppState>(context).state.vacancy.type == 'month' ? kColorPrimary : Colors.white,
-                                                textSize: 14,
+                                                textSize: 13,
                                                 padding: EdgeInsets.all(0),
                                                 height: 40.0,
                                                 onPressed: () {
@@ -1953,8 +1955,10 @@ class _DiscoverTabState extends State<DiscoverTab> with SingleTickerProviderStat
     if (Prefs.getInt(Prefs.OFFSET) > 0 && Prefs.getInt(Prefs.OFFSET) != null) {
       offset = Prefs.getInt(Prefs.OFFSET);
     } else {
-      offset = 5;
+      offset = 4;
     }
+
+    tinderCardLoading = true;
 
     if (Prefs.getString(Prefs.TOKEN) != null) {
       if (type == "LIKED") {
@@ -1982,9 +1986,10 @@ class _DiscoverTabState extends State<DiscoverTab> with SingleTickerProviderStat
         type: StoreProvider.of<AppState>(context).state.vacancy.type)
         .then((value) {
       if (value != null) {
-        offset = offset + 1;
+        // offset = offset + 1;
         Prefs.setInt(Prefs.OFFSET, offset);
         setState(() {
+          tinderCardLoading = false;
           props.listResponse.data.add(value);
         });
       }

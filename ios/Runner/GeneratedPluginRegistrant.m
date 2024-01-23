@@ -4,22 +4,16 @@
 
 #import "GeneratedPluginRegistrant.h"
 
+#if __has_include(<christian_picker_image/ChristianPickerImagePlugin.h>)
+#import <christian_picker_image/ChristianPickerImagePlugin.h>
+#else
+@import christian_picker_image;
+#endif
+
 #if __has_include(<file_picker/FilePickerPlugin.h>)
 #import <file_picker/FilePickerPlugin.h>
 #else
 @import file_picker;
-#endif
-
-#if __has_include(<firebase_auth/FLTFirebaseAuthPlugin.h>)
-#import <firebase_auth/FLTFirebaseAuthPlugin.h>
-#else
-@import firebase_auth;
-#endif
-
-#if __has_include(<firebase_core/FLTFirebaseCorePlugin.h>)
-#import <firebase_core/FLTFirebaseCorePlugin.h>
-#else
-@import firebase_core;
 #endif
 
 #if __has_include(<flutter_exif_rotation/FlutterExifRotationPlugin.h>)
@@ -64,10 +58,22 @@
 @import image_picker;
 #endif
 
+#if __has_include(<images_picker/ImagesPickerPlugin.h>)
+#import <images_picker/ImagesPickerPlugin.h>
+#else
+@import images_picker;
+#endif
+
 #if __has_include(<libphonenumber/LibphonenumberPlugin.h>)
 #import <libphonenumber/LibphonenumberPlugin.h>
 #else
 @import libphonenumber;
+#endif
+
+#if __has_include(<notification_permissions/NotificationPermissionsPlugin.h>)
+#import <notification_permissions/NotificationPermissionsPlugin.h>
+#else
+@import notification_permissions;
 #endif
 
 #if __has_include(<path_provider/FLTPathProviderPlugin.h>)
@@ -76,16 +82,16 @@
 @import path_provider;
 #endif
 
+#if __has_include(<permission_handler/PermissionHandlerPlugin.h>)
+#import <permission_handler/PermissionHandlerPlugin.h>
+#else
+@import permission_handler;
+#endif
+
 #if __has_include(<pusher_client/PusherClientPlugin.h>)
 #import <pusher_client/PusherClientPlugin.h>
 #else
 @import pusher_client;
-#endif
-
-#if __has_include(<searchable_dropdown/SearchableDropdownPlugin.h>)
-#import <searchable_dropdown/SearchableDropdownPlugin.h>
-#else
-@import searchable_dropdown;
 #endif
 
 #if __has_include(<shared_preferences/FLTSharedPreferencesPlugin.h>)
@@ -118,12 +124,6 @@
 @import url_launcher;
 #endif
 
-#if __has_include(<workmanager/WorkmanagerPlugin.h>)
-#import <workmanager/WorkmanagerPlugin.h>
-#else
-@import workmanager;
-#endif
-
 #if __has_include(<yandex_mapkit/YandexMapkitPlugin.h>)
 #import <yandex_mapkit/YandexMapkitPlugin.h>
 #else
@@ -133,9 +133,8 @@
 @implementation GeneratedPluginRegistrant
 
 + (void)registerWithRegistry:(NSObject<FlutterPluginRegistry>*)registry {
+  [ChristianPickerImagePlugin registerWithRegistrar:[registry registrarForPlugin:@"ChristianPickerImagePlugin"]];
   [FilePickerPlugin registerWithRegistrar:[registry registrarForPlugin:@"FilePickerPlugin"]];
-  [FLTFirebaseAuthPlugin registerWithRegistrar:[registry registrarForPlugin:@"FLTFirebaseAuthPlugin"]];
-  [FLTFirebaseCorePlugin registerWithRegistrar:[registry registrarForPlugin:@"FLTFirebaseCorePlugin"]];
   [FlutterExifRotationPlugin registerWithRegistrar:[registry registrarForPlugin:@"FlutterExifRotationPlugin"]];
   [InAppWebViewFlutterPlugin registerWithRegistrar:[registry registrarForPlugin:@"InAppWebViewFlutterPlugin"]];
   [FlutterKeyboardVisibilityPlugin registerWithRegistrar:[registry registrarForPlugin:@"FlutterKeyboardVisibilityPlugin"]];
@@ -143,16 +142,17 @@
   [GeocodingPlugin registerWithRegistrar:[registry registrarForPlugin:@"GeocodingPlugin"]];
   [GeolocatorPlugin registerWithRegistrar:[registry registrarForPlugin:@"GeolocatorPlugin"]];
   [FLTImagePickerPlugin registerWithRegistrar:[registry registrarForPlugin:@"FLTImagePickerPlugin"]];
+  [ImagesPickerPlugin registerWithRegistrar:[registry registrarForPlugin:@"ImagesPickerPlugin"]];
   [LibphonenumberPlugin registerWithRegistrar:[registry registrarForPlugin:@"LibphonenumberPlugin"]];
+  [NotificationPermissionsPlugin registerWithRegistrar:[registry registrarForPlugin:@"NotificationPermissionsPlugin"]];
   [FLTPathProviderPlugin registerWithRegistrar:[registry registrarForPlugin:@"FLTPathProviderPlugin"]];
+  [PermissionHandlerPlugin registerWithRegistrar:[registry registrarForPlugin:@"PermissionHandlerPlugin"]];
   [PusherClientPlugin registerWithRegistrar:[registry registrarForPlugin:@"PusherClientPlugin"]];
-  [SearchableDropdownPlugin registerWithRegistrar:[registry registrarForPlugin:@"SearchableDropdownPlugin"]];
   [FLTSharedPreferencesPlugin registerWithRegistrar:[registry registrarForPlugin:@"FLTSharedPreferencesPlugin"]];
   [SmsAutoFillPlugin registerWithRegistrar:[registry registrarForPlugin:@"SmsAutoFillPlugin"]];
   [SqflitePlugin registerWithRegistrar:[registry registrarForPlugin:@"SqflitePlugin"]];
   [TelephonyPlugin registerWithRegistrar:[registry registrarForPlugin:@"TelephonyPlugin"]];
   [FLTURLLauncherPlugin registerWithRegistrar:[registry registrarForPlugin:@"FLTURLLauncherPlugin"]];
-  [WorkmanagerPlugin registerWithRegistrar:[registry registrarForPlugin:@"WorkmanagerPlugin"]];
   [YandexMapkitPlugin registerWithRegistrar:[registry registrarForPlugin:@"YandexMapkitPlugin"]];
 }
 

@@ -1,19 +1,9 @@
 import 'package:flutter/material.dart';
-import 'package:flutter_svg/flutter_svg.dart';
 import 'package:easy_localization/easy_localization.dart';
-import 'package:flutter_boxicons/flutter_boxicons.dart';
 import 'package:fluttertoast/fluttertoast.dart';
 
-import 'package:ishtapp/constants/constants.dart';
 import 'package:ishtapp/routes/routes.dart';
-import 'package:ishtapp/screens/home_screen.dart';
-import 'package:ishtapp/screens/sign_up_screen.dart';
 
-// import 'package:ishtapp/widgets/app_logo.dart';
-import 'package:ishtapp/widgets/cicle_button.dart';
-import 'package:ishtapp/widgets/default_button.dart';
-import 'package:ishtapp/widgets/svg_icon.dart';
-import 'package:ishtapp/utils/some_painter.dart';
 import 'package:ishtapp/utils/constants.dart';
 import 'package:ishtapp/components/custom_button.dart';
 import 'package:ishtapp/datas/pref_manager.dart';

@@ -223,7 +223,7 @@ class _VacancyViewState extends State<VacancyView> {
                                 text: TextSpan(
                                   text: widget.vacancy.name != null ? widget.vacancy.name.toString() + '\n' : "",
                                   style: TextStyle(
-                                      fontSize: widget.vacancy.name.length > 20 ? 16 : 20,
+                                      fontSize: widget.vacancy.name.length > 20 ? 14 : 20,
                                       fontWeight: FontWeight.w900,
                                       fontFamily: 'Manrope',
                                       color: kColorDark
@@ -347,7 +347,7 @@ class _VacancyViewState extends State<VacancyView> {
                                     (widget.vacancy.salary != null ? widget.vacancy.salary : '') + widget.vacancy.currency,
                                     textAlign: TextAlign.end,
                                     style: TextStyle(
-                                      fontSize: 20,
+                                      fontSize: 16,
                                       fontWeight: FontWeight.w900,
                                       fontFamily: 'Manrope',
                                       color: kColorPrimary,
@@ -359,7 +359,7 @@ class _VacancyViewState extends State<VacancyView> {
                                     widget.vacancy.period != null ? widget.vacancy.period.toLowerCase() : '',
                                     textAlign: TextAlign.end,
                                     style: TextStyle(
-                                      fontSize: 14,
+                                      fontSize: 13,
                                       fontWeight: FontWeight.w700,
                                       fontFamily: 'Manrope',
                                       color: kColorPrimary,
@@ -431,9 +431,12 @@ class _VacancyViewState extends State<VacancyView> {
                                 child: CustomButton(
                                   onPressed: () {
                                     if(widget.page == 'submitted') {
-                                      Vacancy.saveVacancyUser(vacancy_id: widget.vacancy.id,type: "INVITED").then((value) {
+                                      Vacancy.saveVacancyUser(vacancy_id: widget.vacancy.id, type: "INVITED").then((value) {
                                         StoreProvider.of<AppState>(context).state.vacancy.invited_list.data.remove(widget.vacancy);
-                                        StoreProvider.of<AppState>(context).dispatch(getNumberOfLikedVacancies());
+                                        // StoreProvider.of<AppState>(context).dispatch(getNumberOfLikedVacancies());
+                                        StoreProvider.of<AppState>(context).dispatch(getUserVacancies());
+                                        StoreProvider.of<AppState>(context).dispatch(getSubmittedVacancies());
+                                        StoreProvider.of<AppState>(context).dispatch(getInvitedVacancies());
                                         Navigator.of(context).pop();
                                       });
                                     } else {
@@ -442,7 +445,10 @@ class _VacancyViewState extends State<VacancyView> {
                                           type: "LIKED_THEN_DELETED")
                                           .then((value) {
                                         StoreProvider.of<AppState>(context).state.vacancy.liked_list.data.remove(widget.vacancy);
-                                        StoreProvider.of<AppState>(context).dispatch(getNumberOfLikedVacancies());
+                                        // StoreProvider.of<AppState>(context).dispatch(getNumberOfLikedVacancies());
+                                        StoreProvider.of<AppState>(context).dispatch(getUserVacancies());
+                                        StoreProvider.of<AppState>(context).dispatch(getSubmittedVacancies());
+                                        StoreProvider.of<AppState>(context).dispatch(getInvitedVacancies());
                                         Navigator.of(context).pop();
                                       });
                                     }

@@ -48,6 +48,7 @@ String API_LOGIN_PHONE = 'login_phone';
 String API_USER_LIST = 'users';
 String API_USERS_LIST = 'users_list';
 String API_VACANCY_LIST = 'vacancy';
+String API_MAP_VACANCY_LIST = 'map_vacancy';
 String API_QUALIFICATION_LIST = 'qualification';
 String API_LIKED_USER_VACANCY_LIST = 'user_vacancy/LIKED';
 String API_SUBMITTED_USER_VACANCY_LIST = 'user_vacancy/SUBMITTED';

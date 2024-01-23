@@ -59,7 +59,9 @@ class _ProfileCardUserState extends State<ProfileCardUser> {
 
   Future<void> openInviteDialog(context) async {
 
-    if(StoreProvider.of<AppState>(context).state.vacancy.active_list_user.data != null && StoreProvider.of<AppState>(context).state.vacancy.active_list_user.data.length > 0){
+    if(StoreProvider.of<AppState>(context).state.vacancy.active_list_user.data != null &&
+        StoreProvider.of<AppState>(context).state.vacancy.active_list_user.data.length > 0
+    ){
       setState(() {
         _vacancyList = StoreProvider.of<AppState>(context).state.vacancy.active_list_user.data.map<DropdownMenuItem<int>>((dynamic value) {
           var jj = new Vacancy(id: value.id, name: value.name);
@@ -171,7 +173,11 @@ class _ProfileCardUserState extends State<ProfileCardUser> {
                                   onPressed: () {
                                     if (_vacancyAddFormKey.currentState.validate()) {
 
-                                      Vacancy.saveVacancyUserInvite(vacancy_id: vacancyId, type: "INVITED", user_id: widget.user.id).then((value) {
+                                      Vacancy.saveVacancyUserInvite(
+                                          vacancy_id: vacancyId,
+                                          type: "INVITED",
+                                          user_id: widget.user.id
+                                      ).then((value) {
                                         if (value == "OK") {
                                           // Dialogs.showDialogBox(context,"successfully_submitted".tr());
                                           StoreProvider.of<AppState>(context).state.user.list.data.remove(widget.user);

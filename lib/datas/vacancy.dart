@@ -309,7 +309,7 @@ class Vacancy {
           headers: headers,
           body: json.encode({
             'limit': 1,
-            'offset': offset,
+            'offset': offset-1,
             'type_ids': vacancy_type_ids,
             'type': type,
             'job_type_ids': job_type_ids,
@@ -367,6 +367,7 @@ class Vacancy {
       final response = await http.post(url,
           headers: headers,
           body: json.encode({'vacancy_id': vacancy_id, 'type': type}));
+      print(response.body);
       if(response.statusCode == 200) {
         return "OK";
       } else {
@@ -391,7 +392,12 @@ class Vacancy {
       };
       final response = await http.post(url,
           headers: headers,
-          body: json.encode({'vacancy_id': vacancy_id, 'type': type, 'user_id': user_id}));
+          body: json.encode({'vacancy_id': vacancy_id, 'type': type, 'user_id': user_id})
+      );
+
+      print(response.body);
+      print(response.statusCode);
+
       if(response.statusCode == 200) {
         return "OK";
       } else {
